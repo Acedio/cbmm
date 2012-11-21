@@ -24,9 +24,13 @@ all: $(PROJ)
 $(PROJ): $(SRCS:.cpp=.o)
 	$(CXX) -o $@ $^ $(LIBS)
 
+tags: $(wildcard *.cpp *.h)
+	ctags --sort=1 --c++-kinds=+p --fields=+iaS --extra=+q --language-force=C++ *.cpp *.h
+
 clean:
 	-rm $(PROJ) *.o
 	-rm .deps/*
+	-rm tags
 
 .PHONY: all clean
 

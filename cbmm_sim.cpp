@@ -21,8 +21,10 @@ int main(int argc, char **argv) {
     GeometryManager geometryManager = GeometryManager();
 
     TextureManager textureManager = TextureManager();
-    
-    textureManager.BindTexture(0);
+
+    TextureRef ref = textureManager.LoadTexture("bell.png");
+
+    textureManager.BindTexture(ref);
 
     bool running = true;
 
