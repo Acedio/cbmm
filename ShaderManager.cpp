@@ -105,7 +105,7 @@ GLuint CreateProgram(GLuint vertexShader, GLuint fragmentShader) {
 }
 
 ShaderManager::ShaderManager() {
-    program = SetupProgram("vertex.glsl", "fragment.glsl");
+    program = SetupProgram("vertex.glsl", "tile_fragment.glsl");
 }
 
 ShaderManager::~ShaderManager() {
@@ -124,8 +124,12 @@ GLuint ShaderManager::SetupProgram(char const *vertexShaderFile, char const *fra
     return program;
 }
 
-void ShaderManager::UseProgram() {
+void ShaderManager::UseProgram(float x, float y) {
     glUseProgram(program);
+
+    glUniform1i(glGetUniformLocation(program, "tileset"), 0);
+    glUniform1i(glGetUniformLocation(program, "tilemap"), 1);
+    glUniform2f(glGetUniformLocation(program, "offset"), x, y);
 }
 
 void ShaderManager::ClearProgram() {

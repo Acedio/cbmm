@@ -37,6 +37,8 @@ TextureManager::TextureManager(){
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT, color);
 
+    glBindTexture(GL_TEXTURE_2D, 0);
+
 	textures[ref] = texture;
 }
 
@@ -46,7 +48,8 @@ TextureManager::~TextureManager(){
 	}
 }
 
-TextureRef TextureManager::LoadTexture(string filename){
+// level = -1 for auto-mipmapping
+TextureRef TextureManager::LoadTexture(string filename, int level){
 	TextureRef ref;
 	map<string,TextureRef>::iterator fileref = filenames.find(filename);
 	if(fileref != filenames.end()){ // if we already have a reference to this texture, return the ref
@@ -91,14 +94,24 @@ TextureRef TextureManager::LoadTexture(string filename){
 
 		glBindTexture(GL_TEXTURE_2D, texture);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        if(level == -1) {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        } else {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        }
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		gluBuild2DMipmaps(GL_TEXTURE_2D,bpp,surface->w,surface->h,format,GL_UNSIGNED_BYTE,surface->pixels);
-		
+        if(level == -1) {
+            gluBuild2DMipmaps(GL_TEXTURE_2D,bpp,surface->w,surface->h,format,GL_UNSIGNED_BYTE,surface->pixels);
+        } else {
+            glTexImage2D(GL_TEXTURE_2D, level, bpp, surface->w, surface->h, 0, format, GL_UNSIGNED_BYTE, surface->pixels);
+        }
+
 		SDL_FreeSurface(surface);
+
+        glBindTexture(GL_TEXTURE_2D, 0);
 
 		ref = next_unused_ref;
 
@@ -128,8 +141,12 @@ void TextureManager::UnloadTexture(TextureRef ref){
 	}
 }
 
-void TextureManager::BindTexture(TextureRef ref){
-    glActiveTexture(GL_TEXTURE0);
+void TextureManager::BindTexture(TextureRef ref, int unit){
+    if(unit == 0) {
+        glActiveTexture(GL_TEXTURE0);
+    } else {
+        glActiveTexture(GL_TEXTURE1);
+    }
 
 	map<TextureRef,GLuint>::iterator tex = textures.find(ref);
 	if(tex != textures.end()){

@@ -24,10 +24,10 @@ public:
 	TextureManager();
 	~TextureManager();
 
-	TextureRef LoadTexture(string filename);
+	TextureRef LoadTexture(string filename, int level);
 	void UnloadTexture(TextureRef ref);
 
-	void BindTexture(TextureRef ref);
+	void BindTexture(TextureRef ref, int unit);
 private:
 	map<string, TextureRef> filenames;
 	map<TextureRef, GLuint> textures;

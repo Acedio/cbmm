@@ -17,7 +17,7 @@ public:
     ShaderManager();
     ~ShaderManager();
     GLuint SetupProgram(char const *vertexShaderFile, char const *fragmentShaderFile);
-    void UseProgram();
+    void UseProgram(float x, float y);
     void ClearProgram();
 };
 

@@ -22,9 +22,11 @@ int main(int argc, char **argv) {
 
     TextureManager textureManager = TextureManager();
 
-    TextureRef ref = textureManager.LoadTexture("bell.png");
+    TextureRef tileSetRef = textureManager.LoadTexture("tileset.png", 0);
+    TextureRef tileMapRef = textureManager.LoadTexture("tilemap.png", 0);
 
-    textureManager.BindTexture(ref);
+    textureManager.BindTexture(tileSetRef, 0);
+    textureManager.BindTexture(tileMapRef, 1);
 
     bool running = true;
 
@@ -60,7 +62,7 @@ int main(int argc, char **argv) {
         
         display.Clear();
 
-        shaderManager.UseProgram();
+        shaderManager.UseProgram(t, t);
 
         geometryManager.Draw();
 
