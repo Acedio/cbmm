@@ -1,7 +1,7 @@
 #ifndef SHADERMANAGER_H
 #define SHADERMANAGER_H
 
-#include <GL/glew.h>
+#include <glew.h>
 
 GLuint CreateShader(GLenum shaderType, const char *shaderSource);
 

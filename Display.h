@@ -9,6 +9,7 @@ public:
     void Swap();
 
 private:
+    SDL_Window *window;
     unsigned int screen_width;
     unsigned int screen_height;
     unsigned int screen_bpp;

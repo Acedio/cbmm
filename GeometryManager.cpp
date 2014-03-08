@@ -1,6 +1,6 @@
 #include "GeometryManager.h"
 
-#include <GL/glew.h>
+#include <glew.h>
 
 GeometryManager::GeometryManager() {
     glGenBuffers(1, &positionBufferObject);
