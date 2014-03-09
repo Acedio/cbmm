@@ -7,8 +7,8 @@ PROJ=cbmm_sim
 
 SDL_CFLAGS=`sdl2-config --cflags`
 SDL_LFLAGS=`sdl2-config --libs` -lSDL2_image
-GL_CFLAGS=-I/usr/include/GL
-GL_LFLAGS=-lglew32 -lopengl32 -lglu32
+GL_CFLAGS=-I/usr/include
+GL_LFLAGS=-lGLEW -lGL -lGLU
 
 SRCS=$(PROJ).cpp ShaderManager.cpp Display.cpp TextureManager.cpp GeometryManager.cpp
 

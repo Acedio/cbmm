@@ -1,7 +1,7 @@
 #ifndef GEOMETRYMANAGER_H
 #define GEOMETRYMANAGER_H
 
-#include <glew.h>
+#include <GL/glew.h>
 
 const float vertexData[] = {
 	1.0f, 1.0f, 0.0f, 1.0f,

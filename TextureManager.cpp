@@ -2,7 +2,7 @@
 #include <windows.h>
 #endif
 
-#include <glew.h>
+#include <GL/glew.h>
 
 #include <SDL.h>
 #include <SDL_image.h>

@@ -1,4 +1,4 @@
-#include <glew.h>
+#include <GL/glew.h>
 #include <fstream>
 #include <iostream>
 
@@ -104,32 +104,53 @@ GLuint CreateProgram(GLuint vertexShader, GLuint fragmentShader) {
     return program;
 }
 
+bool Program::Load(char const *vertexShaderFile, char const *fragmentShaderFile) {
+    vertexShader = OpenShader(GL_VERTEX_SHADER, vertexShaderFile);
+    fragmentShader = OpenShader(GL_FRAGMENT_SHADER, fragmentShaderFile);
+
+	if (vertexShader == 0 || fragmentShader == 0) {
+		return false;
+	}
+	
+    id = CreateProgram(vertexShader, fragmentShader);
+
+    return true;
+}
+
+void Program::Use() {
+    glUseProgram(id);
+}
+
+MapProgram::MapProgram() {
+    mapOffsetX = 0;
+    mapOffsetY = 0;
+}
+
+void MapProgram::Setup() {
+    glUniform1i(glGetUniformLocation(id, "tileset"), 0);
+    glUniform1i(glGetUniformLocation(id, "tilemap"), 1);
+    glUniform2f(glGetUniformLocation(id, "offset"), mapOffsetX, mapOffsetY);
+}
+
 ShaderManager::ShaderManager() {
-    program = SetupProgram("vertex.glsl", "tile_fragment.glsl");
 }
 
 ShaderManager::~ShaderManager() {
 }
 
-GLuint ShaderManager::SetupProgram(char const *vertexShaderFile, char const *fragmentShaderFile) {
-    vertexShader = OpenShader(GL_VERTEX_SHADER, vertexShaderFile);
-    fragmentShader = OpenShader(GL_FRAGMENT_SHADER, fragmentShaderFile);
+int ShaderManager::AddProgram(char const *vertexShaderFile, char const *fragmentShaderFile) {
+    Program *p = new MapProgram();
+    p->Load(vertexShaderFile, fragmentShaderFile);
 
-	if (vertexShader == 0 || fragmentShader == 0) {
-		return 0;
-	}
-	
-    program = CreateProgram(vertexShader, fragmentShader);
+    programs.push_back(p);
 
-    return program;
+    return programs.size() - 1;
 }
 
-void ShaderManager::UseProgram(float x, float y) {
-    glUseProgram(program);
+void ShaderManager::UseProgram(int pid) {
+    programs.at(pid)->Use();
 
-    glUniform1i(glGetUniformLocation(program, "tileset"), 0);
-    glUniform1i(glGetUniformLocation(program, "tilemap"), 1);
-    glUniform2f(glGetUniformLocation(program, "offset"), x, y);
+    programs.at(pid)->Setup();
 }
 
 void ShaderManager::ClearProgram() {

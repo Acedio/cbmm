@@ -10,13 +10,14 @@
 using namespace std;
 
 int main(int argc, char **argv) {
-    const unsigned int SCREEN_WIDTH = 640;
-    const unsigned int SCREEN_HEIGHT = 480;
+    const unsigned int SCREEN_WIDTH = 1024;
+    const unsigned int SCREEN_HEIGHT = 768;
     const unsigned int SCREEN_BPP = 32;
 
     Display display(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP);
 
     ShaderManager shaderManager = ShaderManager();
+    int mapProgram = shaderManager.AddProgram("vertex.glsl", "tile_fragment.glsl");
 
     GeometryManager geometryManager = GeometryManager();
 
@@ -62,7 +63,7 @@ int main(int argc, char **argv) {
         
         display.Clear();
 
-        shaderManager.UseProgram(t, t);
+        shaderManager.UseProgram(mapProgram);
 
         geometryManager.Draw();
 
