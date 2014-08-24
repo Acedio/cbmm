@@ -32,7 +32,6 @@ private:
 class ShaderManager {
 private:
     vector<Program*> programs;
-    GLuint textureUniform;
 public:
     ShaderManager();
     ~ShaderManager();

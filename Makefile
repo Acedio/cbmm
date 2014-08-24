@@ -12,8 +12,8 @@ GL_LFLAGS=-lGLEW -lGL -lGLU
 
 SRCS=$(PROJ).cpp ShaderManager.cpp Display.cpp TextureManager.cpp GeometryManager.cpp
 
-CXX=g++
-CPPFLAGS=-g -Wall $(SDL_CFLAGS) $(GL_CFLAGS)
+CXX=clang++
+CPPFLAGS=-g -Wall -Wextra -Werror $(SDL_CFLAGS) $(GL_CFLAGS)
 
 LIBS=$(SDL_LFLAGS) $(GL_LFLAGS)
 
@@ -25,13 +25,9 @@ all: $(PROJ)
 $(PROJ): $(SRCS:.cpp=.o)
 	$(CXX) -o $@ $^ $(LIBS)
 
-tags: $(wildcard *.cpp *.h)
-	ctags --sort=1 --c++-kinds=+p --fields=+iaS --extra=+q --language-force=C++ *.cpp *.h
-
 clean:
 	-rm $(PROJ) *.o
 	-rm .deps/*
-	-rm tags
 
 .PHONY: all clean
 

@@ -1,3 +1,4 @@
+#include <cmath>
 #include <iostream>
 
 #include <SDL.h>
@@ -9,7 +10,7 @@
 
 using namespace std;
 
-int main(int argc, char **argv) {
+int main() {
     const unsigned int SCREEN_WIDTH = 1024;
     const unsigned int SCREEN_HEIGHT = 768;
     const unsigned int SCREEN_BPP = 32;
@@ -17,7 +18,8 @@ int main(int argc, char **argv) {
     Display display(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP);
 
     ShaderManager shaderManager = ShaderManager();
-    int mapProgram = shaderManager.AddProgram("vertex.glsl", "tile_fragment.glsl");
+    int tileProgram = shaderManager.AddProgram("texture_vertex.glsl", "tile_fragment.glsl");
+    int lineProgram = shaderManager.AddProgram("color_vertex.glsl", "color_fragment.glsl");
 
     GeometryManager geometryManager = GeometryManager();
 
@@ -63,9 +65,15 @@ int main(int argc, char **argv) {
         
         display.Clear();
 
-        shaderManager.UseProgram(mapProgram);
+        shaderManager.UseProgram(tileProgram);
+        geometryManager.DrawTileMap();
 
-        geometryManager.Draw();
+        glDisable(GL_DEPTH_TEST);
+        shaderManager.UseProgram(lineProgram);
+        for (float x = -1; x < 1; x += 1.0/16.0) {
+            geometryManager.DrawRect(x, abs(sin(t+x)) - 1.0/12.0);
+        }
+        glEnable(GL_DEPTH_TEST);
 
         display.Swap();
 
