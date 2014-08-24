@@ -3,34 +3,21 @@
 
 #include <GL/glew.h>
 
-const float vertexData[] = {
-	1.0f, 1.0f, 0.0f, 1.0f,
-	1.0f, -1.0f, 0.0f, 1.0f,
-	-1.0f, 1.0f, 0.0f, 1.0f,
-	-1.0f, -1.0f, 0.0f, 1.0f,
-    1.0f, 0.0f, 0.0f, 1.0f,
-    0.0f, 1.0f, 0.0f, 1.0f,
-    0.0f, 0.0f, 1.0f, 1.0f,
-    0.0f, 0.0f, 0.0f, 1.0f,
-	1.0f, 1.0f,
-	1.0f, 0.0f,
-	0.0f, 1.0f,
-	0.0f, 0.0f,
-};
-
-const unsigned int indexData[] = {
-    0, 1, 2, 3
-};
-
 class GeometryManager {
 private:
+    float vertexData[24];
+    unsigned int indexData[4];
+    float rectVertexData[32];
+
     GLuint positionBufferObject;
     GLuint vertexArrayObject;
     GLuint indexBufferObject;
+    GLuint rectPositionBufferObject;
 public:
     GeometryManager();
     ~GeometryManager();
-    void Draw();
+    void DrawTileMap();
+    void DrawRect(float x, float y);
 };
 
 #endif

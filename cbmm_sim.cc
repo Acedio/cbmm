@@ -1,6 +1,7 @@
+#include <cmath>
 #include <iostream>
 
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 #include "ShaderManager.h"
 #include "Display.h"
@@ -9,22 +10,26 @@
 
 using namespace std;
 
-int main(int argc, char **argv) {
-    const unsigned int SCREEN_WIDTH = 640;
-    const unsigned int SCREEN_HEIGHT = 480;
+int main() {
+    const unsigned int SCREEN_WIDTH = 1024;
+    const unsigned int SCREEN_HEIGHT = 768;
     const unsigned int SCREEN_BPP = 32;
 
     Display display(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP);
 
     ShaderManager shaderManager = ShaderManager();
+    int tileProgram = shaderManager.AddProgram("texture_vertex.glsl", "tile_fragment.glsl");
+    int lineProgram = shaderManager.AddProgram("color_vertex.glsl", "color_fragment.glsl");
 
     GeometryManager geometryManager = GeometryManager();
 
     TextureManager textureManager = TextureManager();
 
-    TextureRef ref = textureManager.LoadTexture("bell.png");
+    TextureRef tileSetRef = textureManager.LoadTexture("tileset.png", 0);
+    TextureRef tileMapRef = textureManager.LoadTexture("tilemap.png", 0);
 
-    textureManager.BindTexture(ref);
+    textureManager.BindTexture(tileSetRef, 0);
+    textureManager.BindTexture(tileMapRef, 1);
 
     bool running = true;
 
@@ -60,9 +65,15 @@ int main(int argc, char **argv) {
         
         display.Clear();
 
-        shaderManager.UseProgram();
+        shaderManager.UseProgram(tileProgram);
+        geometryManager.DrawTileMap();
 
-        geometryManager.Draw();
+        glDisable(GL_DEPTH_TEST);
+        shaderManager.UseProgram(lineProgram);
+        for (float x = -1; x < 1; x += 1.0/16.0) {
+            geometryManager.DrawRect(x, abs(sin(t+x)) - 1.0/12.0);
+        }
+        glEnable(GL_DEPTH_TEST);
 
         display.Swap();
 

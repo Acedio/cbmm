@@ -1,5 +1,5 @@
 #include <GL/glew.h>
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include <iostream>
 
 #include "Display.h"
@@ -17,16 +17,19 @@ Display::Display(unsigned int width, unsigned int height, unsigned int bpp) {
         cout << "Error setting up GL." << endl;
     }
 
-    SDL_Surface *surface = SDL_SetVideoMode(screen_width, screen_height, screen_bpp, SDL_OPENGL);
+    window = SDL_CreateWindow("CBMM!!!!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_OPENGL);
 
-    if(!surface) {
+    SDL_GL_CreateContext(window); // probably should delete this
+
+    if(!window) {
         cout << "Error opening surface: " << SDL_GetError() << endl;
     }
 
     GLenum glewErr = glewInit();
     
     if(glewErr != GLEW_OK) {
-        cout << "Error: " << glewGetErrorString(glewErr) << endl;
+        unsigned char const *test = glewGetErrorString(glewErr);
+        cout << "Error: " << test << endl;
         return;
     }
 
@@ -43,7 +46,7 @@ void Display::Clear() {
 }
 
 void Display::Swap() {
-    SDL_GL_SwapBuffers();
+    SDL_GL_SwapWindow(window);
 }
 
 Display::~Display() {

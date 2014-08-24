@@ -6,11 +6,9 @@
 #endif
 
 #include <GL/glew.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
 
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
+#include <SDL.h>
+#include <SDL_image.h>
 
 #include <iostream>
 #include <string>
@@ -24,10 +22,10 @@ public:
 	TextureManager();
 	~TextureManager();
 
-	TextureRef LoadTexture(string filename);
+	TextureRef LoadTexture(string filename, int level);
 	void UnloadTexture(TextureRef ref);
 
-	void BindTexture(TextureRef ref);
+	void BindTexture(TextureRef ref, int unit);
 private:
 	map<string, TextureRef> filenames;
 	map<TextureRef, GLuint> textures;
