@@ -10,7 +10,7 @@ SDL_LFLAGS=`sdl2-config --libs` -lSDL2_image
 GL_CFLAGS=-I/usr/include
 GL_LFLAGS=-lGLEW -lGL -lGLU
 
-SRCS=$(PROJ).cpp ShaderManager.cpp Display.cpp TextureManager.cpp GeometryManager.cpp
+SRCS=$(PROJ).cc ShaderManager.cc Display.cc TextureManager.cc GeometryManager.cc
 
 CXX=clang++
 CPPFLAGS=-g -Wall -Wextra -Werror $(SDL_CFLAGS) $(GL_CFLAGS)
@@ -22,7 +22,7 @@ df=$(DEPDIR)/$(*F)
 
 all: $(PROJ)
 
-$(PROJ): $(SRCS:.cpp=.o)
+$(PROJ): $(SRCS:.cc=.o)
 	$(CXX) -o $@ $^ $(LIBS)
 
 clean:
@@ -31,11 +31,11 @@ clean:
 
 .PHONY: all clean
 
-%.o : %.cpp
+%.o : %.cc
 	$(CXX) -MD $(CPPFLAGS) -c -o $@ $<
 	@cp $*.d $(df).P
 	@sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 		-e '/^$$/ d' -e 's/$$/ :/' < $*.d >> $(df).P
 	@rm -f $*.d
 
--include $(SRCS:%.cpp=$(DEPDIR)/%.P)
+-include $(SRCS:%.cc=$(DEPDIR)/%.P)
