@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iterator>
+
 #include <GL/glew.h>
 
 namespace {
@@ -83,14 +84,14 @@ void GeometryManager::DrawTileMap() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void GeometryManager::DrawRect(float x, float y) {
+void GeometryManager::DrawRect(float x, float y, float w, float h) {
     rectVertexData[0] = x;
     rectVertexData[1] = y;
     rectVertexData[4] = x;
-    rectVertexData[5] = y + 1.0/12.0;
-    rectVertexData[8] = x + 1.0/16.0;
-    rectVertexData[9] = y + 1.0/12.0;
-    rectVertexData[12] = x + 1.0/16.0;
+    rectVertexData[5] = y - h;
+    rectVertexData[8] = x + w;
+    rectVertexData[9] = y - h;
+    rectVertexData[12] = x + w;
     rectVertexData[13] = y;
     glBindBuffer(GL_ARRAY_BUFFER, rectPositionBufferObject);
     glBufferData(GL_ARRAY_BUFFER, sizeof(rectVertexData), rectVertexData, GL_STATIC_DRAW);
@@ -105,4 +106,14 @@ void GeometryManager::DrawRect(float x, float y) {
     glDisableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void GeometryManager::DrawRects(const std::function<const Rect*(size_t i)>& rect_at) {
+    for (int i = 0;; ++i) {
+        const Rect* rect = rect_at(i);
+        if (!rect) {
+            break;
+        }
+        DrawRect(rect->upperLeft.x/16.0 - 0.5, rect->upperLeft.y/12.0 - 0.5, rect->w/16.0, rect->h/12.0);
+    }
 }

@@ -5,19 +5,12 @@
 using namespace std;
 
 TileMap::TileMap() {
-    tiles = NULL;
     w = 0;
     h = 0;
 }
 
-TileMap::~TileMap() {
-    if(tiles != NULL) {
-        delete[] tiles;
-    }
-}
-
 /// Returns 0 on success
-int TileMap::Load(char const * fileName) {
+int TileMap::Load(char const* fileName) {
     ifstream tileMapFile(fileName, ifstream::in);
 
     if(!tileMapFile.good()) {
@@ -30,23 +23,31 @@ int TileMap::Load(char const * fileName) {
         return -1;
     }
 
-    tiles = new int[w * h];
+    tiles.resize(w*h);
 
-    if(tiles == NULL) {
-        return -1;
-    }
-
-    for(int y = 0; y < h; y++) {
-        for(int x = 0; x < w; x++) {
-            tileMapFile >> tiles[y*w + x];
+    for (int y = h - 1; y >= 0; y--) {
+        for (int x = 0; x < w; x++) {
+            if (!tileMapFile.good()) {
+                return -1;
+            }
+            int temp;
+            tileMapFile >> temp;
+            tiles.at(y*w + x) = temp;
         }
     }
 
     return 0;
 }
 
-void TileMap::Print(ostream &os) {
-    for(int y = 0; y < h; y++) {
+int TileMap::At(int x, int y) {
+    if (x < 0 || y < 0 || x >= w || y >= h) {
+        return -1;
+    }
+    return tiles.at(y*w + x);
+}
+
+void TileMap::Print(std::ostream &os) {
+    for(int y = h - 1; y >= 0; y--) {
         for(int x = 0; x < w; x++) {
             os << tiles[y*w + x] << " ";
         }

@@ -2,18 +2,24 @@
 #define TILEMAP_H
 
 #include <ostream>
+#include <vector>
 
-using namespace std;
+enum TileType {
+    TILE_EMPTY = 0,
+    TILE_BLOCK = 1,
+    TILE_SLOPE_01 = 2,
+    TILE_SLOPE_10 = 3
+};
 
 class TileMap {
-private:
-    int *tiles;
-    int w, h;
 public:
     TileMap();
-    ~TileMap();
     int Load(char const * fileName);
-    void Print(ostream &os);
+    int At(int x, int y);
+    void Print(std::ostream &os);
+private:
+    std::vector<int> tiles;
+    int w, h;
 };
 
 #endif

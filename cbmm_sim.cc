@@ -3,10 +3,11 @@
 
 #include <SDL.h>
 
-#include "ShaderManager.h"
 #include "Display.h"
-#include "TextureManager.h"
 #include "GeometryManager.h"
+#include "Physics.h"
+#include "ShaderManager.h"
+#include "TextureManager.h"
 
 using namespace std;
 
@@ -31,11 +32,21 @@ int main() {
     textureManager.BindTexture(tileSetRef, 0);
     textureManager.BindTexture(tileMapRef, 1);
 
+    Physics physics;
+    for (int x = 0; x < 16; x++) {
+        physics.AddBody({true, {{(double)x, (double)(1 + x)}, 1, 1}, {0, (double)x/2.0}});
+    }
+
+    TileMap map;
+    map.Load("tiles.map");
+    physics.SetTileMap(map);
+
     bool running = true;
+    bool paused = true;
 
 	int frames = 0;
 
-    float t = 0;
+    double t = 0;
 
     int last_ticks = SDL_GetTicks();
 
@@ -52,6 +63,8 @@ int main() {
                         case SDLK_ESCAPE:
                             running = false;
                             break;
+                        case SDLK_p:
+                            paused = !paused;
                         default:
                             break;
                     }
@@ -70,16 +83,18 @@ int main() {
 
         glDisable(GL_DEPTH_TEST);
         shaderManager.UseProgram(lineProgram);
-        for (float x = -1; x < 1; x += 1.0/16.0) {
-            geometryManager.DrawRect(x, abs(sin(t+x)) - 1.0/12.0);
-        }
+        geometryManager.DrawRects([&physics](size_t i){ return physics.GetBodyRect(i); });
         glEnable(GL_DEPTH_TEST);
 
         display.Swap();
 
         shaderManager.ClearProgram();
 
-		t += (float)(SDL_GetTicks()-last_ticks)/1000.0;
+		double dt = (double)(SDL_GetTicks()-last_ticks)/1000.0;
+        if (!paused) {
+            physics.Update(dt);
+        }
+        t += dt;
 		frames++;
         last_ticks = SDL_GetTicks();
 

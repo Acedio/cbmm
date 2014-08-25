@@ -10,10 +10,10 @@ SDL_LFLAGS=`sdl2-config --libs` -lSDL2_image
 GL_CFLAGS=-I/usr/include
 GL_LFLAGS=-lGLEW -lGL -lGLU
 
-SRCS=$(PROJ).cc ShaderManager.cc Display.cc TextureManager.cc GeometryManager.cc
+SRCS=$(PROJ).cc ShaderManager.cc Display.cc TextureManager.cc GeometryManager.cc Physics.cc TileMap.cc
 
 CXX=clang++
-CPPFLAGS=-g -Wall -Wextra -Werror $(SDL_CFLAGS) $(GL_CFLAGS)
+CPPFLAGS=-g -Wall -Wextra -Werror -std=c++11 $(SDL_CFLAGS) $(GL_CFLAGS)
 
 LIBS=$(SDL_LFLAGS) $(GL_LFLAGS)
 
