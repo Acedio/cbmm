@@ -15,8 +15,8 @@ class TileMap {
 public:
     TileMap();
     int Load(char const * fileName);
-    int At(int x, int y);
-    void Print(std::ostream &os);
+    int At(int x, int y) const;
+    void Print(std::ostream &os) const;
 private:
     std::vector<int> tiles;
     int w, h;

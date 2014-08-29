@@ -39,14 +39,14 @@ int TileMap::Load(char const* fileName) {
     return 0;
 }
 
-int TileMap::At(int x, int y) {
+int TileMap::At(int x, int y) const {
     if (x < 0 || y < 0 || x >= w || y >= h) {
         return -1;
     }
     return tiles.at(y*w + x);
 }
 
-void TileMap::Print(std::ostream &os) {
+void TileMap::Print(std::ostream &os) const {
     for(int y = h - 1; y >= 0; y--) {
         for(int x = 0; x < w; x++) {
             os << tiles[y*w + x] << " ";

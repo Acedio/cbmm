@@ -34,7 +34,7 @@ int main() {
 
     Physics physics;
     for (int x = 0; x < 16; x++) {
-        physics.AddBody({true, {{(double)x, (double)(1 + x)}, 1, 1}, {0, (double)x/2.0}});
+        physics.AddBody({true, {{(double)x, (double)(1 + x)}, 1, 1}, {0, (double)0/2.0}});
     }
 
     TileMap map;
