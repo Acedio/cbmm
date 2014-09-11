@@ -4,23 +4,24 @@
 
 namespace {
 bool PointMapBelow(const TileMap& tile_map, const vec2f& contact_pt, vec2f* fix){
-    float map_x = floor(contact_pt.x);
     float map_y = floor(contact_pt.y);
 
     int tile_type = tile_map.At(contact_pt.x, contact_pt.y);
     if (tile_type == TILE_BLOCK) {
         fix->y = (map_y + 1) - contact_pt.y;
 
-        // Get the TileType of the above tile to check if we've now entered a slope.
-        tile_type = tile_map.At(contact_pt.x, contact_pt.y + 1);
-        if (tile_type == TILE_SLOPE_01) {
-            fix->y += contact_pt.x - map_x;
-        } else if (tile_type == TILE_SLOPE_10) {
-            fix->y += 1 - (contact_pt.x - map_x);
-        }
-
         return true;
-    } else if (tile_type == TILE_SLOPE_01) {
+    }
+
+    return false;
+}
+
+bool PointMapSlope(const TileMap& tile_map, const vec2f& contact_pt, vec2f* fix){
+    float map_x = floor(contact_pt.x);
+    float map_y = floor(contact_pt.y);
+
+    int tile_type = tile_map.At(contact_pt.x, contact_pt.y);
+    if (tile_type == TILE_SLOPE_01) {
         float dist_from_slope = (contact_pt.y - map_y) - (contact_pt.x - map_x);
         if (dist_from_slope < 0) {
             fix->y = -dist_from_slope;
@@ -52,17 +53,20 @@ bool PointMapSide(const TileMap& tile_map, const vec2f& contact_pt, vec2f* fix) 
 }
 
 bool Physics::RectMapCollision(const Rect& rect, vec2f* fix) {
-    bool collided = false;
+    int tile_type = tile_map.At(rect.upperLeft.x + (rect.w/2.0), rect.upperLeft.y - rect.h);
+    if (tile_type == TILE_SLOPE_01 || tile_type == TILE_SLOPE_10) {
+        return PointMapSlope(tile_map, {rect.upperLeft.x + (rect.w/2.0), rect.upperLeft.y - rect.h + fix->y}, fix);
+    }
 
-    collided = PointMapBelow(tile_map, {rect.upperLeft.x + (rect.w/2.0) + fix->x, rect.upperLeft.y - rect.h}, fix) || collided;
+    bool collided_below = PointMapBelow(tile_map, {rect.upperLeft.x, rect.upperLeft.y - rect.h}, fix) || 
+        PointMapBelow(tile_map, {rect.upperLeft.x + rect.w, rect.upperLeft.y - rect.h}, fix);
 
-    collided = PointMapSide(tile_map, {rect.upperLeft.x, rect.upperLeft.y - rect.h + fix->y}, fix) ||
+    bool collided_side = PointMapSide(tile_map, {rect.upperLeft.x, rect.upperLeft.y - rect.h + fix->y}, fix) ||
         PointMapSide(tile_map, {rect.upperLeft.x + rect.w, rect.upperLeft.y - rect.h + fix->y}, fix) ||
         PointMapSide(tile_map, {rect.upperLeft.x, rect.upperLeft.y + fix->y}, fix) ||
-        PointMapSide(tile_map, {rect.upperLeft.x + rect.w, rect.upperLeft.y + fix->y}, fix) ||
-        collided;
+        PointMapSide(tile_map, {rect.upperLeft.x + rect.w, rect.upperLeft.y + fix->y}, fix);
     
-    return collided;
+    return collided_below || collided_side;
 }
 
 void Physics::Update(double dt) {
