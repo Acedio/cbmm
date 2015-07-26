@@ -7,152 +7,154 @@
 using namespace std;
 
 GLuint CreateShader(GLenum shaderType, const char *shaderSource) {
-    GLuint shader = glCreateShader(shaderType);
+  GLuint shader = glCreateShader(shaderType);
 
-    glShaderSource(shader, 1, &shaderSource, NULL);
+  glShaderSource(shader, 1, &shaderSource, NULL);
 
-    glCompileShader(shader);
+  glCompileShader(shader);
 
-    GLint compiled = 0;
+  GLint compiled = 0;
 
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-    
-    if (compiled == GL_FALSE) {
-        cout << "Error encountered in ";
+  glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
 
-        switch (shaderType) {
-            case GL_VERTEX_SHADER: cout << "vertex"; break;
-            case GL_FRAGMENT_SHADER: cout << "fragment"; break;
-            default: cout << "unknown"; break;
-        }
+  if (compiled == GL_FALSE) {
+    cout << "Error encountered in ";
 
-        cout << " shader:" << endl;
-
-        int log_length = 0;
-
-        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
-
-        char *log = new char[log_length];
-
-        glGetShaderInfoLog(shader, log_length, &log_length, log);
-
-        cout << log << endl;
-
-        delete[] log;
+    switch (shaderType) {
+      case GL_VERTEX_SHADER:
+        cout << "vertex";
+        break;
+      case GL_FRAGMENT_SHADER:
+        cout << "fragment";
+        break;
+      default:
+        cout << "unknown";
+        break;
     }
 
-    return shader;
+    cout << " shader:" << endl;
+
+    int log_length = 0;
+
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
+
+    char *log = new char[log_length];
+
+    glGetShaderInfoLog(shader, log_length, &log_length, log);
+
+    cout << log << endl;
+
+    delete[] log;
+  }
+
+  return shader;
 }
 
 GLuint OpenShader(GLenum shaderType, const char *shaderFilename) {
-    ifstream shaderFile(shaderFilename);
+  ifstream shaderFile(shaderFilename);
 
-    if (!shaderFile.good()) {
-        return 0;
-    }
+  if (!shaderFile.good()) {
+    return 0;
+  }
 
-    shaderFile.seekg(0, ios::end);
-    int length = shaderFile.tellg();
-    shaderFile.seekg(0, ios::beg);
+  shaderFile.seekg(0, ios::end);
+  int length = shaderFile.tellg();
+  shaderFile.seekg(0, ios::beg);
 
-    // + 1 for \0
-    char *shaderSource = new char[length + 1];
+  // + 1 for \0
+  char *shaderSource = new char[length + 1];
 
-    shaderFile.read(shaderSource, length);
-    shaderSource[length] = 0;
+  shaderFile.read(shaderSource, length);
+  shaderSource[length] = 0;
 
-    shaderFile.close();
+  shaderFile.close();
 
-    GLuint shaderRef = CreateShader(shaderType, shaderSource);
+  GLuint shaderRef = CreateShader(shaderType, shaderSource);
 
-    delete[] shaderSource;
+  delete[] shaderSource;
 
-    return shaderRef;
+  return shaderRef;
 }
 
 GLuint CreateProgram(GLuint vertexShader, GLuint fragmentShader) {
-    GLuint program = glCreateProgram();
+  GLuint program = glCreateProgram();
 
-    glAttachShader(program, vertexShader);
-    glAttachShader(program, fragmentShader);
+  glAttachShader(program, vertexShader);
+  glAttachShader(program, fragmentShader);
 
-    glLinkProgram(program);
+  glLinkProgram(program);
 
-    GLint linked = 0;
+  GLint linked = 0;
 
-    glGetProgramiv(program, GL_LINK_STATUS, &linked);
-    
-    if (linked == GL_FALSE) {
-        cout << "Error encountered while linking the shader program." << endl;
+  glGetProgramiv(program, GL_LINK_STATUS, &linked);
 
-        int log_length = 0;
+  if (linked == GL_FALSE) {
+    cout << "Error encountered while linking the shader program." << endl;
 
-        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &log_length);
+    int log_length = 0;
 
-        char *log = new char[log_length];
+    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &log_length);
 
-        glGetProgramInfoLog(program, log_length, &log_length, log);
+    char *log = new char[log_length];
 
-        cout << log << endl;
+    glGetProgramInfoLog(program, log_length, &log_length, log);
 
-        delete[] log;
-    }
+    cout << log << endl;
 
-    glDetachShader(program, vertexShader);
-    glDetachShader(program, fragmentShader);
+    delete[] log;
+  }
 
-    return program;
+  glDetachShader(program, vertexShader);
+  glDetachShader(program, fragmentShader);
+
+  return program;
 }
 
-bool Program::Load(char const *vertexShaderFile, char const *fragmentShaderFile) {
-    vertexShader = OpenShader(GL_VERTEX_SHADER, vertexShaderFile);
-    fragmentShader = OpenShader(GL_FRAGMENT_SHADER, fragmentShaderFile);
+bool Program::Load(char const *vertexShaderFile,
+                   char const *fragmentShaderFile) {
+  vertexShader = OpenShader(GL_VERTEX_SHADER, vertexShaderFile);
+  fragmentShader = OpenShader(GL_FRAGMENT_SHADER, fragmentShaderFile);
 
-	if (vertexShader == 0 || fragmentShader == 0) {
-		return false;
-	}
-	
-    id = CreateProgram(vertexShader, fragmentShader);
+  if (vertexShader == 0 || fragmentShader == 0) {
+    return false;
+  }
 
-    return true;
+  id = CreateProgram(vertexShader, fragmentShader);
+
+  return true;
 }
 
-void Program::Use() {
-    glUseProgram(id);
-}
+void Program::Use() { glUseProgram(id); }
 
 MapProgram::MapProgram() {
-    mapOffsetX = 0;
-    mapOffsetY = 0;
+  mapOffsetX = 0;
+  mapOffsetY = 0;
 }
 
 void MapProgram::Setup() {
-    glUniform1i(glGetUniformLocation(id, "tileset"), 0);
-    glUniform1i(glGetUniformLocation(id, "tilemap"), 1);
-    glUniform2f(glGetUniformLocation(id, "offset"), mapOffsetX, mapOffsetY);
+  glUniform1i(glGetUniformLocation(id, "tileset"), 0);
+  glUniform1i(glGetUniformLocation(id, "tilemap"), 1);
+  glUniform2f(glGetUniformLocation(id, "offset"), mapOffsetX, mapOffsetY);
 }
 
-ShaderManager::ShaderManager() {
-}
+ShaderManager::ShaderManager() {}
 
-ShaderManager::~ShaderManager() {
-}
+ShaderManager::~ShaderManager() {}
 
-int ShaderManager::AddProgram(char const *vertexShaderFile, char const *fragmentShaderFile) {
-    Program *p = new MapProgram();
-    p->Load(vertexShaderFile, fragmentShaderFile);
+int ShaderManager::AddProgram(char const *vertexShaderFile,
+                              char const *fragmentShaderFile) {
+  Program *p = new MapProgram();
+  p->Load(vertexShaderFile, fragmentShaderFile);
 
-    programs.push_back(p);
+  programs.push_back(p);
 
-    return programs.size() - 1;
+  return programs.size() - 1;
 }
 
 void ShaderManager::UseProgram(int pid) {
-    programs.at(pid)->Use();
+  programs.at(pid)->Use();
 
-    programs.at(pid)->Setup();
+  programs.at(pid)->Setup();
 }
 
-void ShaderManager::ClearProgram() {
-    glUseProgram(0);
-}
+void ShaderManager::ClearProgram() { glUseProgram(0); }

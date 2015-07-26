@@ -17,20 +17,21 @@ using namespace std;
 
 typedef unsigned int TextureRef;
 
-class TextureManager{
-public:
-	TextureManager();
-	~TextureManager();
+class TextureManager {
+ public:
+  TextureManager();
+  ~TextureManager();
 
-	TextureRef LoadTexture(string filename, int level);
-	void UnloadTexture(TextureRef ref);
+  TextureRef LoadTexture(string filename, int level);
+  void UnloadTexture(TextureRef ref);
 
-	void BindTexture(TextureRef ref, int unit);
-private:
-	map<string, TextureRef> filenames;
-	map<TextureRef, GLuint> textures;
-	map<TextureRef, int> refcounts;
-	TextureRef next_unused_ref;
+  void BindTexture(TextureRef ref, int unit);
+
+ private:
+  map<string, TextureRef> filenames;
+  map<TextureRef, GLuint> textures;
+  map<TextureRef, int> refcounts;
+  TextureRef next_unused_ref;
 };
 
 #endif

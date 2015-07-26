@@ -4,10 +4,11 @@
 #include "MessageType.h"
 
 class Message {
-    public:
-        MessageType GetType() { return type_; }
-    private:
-        MessageType type_;
+ public:
+  MessageType GetType() { return type_; }
+
+ private:
+  MessageType type_;
 };
 
 #endif  // MESSAGE_H_
