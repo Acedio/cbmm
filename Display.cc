@@ -35,6 +35,13 @@ Display::Display(unsigned int width, unsigned int height, unsigned int bpp) {
     return;
   }
 
+  const GLubyte* version = glGetString(GL_SHADING_LANGUAGE_VERSION);
+  if (version) {
+      cout << "GLSL version: " << version << endl;
+  } else {
+      cout << "Could not get GLSL version." << endl;
+  }
+
   glClearColor(0, 0, 0, 1);
 
   glViewport(0, 0, screen_width, screen_height);
