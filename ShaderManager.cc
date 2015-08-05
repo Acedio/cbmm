@@ -144,7 +144,9 @@ ShaderManager::~ShaderManager() {}
 int ShaderManager::AddProgram(char const *vertexShaderFile,
                               char const *fragmentShaderFile) {
   Program *p = new MapProgram();
-  p->Load(vertexShaderFile, fragmentShaderFile);
+  if (!p->Load(vertexShaderFile, fragmentShaderFile)) {
+	return -1;
+  }
 
   programs.push_back(p);
 

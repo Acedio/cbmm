@@ -11,7 +11,7 @@
 
 using namespace std;
 
-int main() {
+int main(int argc, char** argv) {
   const unsigned int SCREEN_WIDTH = 1024;
   const unsigned int SCREEN_HEIGHT = 768;
   const unsigned int SCREEN_BPP = 32;
@@ -20,16 +20,20 @@ int main() {
 
   ShaderManager shaderManager = ShaderManager();
   int tileProgram =
-      shaderManager.AddProgram("texture_vertex.glsl", "tile_fragment.glsl");
+      shaderManager.AddProgram("resources/texture_vertex.glsl",
+                               "resources/tile_fragment.glsl");
   int lineProgram =
-      shaderManager.AddProgram("color_vertex.glsl", "color_fragment.glsl");
+      shaderManager.AddProgram("resources/color_vertex.glsl",
+                               "resources/color_fragment.glsl");
 
   GeometryManager geometryManager = GeometryManager();
 
   TextureManager textureManager = TextureManager();
 
-  TextureRef tileSetRef = textureManager.LoadTexture("tileset.png", 0);
-  TextureRef tileMapRef = textureManager.LoadTexture("tilemap.png", 0);
+  TextureRef tileSetRef =
+      textureManager.LoadTexture("resources/tileset.png", 0);
+  TextureRef tileMapRef =
+      textureManager.LoadTexture("resources/tilemap.png", 0);
 
   textureManager.BindTexture(tileSetRef, 0);
   textureManager.BindTexture(tileMapRef, 1);
@@ -41,7 +45,9 @@ int main() {
   }
 
   TileMap map;
-  map.Load("tiles.map");
+  if (map.Load("resources/tiles.map")) {
+	  cout << "Error loading tiles.map" << endl;
+  }
   physics.SetTileMap(map);
 
   bool running = true;
