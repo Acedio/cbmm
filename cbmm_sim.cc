@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
 
   TileMap map;
   if (map.Load("resources/tiles.map")) {
-	  cout << "Error loading tiles.map" << endl;
+    cout << "Error loading tiles.map" << endl;
   }
   physics.SetTileMap(map);
 
