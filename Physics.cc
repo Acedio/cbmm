@@ -54,6 +54,45 @@ bool PointMapSide(const TileMap& tile_map, const vec2f& contact_pt,
 
   return false;
 }
+
+// Returns true if a and b overlap: A [  { ]  } B
+// @fix is set to the distance A must move to not overlap B.
+bool AxisCheck(double a1, double a2, double b1, double b2, double* fix) {
+  if (b1 < a1) {
+    // Flip so a1 is always left of b1
+    if (AxisCheck(b1, b2, a1, a2, fix)) {
+      *fix = -*fix;
+      return true;
+    }
+  } else {
+    *fix = b1 - a2;
+    if (*fix < 0) {
+      return true;
+    }
+  }
+  return false;
+}
+}  // namespace
+
+// Returns true if @first and @second collide. @fix is set to the correction
+// that @first must make to no longer collide with @second.
+bool Physics::RectRectCollision(const Rect& first, const Rect& second,
+                                vec2f* fix) {
+  double x_fix, y_fix;
+  if (AxisCheck(first.upperLeft.x, first.upperLeft.x + first.w,
+                second.upperLeft.x, second.upperLeft.x + second.w, &x_fix) &&
+      AxisCheck(first.upperLeft.y - first.h, first.upperLeft.y,
+                second.upperLeft.y - second.h, second.upperLeft.y, &y_fix)) {
+    if (abs(x_fix) < abs(y_fix)) {
+      fix->x = x_fix;
+      fix->y = 0;
+    } else {
+      fix->x = 0;
+      fix->y = y_fix;
+    }
+    return true;
+  }
+  return false;
 }
 
 bool Physics::RectMapCollision(const Rect& rect, vec2f* fix) {
@@ -87,31 +126,49 @@ bool Physics::RectMapCollision(const Rect& rect, vec2f* fix) {
   return collided_below || collided_side;
 }
 
-void Physics::Update(double dt) {
-  for (auto& body : bodies) {
-    if (body.enabled) {
-      Rect new_rect = body.bbox;
-      new_rect.upperLeft =
-          body.bbox.upperLeft + body.vel * dt + vec2f{dt / 2.0, 0};
+vector<Collision> Physics::Update(double dt) {
+  vector<Collision> collisions;
 
+  for (BodyId id = 0; id < bodies.size(); ++id) {
+    if (bodies[id].enabled) {
+      // movement
+      Rect new_rect = bodies[id].bbox;
+      new_rect.upperLeft =
+          bodies[id].bbox.upperLeft + bodies[id].vel * dt + vec2f{dt / 2.0, 0};
+
+      // tilemap collision
       vec2f fix;
       if (RectMapCollision(new_rect, &fix)) {
+        // collisions.push_back({id, MAP_BODY_ID, fix});
         new_rect.upperLeft += fix;
         if (fix.x != 0) {
-          body.vel.x = 0;
+          bodies[id].vel.x = 0;
         }
         if (fix.y != 0) {
-          body.vel.y = 0;
+          bodies[id].vel.y = 0;
         }
       } else {
-        body.vel += vec2f{0, -9 * dt};
+        bodies[id].vel += vec2f{0, -9 * dt};
       }
-      body.bbox = new_rect;
+
+      // rect rect collisions
+      vec2f rect_fix;
+      for (BodyId id2 = id + 1; id2 < bodies.size(); ++id2) {
+        if (bodies[id2].enabled &&
+            RectRectCollision(new_rect, bodies[id2].bbox, &rect_fix)) {
+          // TODO: both should react?
+          new_rect.upperLeft += 0.5 * fix;
+          collisions.push_back({id, id2, rect_fix});
+        }
+      }
+      bodies[id].bbox = new_rect;
     }
   }
+
+  return collisions;
 }
 
-const Rect* Physics::GetBodyRect(size_t i) {
+const Rect* Physics::GetBodyRect(BodyId i) {
   if (i < bodies.size()) {
     return &bodies.at(i).bbox;
   } else {
