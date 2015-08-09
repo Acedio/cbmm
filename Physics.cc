@@ -129,7 +129,7 @@ bool Physics::RectMapCollision(const Rect& rect, vec2f* fix) {
 vector<Collision> Physics::Update(double dt) {
   vector<Collision> collisions;
 
-  for (BodyId id = 0; id < bodies.size(); ++id) {
+  for (BodyId id = 0; id < 0 || (unsigned)id < bodies.size(); ++id) {
     if (bodies[id].enabled) {
       // movement
       Rect new_rect = bodies[id].bbox;
@@ -153,7 +153,8 @@ vector<Collision> Physics::Update(double dt) {
 
       // rect rect collisions
       vec2f rect_fix;
-      for (BodyId id2 = id + 1; id2 < bodies.size(); ++id2) {
+      for (BodyId id2 = id + 1; id2 < 0 || (unsigned)id2 < bodies.size();
+           ++id2) {
         if (bodies[id2].enabled &&
             RectRectCollision(new_rect, bodies[id2].bbox, &rect_fix)) {
           // TODO: both should react?
@@ -169,7 +170,7 @@ vector<Collision> Physics::Update(double dt) {
 }
 
 const Rect* Physics::GetBodyRect(BodyId i) {
-  if (i < bodies.size()) {
+  if (i >= 0 && (unsigned)i < bodies.size()) {
     return &bodies.at(i).bbox;
   } else {
     return nullptr;

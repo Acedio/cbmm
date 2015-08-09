@@ -11,7 +11,7 @@
 
 using namespace std;
 
-int main(int argc, char** argv) {
+int main(int, char**) {
   const unsigned int SCREEN_WIDTH = 1024;
   const unsigned int SCREEN_HEIGHT = 768;
   const unsigned int SCREEN_BPP = 32;
@@ -103,10 +103,10 @@ int main(int argc, char** argv) {
     double dt = (double)(SDL_GetTicks() - last_ticks) / 1000.0;
     if (!paused) {
       vector<Collision> collisions = physics.Update(dt);
-      for (const Collision& c : collisions) {
+      /* for (const Collision& c : collisions) {
         cout << "a " << c.first << " b " << c.second << " @ (" << c.fix.x << ","
              << c.fix.y << ")" << endl;
-      }
+      } */
     }
     t += dt;
     frames++;
