@@ -22,6 +22,9 @@ int main(int, char**) {
   int tileProgram =
       shaderManager.AddProgram("resources/texture_vertex.glsl",
                                "resources/tile_fragment.glsl");
+  int textureProgram =
+      shaderManager.AddProgram("resources/texture_vertex.glsl",
+                               "resources/texture_fragment.glsl");
   int lineProgram =
       shaderManager.AddProgram("resources/color_vertex.glsl",
                                "resources/color_fragment.glsl");
@@ -34,9 +37,8 @@ int main(int, char**) {
       textureManager.LoadTexture("resources/tileset.png", 0);
   TextureRef tileMapRef =
       textureManager.LoadTexture("resources/tilemap.png", 0);
-
-  textureManager.BindTexture(tileSetRef, 0);
-  textureManager.BindTexture(tileMapRef, 1);
+  TextureRef dogRef =
+      textureManager.LoadTexture("resources/dog_tilesheet.png", 0);
 
   Physics physics;
   for (int x = 0; x < 16; x++) {
@@ -87,10 +89,20 @@ int main(int, char**) {
 
     display.Clear();
 
+    glDisable(GL_DEPTH_TEST);
+
+    textureManager.BindTexture(tileSetRef, 0);
+    textureManager.BindTexture(tileMapRef, 1);
     shaderManager.UseProgram(tileProgram);
     geometryManager.DrawTileMap();
 
-    glDisable(GL_DEPTH_TEST);
+    textureManager.BindTexture(dogRef, 0);
+    textureManager.BindTexture(-1, 1);
+    shaderManager.UseProgram(textureProgram);
+    geometryManager.DrawSubTexture(5.0 / 16, 1.0 - 4.0 / 16, 1.0 / 16, 1.0 / 16,
+                                   -2.0 / 16, 1.333333 / 16, 1.0 / 16,
+                                   1.333333 / 16);
+
     shaderManager.UseProgram(lineProgram);
     geometryManager.DrawRects(
         [&physics](size_t i) { return physics.GetBodyRect(i); });

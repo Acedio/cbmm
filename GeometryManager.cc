@@ -17,8 +17,8 @@ const unsigned int initialIndexData[4] = {0, 1, 2, 3};
 const float initialRectVertexData[32] = {
     0.0f,      0.0f,      0.0f, 1.0f, 0.0f,      1.0f / 12, 0.0f, 1.0f,
     1.0f / 16, 1.0f / 12, 0.0f, 1.0f, 1.0f / 16, 0.0f,      0.0f, 1.0f,
-    0.0f,      1.0f,      0.0f, 0.0f, 0.0f,      1.0f,      0.0f, 0.0f,
-    0.0f,      1.0f,      0.0f, 0.0f, 0.0f,      1.0f,      0.0f, 0.0f,
+    1.0f,      1.0f,      0.0f, 0.0f, 0.0f,      1.0f,      0.0f, 0.0f,
+    1.0f,      0.0f,      0.0f, 0.0f, 0.0f,      1.0f,      0.0f, 0.0f,
 };
 }
 
@@ -26,6 +26,7 @@ GeometryManager::GeometryManager() {
   std::copy(initialVertexData, initialVertexData + 24, vertexData);
   std::copy(initialIndexData, initialIndexData + 4, indexData);
   std::copy(initialRectVertexData, initialRectVertexData + 32, rectVertexData);
+  for (size_t i = 0; i < 24; ++i) texVertexData[i] = 1.0;
 
   glGenBuffers(1, &positionBufferObject);
   glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
@@ -44,6 +45,13 @@ GeometryManager::GeometryManager() {
                GL_STATIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+
+  glGenBuffers(1, &texPositionBufferObject);
+  glBindBuffer(GL_ARRAY_BUFFER, texPositionBufferObject);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(texVertexData), texVertexData,
+               GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
   glGenVertexArrays(1, &vertexArrayObject);
   glBindVertexArray(vertexArrayObject);
 }
@@ -52,6 +60,57 @@ GeometryManager::~GeometryManager() {}
 
 void GeometryManager::DrawTileMap() {
   glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
+  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0,
+                        (void*)(16 * sizeof(float)));
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferObject);
+
+  glDrawElements(GL_TRIANGLE_STRIP, sizeof(indexData) / sizeof(unsigned int),
+                 GL_UNSIGNED_INT, (void*)0);
+
+  glDisableVertexAttribArray(0);
+  glDisableVertexAttribArray(1);
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void GeometryManager::DrawSubTexture(float sx, float sy, float sw, float sh,
+                                     float dx, float dy, float dw, float dh) {
+  texVertexData[0] = dx + dw;
+  texVertexData[1] = dy + dh;
+  texVertexData[2] = 0;
+
+  texVertexData[4] = dx + dw;
+  texVertexData[5] = dy;
+  texVertexData[6] = 0;
+
+  texVertexData[8] = dx;
+  texVertexData[9] = dy + dh;
+  texVertexData[10] = 0;
+
+  texVertexData[12] = dx;
+  texVertexData[13] = dy;
+  texVertexData[14] = 0;
+
+  texVertexData[16] = sx + sw;
+  texVertexData[17] = sy + sh;
+
+  texVertexData[18] = sx + sw;
+  texVertexData[19] = sy;
+
+  texVertexData[20] = sx;
+  texVertexData[21] = sy + sh;
+
+  texVertexData[22] = sx;
+  texVertexData[23] = sy;
+
+  glBindBuffer(GL_ARRAY_BUFFER, texPositionBufferObject);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(texVertexData), texVertexData,
+               GL_STATIC_DRAW);
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
