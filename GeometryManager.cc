@@ -78,6 +78,19 @@ void GeometryManager::DrawTileMap() {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+void GeometryManager::DrawSubSprite(int si, float dx, float dy) {
+  const float width = 1.0 / 16.0;
+  const float height = 1.0 / 16.0;
+  const int rows = 16;
+  const int cols = 16;
+  int row = si / cols;
+  int col = si % rows;
+  float x = col / (float) cols;
+  // - height because y is defined from top of sprite but height is "upward"
+  float y = 1.0 - row / (float) rows - height;
+  DrawSubTexture(x, y, width, height, dx, dy, 1.0 / 16.0, 1.33333 / 16);
+}
+
 void GeometryManager::DrawSubTexture(float sx, float sy, float sw, float sh,
                                      float dx, float dy, float dw, float dh) {
   texVertexData[0] = dx + dw;

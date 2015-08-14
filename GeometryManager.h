@@ -12,6 +12,7 @@ class GeometryManager {
   GeometryManager();
   ~GeometryManager();
   void DrawTileMap();
+  void DrawSubSprite(int si, float dx, float dy);
   void DrawSubTexture(float sx, float sy, float sw, float sh,
                       float dx, float dy, float dw, float dh);
   void DrawRect(float x, float y, float w, float h);

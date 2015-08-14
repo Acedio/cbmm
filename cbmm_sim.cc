@@ -58,6 +58,7 @@ int main(int, char**) {
   int frames = 0;
 
   double t = 0;
+  double delta = 0;
 
   int last_ticks = SDL_GetTicks();
 
@@ -102,6 +103,11 @@ int main(int, char**) {
     geometryManager.DrawSubTexture(5.0 / 16, 1.0 - 4.0 / 16, 1.0 / 16, 1.0 / 16,
                                    -2.0 / 16, 1.333333 / 16, 1.0 / 16,
                                    1.333333 / 16);
+    for (int i = 0; i < 16; ++i) {
+      float angle = delta/(float)i;
+      float magnitude = (float)i/16.0;
+      geometryManager.DrawSubSprite((i / 4) * 16 + (i % 4), magnitude * cos(angle), magnitude * sin(angle));
+    }
 
     shaderManager.UseProgram(lineProgram);
     geometryManager.DrawRects(
@@ -115,6 +121,7 @@ int main(int, char**) {
     double dt = (double)(SDL_GetTicks() - last_ticks) / 1000.0;
     if (!paused) {
       vector<Collision> collisions = physics.Update(dt);
+      delta += 8*dt;
       /* for (const Collision& c : collisions) {
         cout << "a " << c.first << " b " << c.second << " @ (" << c.fix.x << ","
              << c.fix.y << ")" << endl;
