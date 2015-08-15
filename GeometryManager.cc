@@ -132,8 +132,11 @@ void GeometryManager::DrawSubTexture(float sx, float sy, float sw, float sh,
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferObject);
 
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glDrawElements(GL_TRIANGLE_STRIP, sizeof(indexData) / sizeof(unsigned int),
                  GL_UNSIGNED_INT, (void*)0);
+  glDisable(GL_BLEND);
 
   glDisableVertexAttribArray(0);
   glDisableVertexAttribArray(1);
