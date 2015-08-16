@@ -12,7 +12,8 @@ TileMap::TileMap() {
   h = 0;
 }
 
-int TileMap::LoadTmx(char const* filename) {
+int TileMap::LoadTmx(const std::string& filename,
+                     const std::string& layer_name) {
   std::unique_ptr<Tmx::Map> map(new Tmx::Map());
   map->ParseFile(filename);
 
@@ -24,18 +25,24 @@ int TileMap::LoadTmx(char const* filename) {
   }
 
   for (int i = 0; i < map->GetNumTileLayers(); ++i) {
-    std::cout << "Layer #" << i << std::endl;
-
     const Tmx::TileLayer *tile_layer = map->GetTileLayer(i);
+    if (tile_layer->GetName() == layer_name) {
+      std::cout << "Found layer \"" << layer_name << "\"." << std::endl;
+      w = tile_layer->GetWidth();
+      h = tile_layer->GetHeight();
 
-    for (int y = 0; y < tile_layer->GetHeight(); ++y) {
-      for (int x = 0; x < tile_layer->GetWidth(); ++x) {
-        std::cout << tile_layer->GetTileId(x, y) << " ";
+      tiles.resize(w*h);
+
+      for (int y = 0; y < h; ++y) {
+        for (int x = 0; x < w; ++x) {
+          tiles[y*w + x] = tile_layer->GetTileId(x, y);
+        }
       }
-      std::cout << std::endl;
+      return 0;
     }
   }
-  return 0;
+  std::cout << "Couldn't find layer \"" << layer_name << "\"." << std::endl;
+  return -1;
 }
 
 /// Returns 0 on success

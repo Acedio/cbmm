@@ -46,12 +46,18 @@ int main(int, char**) {
         {true, {{(double)x, (double)(1 + x)}, 1, 1}, {1, (double)0 / 2.0}});
   }
 
-  TileMap map;
-  if (map.Load("resources/tiles.map")) {
-    cout << "Error loading tiles.map" << endl;
+  TileMap collision_map;
+  if (collision_map.LoadTmx("resources/test.tmx", "Collision")) {
+    cout << "Error loading test.tmx" << endl;
   }
-  map.LoadTmx("resources/test.tmx");
-  physics.SetTileMap(map);
+  physics.SetTileMap(collision_map);
+
+  TileMap tilemap;
+  if (tilemap.LoadTmx("resources/test.tmx", "Tiles")) {
+    cout << "Error loading test.tmx" << endl;
+  }
+  tilemap.Print(cout);
+  tileMapRef = textureManager.LoadTilemapTexture(tilemap);
 
   bool running = true;
   bool paused = true;

@@ -1,15 +1,7 @@
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
-#include <GL/glew.h>
-
 #include <SDL.h>
 #include <SDL_image.h>
 
 #include <iostream>
-#include <string>
-#include <map>
 using namespace std;
 
 #include "TextureManager.h"
@@ -129,6 +121,45 @@ TextureRef TextureManager::LoadTexture(string filename, int level) {
 
     next_unused_ref += 1;
   }
+  return ref;
+}
+
+TextureRef TextureManager::LoadTilemapTexture(const TileMap& tilemap) {
+  GLuint texture;
+  glGenTextures(1, &texture);
+
+  glBindTexture(GL_TEXTURE_2D, texture);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+  int w = tilemap.GetWidth();
+  int h = tilemap.GetHeight();
+  vector<unsigned char> map_data(w * h);
+  for (int y = h - 1; y >= 0; --y) {
+    for (int x = 0; x < w; ++x) {
+      map_data.push_back((unsigned char)tilemap.At(x, y));
+    }
+  }
+
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED, GL_UNSIGNED_BYTE,
+               map_data.data());
+
+  if (glGetError() == GL_NO_ERROR) {
+    cout << "Loaded tilemap successfully" << endl;
+  }
+
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  TextureRef ref = next_unused_ref;
+
+  textures[ref] = texture;  // store the stats about our new texture
+  // TODO: Find out if filenames needs to be updated here, and if so, how.
+  refcounts[ref] = 1;
+
+  next_unused_ref += 1;
   return ref;
 }
 

@@ -7,12 +7,11 @@
 
 #include <GL/glew.h>
 
-#include <SDL.h>
-#include <SDL_image.h>
-
-#include <iostream>
 #include <string>
 #include <map>
+
+#include "TileMap.h"
+
 using namespace std;
 
 typedef unsigned int TextureRef;
@@ -26,6 +25,8 @@ class TextureManager {
   void UnloadTexture(TextureRef ref);
 
   void BindTexture(TextureRef ref, int unit);
+
+  TextureRef LoadTilemapTexture(const TileMap& tilemap);
 
  private:
   map<string, TextureRef> filenames;
