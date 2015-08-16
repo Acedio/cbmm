@@ -8,8 +8,7 @@ using namespace std;
 
 TextureManager::TextureManager() {
   next_unused_ref = 0;
-  TextureRef ref = next_unused_ref;
-  next_unused_ref += 1;
+  TextureRef ref = getUnusedRef();
 
   // make the default magenta checkerboard texture
 
@@ -37,6 +36,12 @@ TextureManager::~TextureManager() {
        i != textures.end(); ++i) {
     glDeleteTextures(1, &(i->second));
   }
+}
+
+TextureRef TextureManager::getUnusedRef() {
+  TextureRef ref = next_unused_ref;
+  next_unused_ref += 1;
+  return ref;
 }
 
 // level = -1 for auto-mipmapping
@@ -113,13 +118,11 @@ TextureRef TextureManager::LoadTexture(string filename, int level) {
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    ref = next_unused_ref;
+    ref = getUnusedRef();
 
     textures[ref] = texture;  // store the stats about our new texture
     filenames[filename] = ref;
     refcounts[ref] = 1;
-
-    next_unused_ref += 1;
   }
   return ref;
 }
@@ -137,15 +140,16 @@ TextureRef TextureManager::LoadTilemapTexture(const TileMap& tilemap) {
 
   int w = tilemap.GetWidth();
   int h = tilemap.GetHeight();
-  vector<unsigned char> map_data(w * h);
+  vector<GLubyte> map_data;
+  // Inverted y because textures are positive-up
   for (int y = h - 1; y >= 0; --y) {
     for (int x = 0; x < w; ++x) {
-      map_data.push_back((unsigned char)tilemap.At(x, y));
+      map_data.push_back((GLubyte)tilemap.At(x, y));
     }
   }
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, w, h, 0, GL_RED, GL_UNSIGNED_BYTE,
-               map_data.data());
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, w, h, 0, GL_RED_INTEGER,
+               GL_UNSIGNED_BYTE, map_data.data());
 
   if (glGetError() == GL_NO_ERROR) {
     cout << "Loaded tilemap successfully" << endl;
@@ -153,13 +157,12 @@ TextureRef TextureManager::LoadTilemapTexture(const TileMap& tilemap) {
 
   glBindTexture(GL_TEXTURE_2D, 0);
 
-  TextureRef ref = next_unused_ref;
+  TextureRef ref = getUnusedRef();
 
   textures[ref] = texture;  // store the stats about our new texture
   // TODO: Find out if filenames needs to be updated here, and if so, how.
   refcounts[ref] = 1;
 
-  next_unused_ref += 1;
   return ref;
 }
 

@@ -61,8 +61,8 @@ int TileMap::Load(char const* fileName) {
 
   tiles.resize(w * h);
 
-  for (int y = h - 1; y >= 0; y--) {
-    for (int x = 0; x < w; x++) {
+  for (int y = 0; y < h; ++y) {
+    for (int x = 0; x < w; ++x) {
       if (!tileMapFile.good()) {
         return -1;
       }
@@ -83,8 +83,8 @@ int TileMap::At(int x, int y) const {
 }
 
 void TileMap::Print(std::ostream& os) const {
-  for (int y = h - 1; y >= 0; y--) {
-    for (int x = 0; x < w; x++) {
+  for (int y = 0; y < h; ++y) {
+    for (int x = 0; x < w; ++x) {
       os << tiles[y * w + x] << " ";
     }
     os << endl;

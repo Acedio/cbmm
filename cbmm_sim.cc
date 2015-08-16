@@ -35,8 +35,6 @@ int main(int, char**) {
 
   TextureRef tileSetRef =
       textureManager.LoadTexture("resources/tileset.png", 0);
-  TextureRef tileMapRef =
-      textureManager.LoadTexture("resources/tilemap.png", 0);
   TextureRef dogRef =
       textureManager.LoadTexture("resources/dog_tilesheet.png", 0);
 
@@ -56,8 +54,7 @@ int main(int, char**) {
   if (tilemap.LoadTmx("resources/test.tmx", "Tiles")) {
     cout << "Error loading test.tmx" << endl;
   }
-  tilemap.Print(cout);
-  tileMapRef = textureManager.LoadTilemapTexture(tilemap);
+  TextureRef tileMapRef = textureManager.LoadTilemapTexture(tilemap);
 
   bool running = true;
   bool paused = true;

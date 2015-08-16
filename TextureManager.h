@@ -29,6 +29,7 @@ class TextureManager {
   TextureRef LoadTilemapTexture(const TileMap& tilemap);
 
  private:
+  TextureRef getUnusedRef();
   map<string, TextureRef> filenames;
   map<TextureRef, GLuint> textures;
   map<TextureRef, int> refcounts;
