@@ -14,6 +14,7 @@ enum TileType {
 class TileMap {
  public:
   TileMap();
+  int LoadTmx(char const *fileName);
   int Load(char const *fileName);
   int At(int x, int y) const;
   void Print(std::ostream &os) const;

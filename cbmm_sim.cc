@@ -50,6 +50,7 @@ int main(int, char**) {
   if (map.Load("resources/tiles.map")) {
     cout << "Error loading tiles.map" << endl;
   }
+  map.LoadTmx("resources/test.tmx");
   physics.SetTileMap(map);
 
   bool running = true;
@@ -125,6 +126,7 @@ int main(int, char**) {
       if (i < 12) {
         return rows + i;
       }
+      return 0;
     };
     for (int i = 0; i < 32; ++i) {
       float angle = sin(delta*(float)i/32);

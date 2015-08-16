@@ -1,12 +1,41 @@
 #include "TileMap.h"
+#include "tmxparser/Tmx.h"
 
+#include <iostream>
 #include <fstream>
+#include <memory>
 
 using namespace std;
 
 TileMap::TileMap() {
   w = 0;
   h = 0;
+}
+
+int TileMap::LoadTmx(char const* filename) {
+  std::unique_ptr<Tmx::Map> map(new Tmx::Map());
+  map->ParseFile(filename);
+
+  if (map->HasError()) {
+    std::cout << "Error code: " << map->GetErrorCode() << std::endl;
+    std::cout << "Error text: " << map->GetErrorText() << std::endl;
+    
+    return map->GetErrorCode();
+  }
+
+  for (int i = 0; i < map->GetNumTileLayers(); ++i) {
+    std::cout << "Layer #" << i << std::endl;
+
+    const Tmx::TileLayer *tile_layer = map->GetTileLayer(i);
+
+    for (int y = 0; y < tile_layer->GetHeight(); ++y) {
+      for (int x = 0; x < tile_layer->GetWidth(); ++x) {
+        std::cout << tile_layer->GetTileId(x, y) << " ";
+      }
+      std::cout << std::endl;
+    }
+  }
+  return 0;
 }
 
 /// Returns 0 on success
