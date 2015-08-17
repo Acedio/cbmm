@@ -137,7 +137,7 @@ vector<Collision> Physics::Update(double dt) {
           bodies[id].bbox.upperLeft + bodies[id].vel * dt + vec2f{dt / 2.0, 0};
 
       // tilemap collision
-      vec2f fix;
+      vec2f fix{0, 0};
       if (RectMapCollision(new_rect, &fix)) {
         // collisions.push_back({id, MAP_BODY_ID, fix});
         new_rect.upperLeft += fix;
@@ -152,7 +152,7 @@ vector<Collision> Physics::Update(double dt) {
       }
 
       // rect rect collisions
-      vec2f rect_fix;
+      vec2f rect_fix{0, 0};
       for (BodyId id2 = id + 1; id2 < 0 || (unsigned)id2 < bodies.size();
            ++id2) {
         if (bodies[id2].enabled &&
