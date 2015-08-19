@@ -1,3 +1,6 @@
 [submodule "libs/tinyxml2"]
 	path = libs/tinyxml2
 	url = https://github.com/leethomason/tinyxml2.git
+[submodule "libs/tmxparser"]
+	path = libs/tmxparser
+	url = https://github.com/acedio/tmxparser.git
