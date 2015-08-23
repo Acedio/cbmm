@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.1)
 project (cbmm_sim)
 set (cbmm_sim_VERSION_MAJOR 0)
 set (cbmm_sim_VERSION_MINOR 1)
@@ -37,7 +37,6 @@ if (GLEW_FOUND)
   include_directories (${GLEW_INCLUDE_DIRS})
   link_libraries (${GLEW_LIBRARIES})
 endif ()
-MESSAGE( STATUS "GLEW_LIBRARIES: " ${GLEW_LIBRARIES} )
 
 file(GLOB cbmm_sim_SRC
   "*.h"
@@ -48,6 +47,7 @@ add_executable (cbmm_sim ${cbmm_sim_SRC})
 target_link_libraries (cbmm_sim tmxparser_static tinyxml2)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/libs/tmxparser/src ${CMAKE_CURRENT_BINARY_DIR}/libs)
 set_property (TARGET cbmm_sim PROPERTY CXX_STANDARD 11)
+set_property (TARGET cbmm_sim PROPERTY CXX_STANDARD_REQUIRED ON)
 
 add_custom_target (copy_resources ALL)
 add_custom_command(TARGET copy_resources PRE_BUILD
