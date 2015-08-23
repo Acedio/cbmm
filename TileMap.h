@@ -16,6 +16,7 @@ class TileMap {
   TileMap();
   int LoadTmx(const std::string& filename, const std::string& layer_name);
   int Load(char const *fileName);
+  int InvertAt(int x, int y) const;
   int At(int x, int y) const;
   void Print(std::ostream &os) const;
 

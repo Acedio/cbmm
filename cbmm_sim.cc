@@ -39,9 +39,9 @@ int main(int, char**) {
       textureManager.LoadTexture("resources/dog_tilesheet.png", 0);
 
   Physics physics;
-  for (int x = 0; x < 16; x++) {
+  for (int x = 0; x < 16; x += 2) {
     physics.AddBody(
-        {true, {{(double)x, (double)(1 + x)}, 1, 1}, {1, (double)0 / 2.0}});
+        {true, {{(double)x, (double)x}, 1, 1}, {1, (double)0 / 2.0}});
   }
 
   TileMap collision_map;

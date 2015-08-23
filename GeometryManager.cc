@@ -178,7 +178,7 @@ void GeometryManager::DrawRects(
     if (!rect) {
       break;
     }
-    DrawRect(rect->upperLeft.x / 16.0 - 0.5, rect->upperLeft.y / 12.0 - 0.5,
+    DrawRect(rect->upperLeft.x / 16.0 - 1, rect->upperLeft.y / 12.0 - 1,
              rect->w / 16.0, rect->h / 12.0);
   }
 }

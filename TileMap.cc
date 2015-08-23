@@ -75,6 +75,13 @@ int TileMap::Load(char const* fileName) {
   return 0;
 }
 
+int TileMap::InvertAt(int x, int y) const {
+  if (x < 0 || y < 0 || x >= w || y >= h) {
+    return -1;
+  }
+  return tiles.at((h - 1 - y) * w + x);
+}
+
 int TileMap::At(int x, int y) const {
   if (x < 0 || y < 0 || x >= w || y >= h) {
     return -1;
