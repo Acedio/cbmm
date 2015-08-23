@@ -135,7 +135,7 @@ vector<Collision> Physics::Update(double dt) {
       // movement
       Rect new_rect = bodies[id].bbox;
       new_rect.upperLeft =
-          bodies[id].bbox.upperLeft + bodies[id].vel * dt + vec2f{dt / 2.0, 0};
+          bodies[id].bbox.upperLeft + bodies[id].vel * dt;
 
       // tilemap collision
       vec2f fix{0, 0};
