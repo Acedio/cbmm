@@ -1,3 +1,5 @@
+// Physics stuff
+// NOTE: Y-axis is up-facing for physics purposes, e.g. gravity is down.
 #ifndef PHYSICS_H
 #define PHYSICS_H
 

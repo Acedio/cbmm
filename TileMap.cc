@@ -35,7 +35,8 @@ int TileMap::LoadTmx(const std::string& filename,
 
       for (int y = 0; y < h; ++y) {
         for (int x = 0; x < w; ++x) {
-          tiles[y*w + x] = tile_layer->GetTileId(x, y);
+          // tmx maps have origins in the upper left, but we want lower left.
+          set(x, h - 1 - y, tile_layer->GetTileId(x, y));
         }
       }
       return 0;
@@ -68,32 +69,33 @@ int TileMap::Load(char const* fileName) {
       }
       int temp;
       tileMapFile >> temp;
-      tiles.at(y * w + x) = temp;
+      set(x, y, temp);
     }
   }
 
   return 0;
 }
 
-int TileMap::InvertAt(int x, int y) const {
-  if (x < 0 || y < 0 || x >= w || y >= h) {
-    return -1;
-  }
-  return tiles.at((h - 1 - y) * w + x);
-}
-
 int TileMap::At(int x, int y) const {
   if (x < 0 || y < 0 || x >= w || y >= h) {
     return -1;
   }
-  return tiles.at(y * w + x);
+  return get(x, y);
 }
 
 void TileMap::Print(std::ostream& os) const {
   for (int y = 0; y < h; ++y) {
     for (int x = 0; x < w; ++x) {
-      os << tiles[y * w + x] << " ";
+      os << get(x, y) << " ";
     }
     os << endl;
   }
+}
+
+int TileMap::get(int x, int y) const {
+  return tiles[y * w + x];
+}
+
+void TileMap::set(int x, int y, int tile) {
+  tiles[y * w + x] = tile;
 }

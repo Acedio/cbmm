@@ -8,7 +8,7 @@ bool PointMapBelow(const TileMap& tile_map, const vec2f& contact_pt,
                    vec2f* fix) {
   float map_y = floor(contact_pt.y);
 
-  int tile_type = tile_map.InvertAt(contact_pt.x, contact_pt.y);
+  int tile_type = tile_map.At(contact_pt.x, contact_pt.y);
   if (tile_type == TILE_BLOCK) {
     fix->y = (map_y + 1) - contact_pt.y;
 
@@ -18,12 +18,14 @@ bool PointMapBelow(const TileMap& tile_map, const vec2f& contact_pt,
   return false;
 }
 
+// TODO: Velocity after @fix should be parallel to the slope so jittering
+// doesn't occur.
 bool PointMapSlope(const TileMap& tile_map, const vec2f& contact_pt,
                    vec2f* fix) {
   float map_x = floor(contact_pt.x);
   float map_y = floor(contact_pt.y);
 
-  int tile_type = tile_map.InvertAt(contact_pt.x, contact_pt.y);
+  int tile_type = tile_map.At(contact_pt.x, contact_pt.y);
   if (tile_type == TILE_SLOPE_01) {
     float dist_from_slope = (contact_pt.y - map_y) - (contact_pt.x - map_x);
     if (dist_from_slope < 0) {
@@ -46,7 +48,7 @@ bool PointMapSlope(const TileMap& tile_map, const vec2f& contact_pt,
 
 bool PointMapSide(const TileMap& tile_map, const vec2f& contact_pt,
                   vec2f* fix) {
-  int tile_type = tile_map.InvertAt(contact_pt.x, contact_pt.y);
+  int tile_type = tile_map.At(contact_pt.x, contact_pt.y);
   if (tile_type == TILE_BLOCK) {
     // Might want to split this up into two functions...
     fix->x = round(contact_pt.x) - contact_pt.x;
@@ -97,7 +99,7 @@ bool Physics::RectRectCollision(const Rect& first, const Rect& second,
 }
 
 bool Physics::RectMapCollision(const Rect& rect, vec2f* fix) {
-  int tile_type = tile_map.InvertAt(rect.upperLeft.x + (rect.w / 2.0),
+  int tile_type = tile_map.At(rect.upperLeft.x + (rect.w / 2.0),
                                     rect.upperLeft.y - rect.h);
   if (tile_type == TILE_SLOPE_01 || tile_type == TILE_SLOPE_10) {
     return PointMapSlope(tile_map, {rect.upperLeft.x + (rect.w / 2.0),

@@ -141,8 +141,8 @@ TextureRef TextureManager::LoadTilemapTexture(const TileMap& tilemap) {
   int w = tilemap.GetWidth();
   int h = tilemap.GetHeight();
   vector<GLubyte> map_data;
-  // Inverted y because textures are positive-up
-  for (int y = h - 1; y >= 0; --y) {
+  // Textures are positive-up
+  for (int y = 0; y < h; ++y) {
     for (int x = 0; x < w; ++x) {
       map_data.push_back((GLubyte)tilemap.At(x, y));
     }

@@ -16,7 +16,7 @@ class TileMap {
   TileMap();
   int LoadTmx(const std::string& filename, const std::string& layer_name);
   int Load(char const *fileName);
-  int InvertAt(int x, int y) const;
+  // 0,0 is lower left
   int At(int x, int y) const;
   void Print(std::ostream &os) const;
 
@@ -24,6 +24,8 @@ class TileMap {
   int GetHeight() const { return h; }
 
  private:
+  int get(int x, int y) const;
+  void set(int x, int y, int tile);
   std::vector<int> tiles;
   int w, h;
 };
