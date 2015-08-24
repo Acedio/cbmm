@@ -51,5 +51,5 @@ set_property (TARGET cbmm_sim PROPERTY CXX_STANDARD_REQUIRED ON)
 
 add_custom_target (copy_resources ALL)
 add_custom_command(TARGET copy_resources PRE_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E
-                   copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resources $<TARGET_FILE_DIR:cbmm_sim>/resources)
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                   ${CMAKE_CURRENT_SOURCE_DIR}/resources $<TARGET_FILE_DIR:cbmm_sim>/resources)
