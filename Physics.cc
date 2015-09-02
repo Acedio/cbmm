@@ -129,7 +129,7 @@ bool Physics::RectMapCollision(const Rect& rect, vec2f* fix) {
   return collided_below || collided_side;
 }
 
-vector<Collision> Physics::Update(double dt) {
+vector<Collision> Physics::Update(Seconds dt) {
   vector<Collision> collisions;
 
   for (BodyId id = 0; id < 0 || (unsigned)id < bodies.size(); ++id) {

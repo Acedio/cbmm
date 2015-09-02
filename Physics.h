@@ -26,6 +26,8 @@ struct Collision {
   vec2f fix;
 };
 
+typedef double Seconds;
+
 class Physics {
  public:
   BodyId AddBody(Body body) {
@@ -33,7 +35,7 @@ class Physics {
     return bodies.size() - 1;
   }
   void SetTileMap(const TileMap& tile_map) { this->tile_map = tile_map; }
-  vector<Collision> Update(double dt);
+  vector<Collision> Update(Seconds dt);
   const Rect* GetBodyRect(BodyId id);
 
  private:
