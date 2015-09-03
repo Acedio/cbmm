@@ -5,6 +5,7 @@
 
 #include "Display.h"
 #include "GeometryManager.h"
+#include "Input.h"
 #include "Physics.h"
 #include "ShaderManager.h"
 #include "TextureManager.h"
@@ -67,31 +68,21 @@ int main(int, char**) {
   int last_ticks = SDL_GetTicks();
 
   while (running) {
-    SDL_Event event;
-
-    while (SDL_PollEvent(&event)) {
-      switch (event.type) {
-        case SDL_QUIT:
-          running = false;
-          break;
-        case SDL_KEYUP:
-          switch (event.key.keysym.sym) {
-            case SDLK_ESCAPE:
-              running = false;
-              break;
-            case SDLK_p:
-              paused = !paused;
-            default:
-              break;
-          }
-          break;
-        default:
-          break;
+    for (ButtonEvent event : GetButtonEvents()) {
+      if (event.button_state == ButtonState::RELEASED) {
+        switch (event.button) {
+          case Button::QUIT:
+            running = false;
+            break;
+          case Button::PAUSE:
+            paused = !paused;
+          default:
+            break;
+        }
       }
     }
 
     // Begin drawing
-
     display.Clear();
 
     glDisable(GL_DEPTH_TEST);
