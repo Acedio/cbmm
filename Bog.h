@@ -10,9 +10,6 @@ class State;
 
 class Bog {
  public:
-  static const bog_states::State* kStanding;
-  static const bog_states::State* kJumping;
-
   void Update(const Seconds dt);
   void HandleInput(const Button button, const ButtonState button_state);
   // This and Update should probably be part of a "PhysicsComponent" class.
@@ -34,6 +31,8 @@ class State {
   // Handles collision with ground and other objects.
   virtual const State* HandleCollision(Bog* bog,
                                        const Collision& collision) const = 0;
+  static bog_states::State* kStanding;
+  static bog_states::State* kJumping;
 };
 
 class Standing : public State {

@@ -21,13 +21,17 @@ void Bog::HandleCollision(const Collision& collision) {
 }
 
 namespace bog_states {
+// Initialize static states.
+State* State::kStanding = nullptr;
+State* State::kJumping = nullptr;
+
 const State* Standing::Update(Bog*, const Seconds) const {
   return nullptr;
 }
 const State* Standing::HandleInput(Bog*, const Button button,
                                    const ButtonState button_state) const {
   if (button == Button::JUMP && button_state == ButtonState::PRESSED) {
-    return Bog::kJumping;
+    return State::kJumping;
   }
   return nullptr;
 }
@@ -42,6 +46,6 @@ const State* Jumping::HandleInput(Bog*, const Button, const ButtonState) const {
   return nullptr;
 }
 const State* Jumping::HandleCollision(Bog*, const Collision&) const {
-  return Bog::kStanding;
+  return State::kStanding;
 }
 }  // bog_states
