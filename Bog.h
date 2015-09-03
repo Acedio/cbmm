@@ -1,6 +1,8 @@
 #ifndef BOG_H
 #define BOG_H
 
+#include <memory>
+
 #include "Input.h"
 #include "Physics.h"
 
@@ -14,10 +16,13 @@ class Bog {
   void HandleInput(const Button button, const ButtonState button_state);
   // This and Update should probably be part of a "PhysicsComponent" class.
   // There should be an easy way of describing and sharing physical behaviors.
+  // -- Or maybe they should just interact with the PhysicsComponent?
   void HandleCollision(const Collision& collision);
+  static std::unique_ptr<Bog> MakeBog(const vec2f& location);
  private:
+  Bog();
   const bog_states::State* state;
-  BodyId body_id_;
+  Body* body_;
 };
 
 namespace bog_states {

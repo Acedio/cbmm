@@ -20,10 +20,23 @@ void Bog::HandleCollision(const Collision& collision) {
   }
 }
 
+std::unique_ptr<Bog> Bog::MakeBog(
+    const vec2f& /* should probably pass Physics here as well*/) {
+  Bog* bog = new Bog();
+  bog->state = bog_states::State::kStanding;
+  return std::unique_ptr<Bog>();
+}
+
+Bog::Bog() {
+  // Nada.
+}
+
 namespace bog_states {
 // Initialize static states.
-State* State::kStanding = nullptr;
-State* State::kJumping = nullptr;
+Standing standing;
+State* State::kStanding = &standing;
+Jumping jumping;
+State* State::kJumping = &jumping;
 
 const State* Standing::Update(Bog*, const Seconds) const {
   return nullptr;
