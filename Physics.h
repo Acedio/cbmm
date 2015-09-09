@@ -14,10 +14,24 @@ typedef int BodyId;
 
 const BodyId MAP_BODY_ID = -1;
 
-struct Body {
-  bool enabled;
-  Rect bbox;
-  vec2f vel;
+class Body {
+ public:
+  bool enabled() { return enabled_; }
+  void set_enabled(bool enabled) { enabled_ = enabled; };
+  const Rect& bbox() { return bbox_; }
+  void set_bbox(const Rect& bbox) { bbox_ = bbox; }
+  const vec2f& vel() { return vel_; }
+  void set_vel(const vec2f& vel) { vel_ = vel; }
+
+  Body(bool enabled, const Rect& bbox, const vec2f& vel) {
+    enabled_ = enabled;
+    bbox_ = bbox;
+    vel_ = vel;
+  }
+ private:
+  bool enabled_;
+  Rect bbox_;
+  vec2f vel_;
 };
 
 struct Collision {

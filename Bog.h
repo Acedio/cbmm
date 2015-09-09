@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include "Actor.h"
 #include "Input.h"
 #include "Physics.h"
 
@@ -10,18 +11,18 @@ namespace bog_states {
 class State;
 }  // bog_states
 
-class Bog {
+class Bog : public Actor {
  public:
-  void Update(const Seconds dt);
+  void Update(const Seconds dt) override;
   void HandleInput(const Button button, const ButtonState button_state);
   // This and Update should probably be part of a "PhysicsComponent" class.
   // There should be an easy way of describing and sharing physical behaviors.
   // -- Or maybe they should just interact with the PhysicsComponent?
-  void HandleCollision(const Collision& collision);
+  void HandleCollision(const Collision& collision) override;
   static std::unique_ptr<Bog> MakeBog(const vec2f& location);
  private:
   Bog();
-  const bog_states::State* state;
+  const bog_states::State* state_;
   Body* body_;
 };
 

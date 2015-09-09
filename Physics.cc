@@ -133,39 +133,41 @@ vector<Collision> Physics::Update(Seconds dt) {
   vector<Collision> collisions;
 
   for (BodyId id = 0; id < 0 || (unsigned)id < bodies.size(); ++id) {
-    if (bodies[id].enabled) {
+    if (bodies[id].enabled()) {
       // movement
-      Rect new_rect = bodies[id].bbox;
+      Rect new_rect = bodies[id].bbox();
       new_rect.upperLeft =
-          bodies[id].bbox.upperLeft + bodies[id].vel * dt;
+          bodies[id].bbox().upperLeft + bodies[id].vel() * dt;
 
       // tilemap collision
       vec2f fix{0, 0};
       if (RectMapCollision(new_rect, &fix)) {
-        // collisions.push_back({id, MAP_BODY_ID, fix});
+        collisions.push_back({id, MAP_BODY_ID, fix});
         new_rect.upperLeft += fix;
+        /*
         if (fix.x != 0) {
           bodies[id].vel.x = 0;
         }
         if (fix.y != 0) {
           bodies[id].vel.y = 0;
         }
+        */
       } else {
-        bodies[id].vel += vec2f{0, -9 * dt};
+        bodies[id].set_vel(bodies[id].vel() + vec2f{0, -9 * dt});
       }
 
       // rect rect collisions
       vec2f rect_fix{0, 0};
       for (BodyId id2 = id + 1; id2 < 0 || (unsigned)id2 < bodies.size();
            ++id2) {
-        if (bodies[id2].enabled &&
-            RectRectCollision(new_rect, bodies[id2].bbox, &rect_fix)) {
+        if (bodies[id2].enabled() &&
+            RectRectCollision(new_rect, bodies[id2].bbox(), &rect_fix)) {
           // TODO: both should react?
           //new_rect.upperLeft += 0.5 * fix;
           collisions.push_back({id, id2, rect_fix});
         }
       }
-      bodies[id].bbox = new_rect;
+      bodies[id].set_bbox(new_rect);
     }
   }
 
@@ -174,7 +176,7 @@ vector<Collision> Physics::Update(Seconds dt) {
 
 const Rect* Physics::GetBodyRect(BodyId i) {
   if (i >= 0 && (unsigned)i < bodies.size()) {
-    return &bodies.at(i).bbox;
+    return &bodies[i].bbox();
   } else {
     return nullptr;
   }

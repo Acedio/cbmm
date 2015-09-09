@@ -1,29 +1,29 @@
 #include "Bog.h"
 
 void Bog::Update(const Seconds dt) {
-  const bog_states::State* new_state = state->Update(this, dt);
+  const bog_states::State* new_state = state_->Update(this, dt);
   if (new_state) {
-    state = new_state;
+    state_ = new_state;
   }
 }
 void Bog::HandleInput(const Button button, const ButtonState button_state) {
   const bog_states::State* new_state =
-      state->HandleInput(this, button, button_state);
+      state_->HandleInput(this, button, button_state);
   if (new_state) {
-    state = new_state;
+    state_ = new_state;
   }
 }
 void Bog::HandleCollision(const Collision& collision) {
-  const bog_states::State* new_state = state->HandleCollision(this, collision);
+  const bog_states::State* new_state = state_->HandleCollision(this, collision);
   if (new_state) {
-    state = new_state;
+    state_ = new_state;
   }
 }
 
 std::unique_ptr<Bog> Bog::MakeBog(
     const vec2f& /* should probably pass Physics here as well*/) {
   Bog* bog = new Bog();
-  bog->state = bog_states::State::kStanding;
+  bog->state_ = bog_states::State::kStanding;
   return std::unique_ptr<Bog>();
 }
 
