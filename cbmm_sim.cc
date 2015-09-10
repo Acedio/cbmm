@@ -1,8 +1,10 @@
 #include <cmath>
 #include <iostream>
+#include <vector>
 
 #include <SDL.h>
 
+#include "Bog.h"
 #include "Display.h"
 #include "GeometryManager.h"
 #include "Input.h"
@@ -40,9 +42,11 @@ int main(int, char**) {
       textureManager.LoadTexture("resources/dog_tilesheet.png", 0);
 
   Physics physics;
+  vector<unique_ptr<Entity>> bogs;
   for (int x = 0; x < 16; x += 2) {
-    physics.AddBody(
-        {true, {{(double)x, (double)x}, 1, 1}, {1, (double)0 / 2.0}});
+    Body body = {true, {{(double)x, (double)x}, 1, 1}, {1, (double)0 / 2.0}};
+    physics.AddBody(body);
+    bogs.push_back(MakeBog(&body));
   }
 
   TileMap collision_map;
@@ -141,7 +145,16 @@ int main(int, char**) {
 
     double dt = (double)(SDL_GetTicks() - last_ticks) / 1000.0;
     if (!paused) {
+      for (const auto& bog : bogs) {
+        bog->state_machine->Update(bog.get(), dt);
+      }
       vector<Collision> collisions = physics.Update(dt);
+      for (const auto& collision : collisions) {
+        cout << collision.first << endl;
+        // TODO: We should just have Physics use EntityIds?
+        BodyId id = collision.first;
+        bogs[id]->state_machine->HandleCollision(bogs[id].get(), collision);
+      }
       delta += 8*dt;
       /* for (const Collision& c : collisions) {
         cout << "a " << c.first << " b " << c.second << " @ (" << c.fix.x << ","

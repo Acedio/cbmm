@@ -6,57 +6,29 @@
 #include "Actor.h"
 #include "Input.h"
 #include "Physics.h"
+#include "State.h"
+
+std::unique_ptr<Entity> MakeBog(Body* body);
 
 namespace bog_states {
-class State;
-}  // bog_states
-
-class Bog : public Actor {
- public:
-  void Update(const Seconds dt) override;
-  void HandleInput(const Button button, const ButtonState button_state);
-  // This and Update should probably be part of a "PhysicsComponent" class.
-  // There should be an easy way of describing and sharing physical behaviors.
-  // -- Or maybe they should just interact with the PhysicsComponent?
-  void HandleCollision(const Collision& collision) override;
-  static std::unique_ptr<Bog> MakeBog(const vec2f& location);
- private:
-  Bog();
-  const bog_states::State* state_;
-  Body* body_;
-};
-
-namespace bog_states {
-class State {
- public:
-  // Update handles physics movement and other such things
-  virtual const State* Update(Bog* bog, const Seconds dt) const = 0;
-  // Handles button presses and releases.
-  virtual const State* HandleInput(Bog* bog, const Button button,
-                                   const ButtonState button_state) const = 0;
-  // Handles collision with ground and other objects.
-  virtual const State* HandleCollision(Bog* bog,
-                                       const Collision& collision) const = 0;
-  static bog_states::State* kStanding;
-  static bog_states::State* kJumping;
-};
-
 class Standing : public State {
  public:
-  const State* Update(Bog* bog, const Seconds dt) const override;
-  const State* HandleInput(Bog* bog, const Button button,
+  const State* Update(Entity* entity, const Seconds dt) const override;
+  const State* HandleInput(Entity* entity, const Button button,
                            const ButtonState button_state) const override;
-  const State* HandleCollision(Bog* bog,
+  const State* HandleCollision(Entity* entity,
                                const Collision& collision) const override;
+  static const Standing state;
 };
 
 class Jumping : public State {
  public:
-  const State* Update(Bog* bog, const Seconds dt) const override;
-  const State* HandleInput(Bog* bog, const Button button,
+  const State* Update(Entity* entity, const Seconds dt) const override;
+  const State* HandleInput(Entity* entity, const Button button,
                            const ButtonState button_state) const override;
-  const State* HandleCollision(Bog* bog,
+  const State* HandleCollision(Entity* entity,
                                const Collision& collision) const override;
+  static const Jumping state;
 };
 }  // bog_states
 

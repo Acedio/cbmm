@@ -1,64 +1,57 @@
 #include "Bog.h"
+#include "Entity.h"
+#include "State.h"
 
-void Bog::Update(const Seconds dt) {
-  const bog_states::State* new_state = state_->Update(this, dt);
-  if (new_state) {
-    state_ = new_state;
-  }
-}
-void Bog::HandleInput(const Button button, const ButtonState button_state) {
-  const bog_states::State* new_state =
-      state_->HandleInput(this, button, button_state);
-  if (new_state) {
-    state_ = new_state;
-  }
-}
-void Bog::HandleCollision(const Collision& collision) {
-  const bog_states::State* new_state = state_->HandleCollision(this, collision);
-  if (new_state) {
-    state_ = new_state;
-  }
-}
+#include <iostream>
+using namespace std;
 
-std::unique_ptr<Bog> Bog::MakeBog(
-    const vec2f& /* should probably pass Physics here as well*/) {
-  Bog* bog = new Bog();
-  bog->state_ = bog_states::State::kStanding;
-  return std::unique_ptr<Bog>();
-}
-
-Bog::Bog() {
-  // Nada.
+std::unique_ptr<Entity> MakeBog(
+    Body* body/* should probably pass Physics here as well*/) {
+  Entity* bog = new Entity();
+  bog->body = body;
+  bog->state_machine.reset(new StateMachine(&bog_states::Standing::state));
+  return std::unique_ptr<Entity>(bog);
 }
 
 namespace bog_states {
 // Initialize static states.
-Standing standing;
-State* State::kStanding = &standing;
-Jumping jumping;
-State* State::kJumping = &jumping;
+const State* Standing::Update(Entity* bog, const Seconds dt) const {
+  // movement
+  Body new_body = *bog->body;
+  new_body.bbox.upperLeft = new_body.bbox.upperLeft + new_body.vel * dt;
 
-const State* Standing::Update(Bog*, const Seconds) const {
+  *bog->body = new_body;
+
   return nullptr;
 }
-const State* Standing::HandleInput(Bog*, const Button button,
+const State* Standing::HandleInput(Entity*, const Button button,
                                    const ButtonState button_state) const {
   if (button == Button::JUMP && button_state == ButtonState::PRESSED) {
-    return State::kJumping;
+    return &Jumping::state;
   }
   return nullptr;
 }
-const State* Standing::HandleCollision(Bog*, const Collision&) const {
+const State* Standing::HandleCollision(Entity* bog,
+                                       const Collision& collision) const {
+  if (collision.second == MAP_BODY_ID) {
+    Body new_body = *bog->body;
+    cout << new_body.bbox.upperLeft.y << " to ";
+    new_body.bbox.upperLeft += collision.fix;
+    cout << new_body.bbox.upperLeft.y << endl;
+    *bog->body = new_body;
+  }
   return nullptr;
 }
+const Standing Standing::state = Standing();
 
-const State* Jumping::Update(Bog*, const Seconds) const {
+const State* Jumping::Update(Entity*, const Seconds) const {
   return nullptr;
 }
-const State* Jumping::HandleInput(Bog*, const Button, const ButtonState) const {
+const State* Jumping::HandleInput(Entity*, const Button, const ButtonState) const {
   return nullptr;
 }
-const State* Jumping::HandleCollision(Bog*, const Collision&) const {
-  return State::kStanding;
+const State* Jumping::HandleCollision(Entity*, const Collision&) const {
+  return &Standing::state;
 }
+const Jumping Jumping::state = Jumping();
 }  // bog_states
