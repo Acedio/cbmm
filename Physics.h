@@ -36,7 +36,7 @@ class Physics {
   }
   void SetTileMap(const TileMap& tile_map) { this->tile_map = tile_map; }
   vector<Collision> Update(Seconds dt);
-  const Rect* GetBodyRect(BodyId id);
+  Body* GetMutableBody(BodyId id);
 
  private:
   bool RectRectCollision(const Rect& first, const Rect& second, vec2f* fix);

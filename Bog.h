@@ -4,29 +4,32 @@
 #include <memory>
 
 #include "Actor.h"
+#include "Entity.h"
 #include "Input.h"
 #include "Physics.h"
 #include "State.h"
 
-std::unique_ptr<Entity> MakeBog(Body* body);
+Entity MakeBog(Physics* physics,
+               vector<unique_ptr<StateMachine>>* state_machines,
+               const Body& body);
 
 namespace bog_states {
 class Standing : public State {
  public:
-  const State* Update(Entity* entity, const Seconds dt) const override;
-  const State* HandleInput(Entity* entity, const Button button,
+  const State* Update(Body* body, const Seconds dt) const override;
+  const State* HandleInput(Body* body, const Button button,
                            const ButtonState button_state) const override;
-  const State* HandleCollision(Entity* entity,
+  const State* HandleCollision(Body* body,
                                const Collision& collision) const override;
   static const Standing state;
 };
 
 class Jumping : public State {
  public:
-  const State* Update(Entity* entity, const Seconds dt) const override;
-  const State* HandleInput(Entity* entity, const Button button,
+  const State* Update(Body* body, const Seconds dt) const override;
+  const State* HandleInput(Body* body, const Button button,
                            const ButtonState button_state) const override;
-  const State* HandleCollision(Entity* entity,
+  const State* HandleCollision(Body* body,
                                const Collision& collision) const override;
   static const Jumping state;
 };

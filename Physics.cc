@@ -156,9 +156,9 @@ vector<Collision> Physics::Update(Seconds dt) {
   return collisions;
 }
 
-const Rect* Physics::GetBodyRect(BodyId i) {
+Body* Physics::GetMutableBody(BodyId i) {
   if (i >= 0 && (unsigned)i < bodies.size()) {
-    return &bodies[i].bbox;
+    return &bodies[i];
   } else {
     return nullptr;
   }

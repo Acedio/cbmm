@@ -42,11 +42,11 @@ int main(int, char**) {
       textureManager.LoadTexture("resources/dog_tilesheet.png", 0);
 
   Physics physics;
-  vector<unique_ptr<Entity>> bogs;
+  vector<Entity> bogs;
+  vector<unique_ptr<StateMachine>> state_machines;
   for (int x = 0; x < 16; x += 2) {
     Body body = {true, {{(double)x, (double)x}, 1, 1}, {1, (double)0 / 2.0}};
-    physics.AddBody(body);
-    bogs.push_back(MakeBog(&body));
+    bogs.push_back(MakeBog(&physics, &state_machines, body));
   }
 
   TileMap collision_map;
@@ -136,7 +136,7 @@ int main(int, char**) {
 
     shaderManager.UseProgram(lineProgram);
     geometryManager.DrawRects(
-        [&physics](size_t i) { return physics.GetBodyRect(i); });
+        [&physics](size_t i) { Rect* ret = nullptr; if (i < 8)  ret = &physics.GetMutableBody(i)->bbox; return ret;});
     glEnable(GL_DEPTH_TEST);
 
     display.Swap();
@@ -146,14 +146,14 @@ int main(int, char**) {
     double dt = (double)(SDL_GetTicks() - last_ticks) / 1000.0;
     if (!paused) {
       for (const auto& bog : bogs) {
-        bog->state_machine->Update(bog.get(), dt);
+        state_machines[bog]->Update(physics.GetMutableBody(bog), dt);
       }
       vector<Collision> collisions = physics.Update(dt);
       for (const auto& collision : collisions) {
         cout << collision.first << endl;
         // TODO: We should just have Physics use EntityIds?
         BodyId id = collision.first;
-        bogs[id]->state_machine->HandleCollision(bogs[id].get(), collision);
+        state_machines[id]->HandleCollision(physics.GetMutableBody(id), collision);
       }
       delta += 8*dt;
       /* for (const Collision& c : collisions) {
