@@ -18,7 +18,7 @@ namespace bog_states {
 const State* Standing::Update(Body* body, const Seconds dt) const {
   // movement
   Body new_body = *body;
-  new_body.vel = body->vel - vec2f{0, 0.01};
+  new_body.vel = body->vel - vec2f{0, 9} * dt;
   new_body.bbox.upperLeft = new_body.bbox.upperLeft + body->vel * dt;
 
   *body = new_body;
@@ -38,6 +38,8 @@ const State* Standing::HandleCollision(Body* body,
     Body new_body = *body;
     cout << new_body.bbox.upperLeft.y << " to ";
     new_body.bbox.upperLeft += collision.fix;
+    if (collision.fix.x != 0) new_body.vel.x = 0;
+    if (collision.fix.y != 0) new_body.vel.y = 0;
     cout << new_body.bbox.upperLeft.y << endl;
     *body = new_body;
   }
