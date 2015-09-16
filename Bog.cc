@@ -36,11 +36,9 @@ const State* Standing::HandleCollision(Body* body,
                                        const Collision& collision) const {
   if (collision.second == MAP_BODY_ID) {
     Body new_body = *body;
-    cout << new_body.bbox.upperLeft.y << " to ";
     new_body.bbox.upperLeft += collision.fix;
     if (collision.fix.x != 0) new_body.vel.x = 0;
     if (collision.fix.y != 0) new_body.vel.y = 0;
-    cout << new_body.bbox.upperLeft.y << endl;
     *body = new_body;
   }
   return nullptr;

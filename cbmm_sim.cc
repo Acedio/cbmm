@@ -150,7 +150,6 @@ int main(int, char**) {
       }
       vector<Collision> collisions = physics.Update(dt);
       for (const auto& collision : collisions) {
-        cout << collision.first << endl;
         // TODO: We should just have Physics use EntityIds?
         BodyId id = collision.first;
         state_machines[id]->HandleCollision(physics.GetMutableBody(id), collision);

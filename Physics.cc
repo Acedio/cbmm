@@ -134,7 +134,7 @@ vector<Collision> Physics::Update(Seconds dt) {
 
   for (BodyId id = 0; id < 0 || (unsigned)id < bodies.size(); ++id) {
     if (bodies[id].enabled) {
-      cout << "Body " << id << " is at y = " << bodies[id].bbox.upperLeft.y << endl;
+      // cout << "Body " << id << " is at y = " << bodies[id].bbox.upperLeft.y << endl;
       // tilemap collision
       vec2f fix{0, 0};
       if (RectMapCollision(bodies[id].bbox, &fix)) {
