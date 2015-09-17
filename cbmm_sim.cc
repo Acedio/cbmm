@@ -45,8 +45,8 @@ int main(int, char**) {
 
   Physics physics;
   EntityManager em;
-  ComponentMap<Body> bodies;
   vector<Entity> bogs;
+  ComponentMap<Body> bodies;
   ComponentMap<StateMachine> state_machines;
   for (int x = 0; x < 16; x += 2) {
     Entity entity = em.CreateEntity();
@@ -142,9 +142,15 @@ int main(int, char**) {
     }
 
     shaderManager.UseProgram(lineProgram);
-    // TODO: Custom iterator here to grab rects out of bodies?
-    geometryManager.DrawRects(
-        [&bodies](size_t i) { Rect* ret = nullptr; if (i > 0 && i < 8)  ret = &bodies[i]->bbox; return ret;});
+    auto iter = bodies.begin();
+    geometryManager.DrawRects([&iter, &bodies]() {
+      Rect* ret = nullptr;
+      if (iter != bodies.end()) {
+        ret = &iter->second->bbox;
+        ++iter;
+      }
+      return ret;
+    });
     glEnable(GL_DEPTH_TEST);
 
     display.Swap();

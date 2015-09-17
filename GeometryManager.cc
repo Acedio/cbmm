@@ -171,10 +171,9 @@ void GeometryManager::DrawRect(float x, float y, float w, float h) {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void GeometryManager::DrawRects(
-    const std::function<const Rect*(size_t i)>& rect_at) {
-  for (int i = 1;; ++i) {
-    const Rect* rect = rect_at(i);
+void GeometryManager::DrawRects(const std::function<const Rect*()>& next_rect) {
+  const Rect* rect;
+  while ((rect = next_rect())) {
     if (!rect) {
       break;
     }

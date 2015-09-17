@@ -16,7 +16,7 @@ class GeometryManager {
   void DrawSubTexture(float sx, float sy, float sw, float sh,
                       float dx, float dy, float dw, float dh);
   void DrawRect(float x, float y, float w, float h);
-  void DrawRects(const std::function<const Rect*(size_t i)>& rect_at);
+  void DrawRects(const std::function<const Rect*()>& next_rect);
 
  private:
   float vertexData[24];
