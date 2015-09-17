@@ -4,16 +4,13 @@
 #include "Entity.h"
 
 enum class ComponentType {
-  PHYSICS,
+  BODY,
+  MOVE_STATE,
 };
 
 class Component {
  public:
-  Component(Entity id) { id_ = id; }
-  Entity id() { return id_; }
-  virtual ComponentType type() = 0;
- private:
-  Entity id_;
+  virtual ComponentType type() const = 0;
 };
 
 #endif  // COMPONENT_H

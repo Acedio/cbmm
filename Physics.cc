@@ -129,37 +129,30 @@ bool Physics::RectMapCollision(const Rect& rect, vec2f* fix) {
   return collided_below || collided_side;
 }
 
-vector<Collision> Physics::Update(Seconds dt) {
+vector<Collision> Physics::Update(Seconds dt, const ComponentMap<Body>& bodies) {
   vector<Collision> collisions;
 
-  for (BodyId id = 0; id < 0 || (unsigned)id < bodies.size(); ++id) {
-    if (bodies[id].enabled) {
+  for (auto body = bodies.begin(); body != bodies.end(); ++body) {
+    if (body->second->enabled) {
       // cout << "Body " << id << " is at y = " << bodies[id].bbox.upperLeft.y << endl;
       // tilemap collision
       vec2f fix{0, 0};
-      if (RectMapCollision(bodies[id].bbox, &fix)) {
-        collisions.push_back({id, MAP_BODY_ID, fix});
+      if (RectMapCollision(body->second->bbox, &fix)) {
+        collisions.push_back({body->first, MAP_BODY_ID, fix});
       }
 
       // rect rect collisions
       vec2f rect_fix{0, 0};
-      for (BodyId id2 = id + 1; id2 < 0 || (unsigned)id2 < bodies.size();
-           ++id2) {
-        if (bodies[id2].enabled &&
-            RectRectCollision(bodies[id].bbox, bodies[id2].bbox, &rect_fix)) {
-          collisions.push_back({id, id2, rect_fix});
+      auto collide_to = body;
+      collide_to++;
+      for (; collide_to != bodies.end(); ++collide_to) {
+        if (collide_to->second->enabled &&
+            RectRectCollision(collide_to->second->bbox, collide_to->second->bbox, &rect_fix)) {
+          collisions.push_back({body->first, collide_to->first, rect_fix});
         }
       }
     }
   }
 
   return collisions;
-}
-
-Body* Physics::GetMutableBody(BodyId i) {
-  if (i >= 0 && (unsigned)i < bodies.size()) {
-    return &bodies[i];
-  } else {
-    return nullptr;
-  }
 }

@@ -1,11 +1,13 @@
 #ifndef STATE_H
 #define STATE_H
 
+#include "Component.h"
 #include "Physics.h"
 #include "Input.h"
 
-class State {
+class State : public Component {
  public:
+  ComponentType type() const override { return ComponentType::MOVE_STATE; };
   // Update handles physics movement and other such things
   virtual const State* Update(Body* body, const Seconds dt) const = 0;
   // Handles button presses and releases.

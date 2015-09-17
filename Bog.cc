@@ -5,12 +5,11 @@
 #include <iostream>
 using namespace std;
 
-Entity MakeBog(
-    Physics* physics, vector<unique_ptr<StateMachine>>* state_machines,
-    const Body& body /* should probably pass Physics here as well*/) {
-  Entity bog = physics->AddBody(body);
-  state_machines->emplace_back(new StateMachine(&bog_states::Standing::state));
-  return bog;
+void MakeBog(Entity entity, ComponentMap<Body>* bodies,
+             ComponentMap<StateMachine>* state_machines,
+             const Body& body) {
+  (*bodies)[entity].reset(new Body(body));
+  (*state_machines)[entity].reset(new StateMachine(&bog_states::Standing::state));
 }
 
 namespace bog_states {

@@ -7,17 +7,18 @@
 #include "Component.h"
 #include "Entity.h"
 
+template <typename T>
+using ComponentMap = std::map<Entity, std::unique_ptr<T>>;
+
 class EntityManager {
  public:
   Entity CreateEntity();
   bool AddComponent(Entity id, std::unique_ptr<Component> component);
   void RemoveEntity(Entity id);
-  const std::map<Entity, std::unique_ptr<Component>>* GetComponentsOfType(
-      ComponentType type);
+  const ComponentMap* GetComponentsOfType(ComponentType type);
 
  private:
-  std::map<ComponentType, std::map<Entity, std::unique_ptr<Component>>>
-      components_;
+  std::map<ComponentType, std::map<Entity, std::unique_ptr<Component>>> components_;
   int last_id = 0;
 };
 

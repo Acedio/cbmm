@@ -6,10 +6,12 @@
 
 #include "Bog.h"
 #include "Display.h"
+#include "EntityManager.h"
 #include "GeometryManager.h"
 #include "Input.h"
 #include "Physics.h"
 #include "ShaderManager.h"
+#include "State.h"
 #include "TextureManager.h"
 
 using namespace std;
@@ -42,11 +44,16 @@ int main(int, char**) {
       textureManager.LoadTexture("resources/dog_tilesheet.png", 0);
 
   Physics physics;
+  EntityManager em;
+  ComponentMap<Body> bodies;
   vector<Entity> bogs;
-  vector<unique_ptr<StateMachine>> state_machines;
+  ComponentMap<StateMachine> state_machines;
   for (int x = 0; x < 16; x += 2) {
-    Body body = {true, {{(double)x, (double)x}, 1, 1}, {1, (double)0 / 2.0}};
-    bogs.push_back(MakeBog(&physics, &state_machines, body));
+    Entity entity = em.CreateEntity();
+    bogs.push_back(entity);
+    bodies[entity].reset(
+        new Body(true, {{(double)x, (double)x}, 1, 1}, {1, (double)0 / 2.0}));
+    state_machines[entity].reset(new StateMachine(&bog_states::Standing::state));
   }
 
   TileMap collision_map;
@@ -135,8 +142,9 @@ int main(int, char**) {
     }
 
     shaderManager.UseProgram(lineProgram);
+    // TODO: Custom iterator here to grab rects out of bodies?
     geometryManager.DrawRects(
-        [&physics](size_t i) { Rect* ret = nullptr; if (i < 8)  ret = &physics.GetMutableBody(i)->bbox; return ret;});
+        [&bodies](size_t i) { Rect* ret = nullptr; if (i > 0 && i < 8)  ret = &bodies[i]->bbox; return ret;});
     glEnable(GL_DEPTH_TEST);
 
     display.Swap();
@@ -146,13 +154,12 @@ int main(int, char**) {
     double dt = (double)(SDL_GetTicks() - last_ticks) / 1000.0;
     if (!paused) {
       for (const auto& bog : bogs) {
-        state_machines[bog]->Update(physics.GetMutableBody(bog), dt);
+        state_machines[bog]->Update(bodies[bog].get(), dt);
       }
-      vector<Collision> collisions = physics.Update(dt);
+      vector<Collision> collisions = physics.Update(dt, bodies);
       for (const auto& collision : collisions) {
-        // TODO: We should just have Physics use EntityIds?
-        BodyId id = collision.first;
-        state_machines[id]->HandleCollision(physics.GetMutableBody(id), collision);
+        Entity id = collision.first;
+        state_machines[id]->HandleCollision(bodies[id].get(), collision);
       }
       delta += 8*dt;
       /* for (const Collision& c : collisions) {

@@ -173,7 +173,7 @@ void GeometryManager::DrawRect(float x, float y, float w, float h) {
 
 void GeometryManager::DrawRects(
     const std::function<const Rect*(size_t i)>& rect_at) {
-  for (int i = 0;; ++i) {
+  for (int i = 1;; ++i) {
     const Rect* rect = rect_at(i);
     if (!rect) {
       break;

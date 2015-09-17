@@ -22,7 +22,6 @@ void EntityManager::RemoveEntity(Entity id) {
   }
 }
 
-const std::map<Entity, std::unique_ptr<Component>>*
-EntityManager::GetComponentsOfType(ComponentType type) {
+const ComponentMap* EntityManager::GetComponentsOfType(ComponentType type) {
   return &components_[type];
 }
