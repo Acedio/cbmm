@@ -13,12 +13,8 @@ using ComponentMap = std::map<Entity, std::unique_ptr<T>>;
 class EntityManager {
  public:
   Entity CreateEntity();
-  bool AddComponent(Entity id, std::unique_ptr<Component> component);
-  void RemoveEntity(Entity id);
-  const ComponentMap* GetComponentsOfType(ComponentType type);
 
  private:
-  std::map<ComponentType, std::map<Entity, std::unique_ptr<Component>>> components_;
   int last_id = 0;
 };
 
