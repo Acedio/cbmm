@@ -16,8 +16,10 @@ Entity MakeBog(Physics* physics,
 namespace bog_states {
 class Standing : public State {
  public:
+  void Enter() const override;
+  void Exit() const override;
   const State* Update(Body* body, const Seconds dt) const override;
-  const State* HandleInput(Body* body, const Button button,
+  const State* HandleInput(const Button button,
                            const ButtonState button_state) const override;
   const State* HandleCollision(Body* body,
                                const Collision& collision) const override;
@@ -26,8 +28,10 @@ class Standing : public State {
 
 class Jumping : public State {
  public:
+  void Enter() const override;
+  void Exit() const override;
   const State* Update(Body* body, const Seconds dt) const override;
-  const State* HandleInput(Body* body, const Button button,
+  const State* HandleInput(const Button button,
                            const ButtonState button_state) const override;
   const State* HandleCollision(Body* body,
                                const Collision& collision) const override;

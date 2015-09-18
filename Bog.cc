@@ -13,7 +13,12 @@ void MakeBog(Entity entity, ComponentMap<Body>* bodies,
 }
 
 namespace bog_states {
-// Initialize static states.
+void Standing::Enter() const {
+  cout << "Enter Standing" << endl;
+}
+void Standing::Exit() const {
+  cout << "Exit Standing" << endl;
+}
 const State* Standing::Update(Body* body, const Seconds dt) const {
   // movement
   Body new_body = *body;
@@ -24,7 +29,7 @@ const State* Standing::Update(Body* body, const Seconds dt) const {
 
   return nullptr;
 }
-const State* Standing::HandleInput(Body*, const Button button,
+const State* Standing::HandleInput(const Button button,
                                    const ButtonState button_state) const {
   if (button == Button::JUMP && button_state == ButtonState::PRESSED) {
     return &Jumping::state;
@@ -44,10 +49,23 @@ const State* Standing::HandleCollision(Body* body,
 }
 const Standing Standing::state = Standing();
 
-const State* Jumping::Update(Body*, const Seconds) const {
+void Jumping::Enter() const {
+  cout << "Enter Jumping" << endl;
+}
+void Jumping::Exit() const {
+  cout << "Exit Jumping" << endl;
+}
+const State* Jumping::Update(Body* body, const Seconds dt) const {
+  // movement
+  Body new_body = *body;
+  new_body.vel = body->vel - vec2f{0, 9} * dt;
+  new_body.bbox.upperLeft = new_body.bbox.upperLeft + body->vel * dt;
+
+  *body = new_body;
+
   return nullptr;
 }
-const State* Jumping::HandleInput(Body*, const Button, const ButtonState) const {
+const State* Jumping::HandleInput(const Button, const ButtonState) const {
   return nullptr;
 }
 const State* Jumping::HandleCollision(Body*, const Collision&) const {

@@ -9,16 +9,25 @@ std::vector<ButtonEvent> GetButtonEvents() {
         button_events.push_back({Button::QUIT, ButtonState::RELEASED});
         break;
       case SDL_KEYUP:
+      case SDL_KEYDOWN:
+      {
+        ButtonState state = (event.type == SDL_KEYUP ? ButtonState::RELEASED
+                                                     : ButtonState::PRESSED);
         switch (event.key.keysym.sym) {
           case SDLK_ESCAPE:
-            button_events.push_back({Button::QUIT, ButtonState::RELEASED});
+            button_events.push_back({Button::QUIT, state});
             break;
           case SDLK_p:
-            button_events.push_back({Button::PAUSE, ButtonState::RELEASED});
+            button_events.push_back({Button::PAUSE, state});
+            break;
+          case SDLK_z:
+            button_events.push_back({Button::JUMP, state});
+            break;
           default:
             break;
         }
         break;
+      }
       default:
         break;
     }

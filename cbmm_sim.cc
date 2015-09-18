@@ -84,12 +84,18 @@ int main(int, char**) {
         switch (event.button) {
           case Button::QUIT:
             running = false;
-            break;
+            continue;
           case Button::PAUSE:
             paused = !paused;
+            continue;
           default:
             break;
         }
+      }
+      for (const auto& state_machine : state_machines) {
+        // May want to prevent input from triggering two immediate state
+        // changes?
+        state_machine.second->HandleInput(event.button, event.button_state);
       }
     }
 
