@@ -8,6 +8,7 @@
 #include "Bog.h"
 #include "Display.h"
 #include "EntityManager.h"
+#include "Event.h"
 #include "GeometryManager.h"
 #include "Input.h"
 #include "Physics.h"
@@ -45,6 +46,7 @@ int main(int, char**) {
       textureManager.LoadTexture("resources/dog_tilesheet.png", 0);
 
   Physics physics;
+  StateMachineSystem state_machine;
   EntityManager em;
   vector<Entity> bogs;
   for (int x = 0; x < 16; x += 2) {
@@ -52,8 +54,8 @@ int main(int, char**) {
     bogs.emplace_back(id);
     bogs.back().AddComponent(std::unique_ptr<Body>(
         new Body(true, {{(double)x, (double)x}, 1, 1}, {1, (double)0 / 2.0})));
-    /*entity->AddComponent(std::unique_ptr<StateMachine>(
-        new StateMachine(&bog_states::Standing::state)));*/
+    bogs.back().AddComponent(std::unique_ptr<StateComponent>(
+        new StateComponent(&bog_states::Standing::state)));
   }
 
   TileMap collision_map;
@@ -80,8 +82,8 @@ int main(int, char**) {
 
   while (running) {
     for (ButtonEvent event : GetButtonEvents()) {
-      if (event.button_state == ButtonState::RELEASED) {
-        switch (event.button) {
+      if (event.button_state() == ButtonState::RELEASED) {
+        switch (event.button()) {
           case Button::QUIT:
             running = false;
             continue;
@@ -92,11 +94,9 @@ int main(int, char**) {
             break;
         }
       }
-      /*for (const auto& state_machine : state_machines) {
-        // May want to prevent input from triggering two immediate state
-        // changes?
-        state_machine.second->HandleInput(event.button, event.button_state);
-      }*/
+      // May want to prevent input from triggering two immediate state
+      // changes?
+      state_machine.HandleEvent(&event, bogs);
     }
 
     // Begin drawing
@@ -165,13 +165,10 @@ int main(int, char**) {
 
     double dt = (double)(SDL_GetTicks() - last_ticks) / 1000.0;
     if (!paused) {
-      for (const auto& bog : bogs) {
-        //state_machines[bog]->Update(bodies[bog].get(), dt);
-      }
-      vector<Collision> collisions = physics.Update(dt, bogs);
-      for (const auto& collision : collisions) {
-        Entity id = collision.first;
-        //state_machines[id]->HandleCollision(bodies[id].get(), collision);
+      state_machine.Update(dt, bogs);
+      vector<std::unique_ptr<Event>> events = physics.Update(dt, bogs);
+      for (const auto& event : events) {
+        state_machine.HandleEvent(event.get(), bogs);
       }
       delta += 8*dt;
       /* for (const Collision& c : collisions) {

@@ -129,8 +129,8 @@ bool Physics::RectMapCollision(const Rect& rect, vec2f* fix) {
   return collided_below || collided_side;
 }
 
-vector<Collision> Physics::Update(Seconds, const vector<Entity>& entities) {
-  vector<Collision> collisions;
+vector<std::unique_ptr<Event>> Physics::Update(Seconds, const vector<Entity>& entities) {
+  vector<std::unique_ptr<Event>> collisions;
 
   for (size_t i = 0; i < entities.size(); ++i) {
     auto* body = entities[i].GetComponent<Body>();
@@ -140,7 +140,11 @@ vector<Collision> Physics::Update(Seconds, const vector<Entity>& entities) {
       // tilemap collision
       vec2f fix{0, 0};
       if (RectMapCollision(body->bbox, &fix)) {
-        collisions.push_back({i, MAP_BODY_ID, fix});
+        std::unique_ptr<CollisionEvent> collision(new CollisionEvent());
+        collision->first = i;
+        collision->second = MAP_BODY_ID;
+        collision->fix = fix;
+        collisions.push_back(std::move(collision));
       }
 
       // rect rect collisions
@@ -152,7 +156,11 @@ vector<Collision> Physics::Update(Seconds, const vector<Entity>& entities) {
         assert(target_body);
         if (target_body->enabled &&
             RectRectCollision(body->bbox, target_body->bbox, &rect_fix)) {
-          collisions.push_back({i, target_i, rect_fix});
+          std::unique_ptr<CollisionEvent> collision(new CollisionEvent());
+          collision->first = i;
+          collision->second = target_i;
+          collision->fix = rect_fix;
+          collisions.push_back(std::move(collision));
         }
       }
     }

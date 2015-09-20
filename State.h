@@ -2,35 +2,43 @@
 #define STATE_H
 
 #include "Component.h"
-#include "Physics.h"
 #include "Input.h"
+#include "Physics.h"
+#include "System.h"
 
-class State : public Component {
+class State {
  public:
-  ComponentType type() const override { return ComponentType::MOVE_STATE; };
   virtual void Enter() const {};
   virtual void Exit() const {};
   // Update handles physics movement and other such things
   virtual const State* Update(Body* body, const Seconds dt) const = 0;
   // Handles button presses and releases.
-  virtual const State* HandleInput(const Button button,
-                                   const ButtonState button_state) const = 0;
+  virtual const State* HandleInput(const ButtonEvent* event) const = 0;
   // Handles collision with ground and other objects.
   virtual const State* HandleCollision(Body* body,
-                                       const Collision& collision) const = 0;
+                                       const CollisionEvent* event) const = 0;
 };
 
-class StateMachine {
+class StateComponent : public Component {
  public:
-  void Update(Body* body, const Seconds dt);
-  void HandleInput(const Button button, const ButtonState button_state);
-  // This and Update should probably be part of a "PhysicsComponent" class.
-  // There should be an easy way of describing and sharing physical behaviors.
-  // -- Or maybe they should just interact with the PhysicsComponent?
-  void HandleCollision(Body* body, const Collision& collision);
-  StateMachine(const State* initial_state);
+  StateComponent() {}
+  StateComponent(const State* state) : state_(state) {}
+  const State* state() { return state_; }
+  void state(const State* state) { state_ = state; }
+
+  ComponentType type() const override { return ComponentType::MOVE_STATE; };
  private:
-  void HandleTransition(const State* new_state);
+  const State* state_ = nullptr;
+};
+
+class StateMachineSystem : public System {
+ public:
+  std::vector<std::unique_ptr<Event>> Update(Seconds dt, const std::vector<Entity>& entities) override;
+  std::vector<std::unique_ptr<Event>> HandleEvent(
+      const Event* event, const std::vector<Entity>& entities) override;
+
+ private:
+  void HandleTransition(StateComponent* state, const State* new_state);
   const State* state_;
 };
 

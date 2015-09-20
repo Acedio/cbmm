@@ -27,20 +27,20 @@ const State* Standing::Update(Body* body, const Seconds dt) const {
 
   return nullptr;
 }
-const State* Standing::HandleInput(const Button button,
-                                   const ButtonState button_state) const {
-  if (button == Button::JUMP && button_state == ButtonState::PRESSED) {
+const State* Standing::HandleInput(const ButtonEvent* event) const {
+  if (event->button() == Button::JUMP &&
+      event->button_state() == ButtonState::PRESSED) {
     return &Jumping::state;
   }
   return nullptr;
 }
 const State* Standing::HandleCollision(Body* body,
-                                       const Collision& collision) const {
-  if (collision.second == MAP_BODY_ID) {
+                                       const CollisionEvent* collision) const {
+  if (collision->second == MAP_BODY_ID) {
     Body new_body = *body;
-    new_body.bbox.upperLeft += collision.fix;
-    if (collision.fix.x != 0) new_body.vel.x = 0;
-    if (collision.fix.y != 0) new_body.vel.y = 0;
+    new_body.bbox.upperLeft += collision->fix;
+    if (collision->fix.x != 0) new_body.vel.x = 0;
+    if (collision->fix.y != 0) new_body.vel.y = 0;
     *body = new_body;
   }
   return nullptr;
@@ -63,10 +63,10 @@ const State* Jumping::Update(Body* body, const Seconds dt) const {
 
   return nullptr;
 }
-const State* Jumping::HandleInput(const Button, const ButtonState) const {
+const State* Jumping::HandleInput(const ButtonEvent*) const {
   return nullptr;
 }
-const State* Jumping::HandleCollision(Body*, const Collision&) const {
+const State* Jumping::HandleCollision(Body*, const CollisionEvent*) const {
   return &Standing::state;
 }
 const Jumping Jumping::state = Jumping();

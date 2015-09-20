@@ -9,6 +9,7 @@
 #include "Component.h"
 #include "Geometry.h"
 #include "TileMap.h"
+#include "System.h"
 
 using namespace std;
 
@@ -29,19 +30,18 @@ class Body : public Component {
   ~Body() override {}
 };
 
-struct Collision {
+class CollisionEvent : public Event {
+ public:
+  EventType type() const override { return EventType::COLLISION; }
   EntityId first;
   EntityId second;
   vec2f fix;
 };
 
-typedef double Seconds;
-
-class Physics {
+class Physics : public System {
  public:
   void SetTileMap(const TileMap& tile_map) { this->tile_map = tile_map; }
-  vector<Collision> Update(Seconds dt, const vector<Entity>& entities);
-
+  vector<std::unique_ptr<Event>> Update(Seconds dt, const vector<Entity>& entities) override;
  private:
   bool RectRectCollision(const Rect& first, const Rect& second, vec2f* fix);
   bool RectMapCollision(const Rect& rect, vec2f* fix);

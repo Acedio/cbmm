@@ -5,6 +5,8 @@
 
 #include <SDL.h>
 
+#include "Event.h"
+
 enum class Button {
   UNKNOWN = 0,
   JUMP,
@@ -23,9 +25,16 @@ enum class ButtonState {
   RELEASED
 };
 
-struct ButtonEvent {
-  Button button;
-  ButtonState button_state;
+class ButtonEvent : public Event {
+ public:
+  EventType type() const override { return EventType::INPUT; }
+  ButtonEvent(Button button, ButtonState button_state)
+      : button_(button), button_state_(button_state) {}
+  Button button() const { return button_; }
+  ButtonState button_state() const { return button_state_; }
+ private:
+  Button button_;
+  ButtonState button_state_;
 };
 
 std::vector<ButtonEvent> GetButtonEvents();
