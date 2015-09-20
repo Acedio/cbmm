@@ -129,14 +129,14 @@ bool Physics::RectMapCollision(const Rect& rect, vec2f* fix) {
   return collided_below || collided_side;
 }
 
-vector<std::unique_ptr<Event>> Physics::Update(Seconds, const vector<Entity>& entities) {
+vector<std::unique_ptr<Event>> Physics::Update(Seconds,
+                                               const vector<Entity>& entities) {
   vector<std::unique_ptr<Event>> collisions;
 
   for (size_t i = 0; i < entities.size(); ++i) {
     auto* body = entities[i].GetComponent<Body>();
     assert(body);
     if (body->enabled) {
-      // cout << "Body " << id << " is at y = " << bodies[id].bbox.upperLeft.y << endl;
       // tilemap collision
       vec2f fix{0, 0};
       if (RectMapCollision(body->bbox, &fix)) {

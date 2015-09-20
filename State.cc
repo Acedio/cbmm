@@ -27,9 +27,9 @@ std::vector<std::unique_ptr<Event>> StateMachineSystem::HandleEvent(
   } else if (event->type() == EventType::COLLISION) {
     auto* collision = static_cast<const CollisionEvent*>(event);
     if (collision->first < (int)entities.size()) {
-      auto* state = entities[collision->first].GetComponent<StateComponent>();
-      auto* body = entities[collision->first].GetComponent<Body>();
-      if (state && body) {
+      StateComponent* state;
+      Body* body;
+      if (entities[collision->first].GetComponents(&state, &body)) {
         const State* new_state =
             state->state()->HandleCollision(body, collision);
         HandleTransition(state, new_state);
