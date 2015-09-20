@@ -6,7 +6,7 @@ std::vector<std::unique_ptr<Event>> StateMachineSystem::Update(
     Body* body = entity.GetComponent<Body>();
     StateComponent* state_component = entity.GetComponent<StateComponent>();
     if (body && state_component) {
-      const State* new_state = state_->Update(body, dt);
+      const State* new_state = state_component->state()->Update(body, dt);
       HandleTransition(state_component, new_state);
     }
   }
@@ -20,7 +20,7 @@ std::vector<std::unique_ptr<Event>> StateMachineSystem::HandleEvent(
       auto* state = entity.GetComponent<StateComponent>();
       if (state) {
         const State* new_state =
-            state_->HandleInput(static_cast<const ButtonEvent*>(event));
+            state->state()->HandleInput(static_cast<const ButtonEvent*>(event));
         HandleTransition(state, new_state);
       }
     }
@@ -30,7 +30,8 @@ std::vector<std::unique_ptr<Event>> StateMachineSystem::HandleEvent(
       auto* state = entities[collision->first].GetComponent<StateComponent>();
       auto* body = entities[collision->first].GetComponent<Body>();
       if (state && body) {
-        const State* new_state = state_->HandleCollision(body, collision);
+        const State* new_state =
+            state->state()->HandleCollision(body, collision);
         HandleTransition(state, new_state);
       }
     }

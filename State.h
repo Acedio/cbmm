@@ -39,7 +39,6 @@ class StateMachineSystem : public System {
 
  private:
   void HandleTransition(StateComponent* state, const State* new_state);
-  const State* state_;
 };
 
 #endif  // STATE_H
