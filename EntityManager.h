@@ -12,7 +12,7 @@ using ComponentMap = std::map<Entity, std::unique_ptr<T>>;
 
 class EntityManager {
  public:
-  Entity CreateEntity();
+  EntityId CreateEntity();
 
  private:
   int last_id = 0;

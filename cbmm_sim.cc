@@ -1,5 +1,6 @@
 #include <cmath>
 #include <iostream>
+#include <memory>
 #include <vector>
 
 #include <SDL.h>
@@ -45,15 +46,15 @@ int main(int, char**) {
 
   Physics physics;
   EntityManager em;
-  vector<Entity> bogs;
-  ComponentMap<Body> bodies;
-  ComponentMap<StateMachine> state_machines;
+  vector<std::unique_ptr<Entity>> bogs;
   for (int x = 0; x < 16; x += 2) {
-    Entity entity = em.CreateEntity();
+    EntityId id = em.CreateEntity();
+    std::unique_ptr<Entity> entity(new Entity(id));
+    entity->AddComponent(std::unique_ptr<Body>(
+        new Body(true, {{(double)x, (double)x}, 1, 1}, {1, (double)0 / 2.0})));
+    entity->AddComponent(std::unique_ptr<StateMachine>(
+        new StateMachine(&bog_states::Standing::state)));
     bogs.push_back(entity);
-    bodies[entity].reset(
-        new Body(true, {{(double)x, (double)x}, 1, 1}, {1, (double)0 / 2.0}));
-    state_machines[entity].reset(new StateMachine(&bog_states::Standing::state));
   }
 
   TileMap collision_map;

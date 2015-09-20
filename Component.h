@@ -1,9 +1,8 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
-#include "Entity.h"
-
 enum class ComponentType {
+  UNKNOWN,
   BODY,
   MOVE_STATE,
 };
