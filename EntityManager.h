@@ -4,11 +4,7 @@
 #include <map>
 #include <memory>
 
-#include "Component.h"
 #include "Entity.h"
-
-template <typename T>
-using ComponentMap = std::map<Entity, std::unique_ptr<T>>;
 
 class EntityManager {
  public:

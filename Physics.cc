@@ -1,5 +1,5 @@
+#include <cassert>
 #include <cmath>
-#include <iostream>
 
 #include "Physics.h"
 
@@ -129,26 +129,30 @@ bool Physics::RectMapCollision(const Rect& rect, vec2f* fix) {
   return collided_below || collided_side;
 }
 
-vector<Collision> Physics::Update(Seconds dt, const ComponentMap<Body>& bodies) {
+vector<Collision> Physics::Update(Seconds, const vector<Entity>& entities) {
   vector<Collision> collisions;
 
-  for (auto body = bodies.begin(); body != bodies.end(); ++body) {
-    if (body->second->enabled) {
+  for (size_t i = 0; i < entities.size(); ++i) {
+    auto* body = entities[i].GetComponent<Body>();
+    assert(body);
+    if (body->enabled) {
       // cout << "Body " << id << " is at y = " << bodies[id].bbox.upperLeft.y << endl;
       // tilemap collision
       vec2f fix{0, 0};
-      if (RectMapCollision(body->second->bbox, &fix)) {
-        collisions.push_back({body->first, MAP_BODY_ID, fix});
+      if (RectMapCollision(body->bbox, &fix)) {
+        collisions.push_back({i, MAP_BODY_ID, fix});
       }
 
       // rect rect collisions
       vec2f rect_fix{0, 0};
       auto collide_to = body;
       collide_to++;
-      for (; collide_to != bodies.end(); ++collide_to) {
-        if (collide_to->second->enabled &&
-            RectRectCollision(collide_to->second->bbox, collide_to->second->bbox, &rect_fix)) {
-          collisions.push_back({body->first, collide_to->first, rect_fix});
+      for (size_t target_i = i + 1; target_i < entities.size(); ++target_i) {
+        auto* target_body = entities[i].GetComponent<Body>();
+        assert(target_body);
+        if (target_body->enabled &&
+            RectRectCollision(body->bbox, target_body->bbox, &rect_fix)) {
+          collisions.push_back({i, target_i, rect_fix});
         }
       }
     }

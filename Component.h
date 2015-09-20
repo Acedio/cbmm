@@ -10,6 +10,7 @@ enum class ComponentType {
 class Component {
  public:
   virtual ComponentType type() const = 0;
+  virtual ~Component() {}
 };
 
 #endif  // COMPONENT_H

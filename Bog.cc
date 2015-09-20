@@ -5,11 +5,9 @@
 #include <iostream>
 using namespace std;
 
-void MakeBog(Entity entity, ComponentMap<Body>* bodies,
-             ComponentMap<StateMachine>* state_machines,
-             const Body& body) {
-  (*bodies)[entity].reset(new Body(body));
-  (*state_machines)[entity].reset(new StateMachine(&bog_states::Standing::state));
+void MakeBog(Entity* entity, const Body& body) {
+  entity->AddComponent(std::unique_ptr<Body>(new Body(body)));
+  //entity->AddComponent(std::unique_ptr<StateMachine>(new StateMachine(&bog_states::Standing::state)));
 }
 
 namespace bog_states {

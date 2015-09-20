@@ -46,15 +46,14 @@ int main(int, char**) {
 
   Physics physics;
   EntityManager em;
-  vector<std::unique_ptr<Entity>> bogs;
+  vector<Entity> bogs;
   for (int x = 0; x < 16; x += 2) {
     EntityId id = em.CreateEntity();
-    std::unique_ptr<Entity> entity(new Entity(id));
-    entity->AddComponent(std::unique_ptr<Body>(
+    bogs.emplace_back(id);
+    bogs.back().AddComponent(std::unique_ptr<Body>(
         new Body(true, {{(double)x, (double)x}, 1, 1}, {1, (double)0 / 2.0})));
-    entity->AddComponent(std::unique_ptr<StateMachine>(
-        new StateMachine(&bog_states::Standing::state)));
-    bogs.push_back(entity);
+    /*entity->AddComponent(std::unique_ptr<StateMachine>(
+        new StateMachine(&bog_states::Standing::state)));*/
   }
 
   TileMap collision_map;
@@ -93,11 +92,11 @@ int main(int, char**) {
             break;
         }
       }
-      for (const auto& state_machine : state_machines) {
+      /*for (const auto& state_machine : state_machines) {
         // May want to prevent input from triggering two immediate state
         // changes?
         state_machine.second->HandleInput(event.button, event.button_state);
-      }
+      }*/
     }
 
     // Begin drawing
@@ -149,11 +148,11 @@ int main(int, char**) {
     }
 
     shaderManager.UseProgram(lineProgram);
-    auto iter = bodies.begin();
-    geometryManager.DrawRects([&iter, &bodies]() {
+    auto iter = bogs.begin();
+    geometryManager.DrawRects([&iter, &bogs]() {
       Rect* ret = nullptr;
-      if (iter != bodies.end()) {
-        ret = &iter->second->bbox;
+      if (iter != bogs.end()) {
+        ret = &iter->GetComponent<Body>()->bbox;
         ++iter;
       }
       return ret;
@@ -167,12 +166,12 @@ int main(int, char**) {
     double dt = (double)(SDL_GetTicks() - last_ticks) / 1000.0;
     if (!paused) {
       for (const auto& bog : bogs) {
-        state_machines[bog]->Update(bodies[bog].get(), dt);
+        //state_machines[bog]->Update(bodies[bog].get(), dt);
       }
-      vector<Collision> collisions = physics.Update(dt, bodies);
+      vector<Collision> collisions = physics.Update(dt, bogs);
       for (const auto& collision : collisions) {
         Entity id = collision.first;
-        state_machines[id]->HandleCollision(bodies[id].get(), collision);
+        //state_machines[id]->HandleCollision(bodies[id].get(), collision);
       }
       delta += 8*dt;
       /* for (const Collision& c : collisions) {
