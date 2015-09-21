@@ -13,8 +13,8 @@ void MakeBog(Entity* entity, const Body& body);
 namespace bog_states {
 class Standing : public State {
  public:
-  void Enter() const override;
-  void Exit() const override;
+  void Enter(Body* body) const override;
+  void Exit(Body* body) const override;
   const State* Update(Body* body, const Seconds dt) const override;
   const State* HandleInput(const ButtonEvent* event) const override;
   const State* HandleCollision(Body* body,
@@ -24,8 +24,8 @@ class Standing : public State {
 
 class Jumping : public State {
  public:
-  void Enter() const override;
-  void Exit() const override;
+  void Enter(Body* body) const override;
+  void Exit(Body* body) const override;
   const State* Update(Body* body, const Seconds dt) const override;
   const State* HandleInput(const ButtonEvent* event) const override;
   const State* HandleCollision(Body* body,

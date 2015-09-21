@@ -168,6 +168,7 @@ int main(int, char**) {
       state_machine.Update(dt, bogs);
       vector<std::unique_ptr<Event>> events = physics.Update(dt, bogs);
       for (const auto& event : events) {
+        auto* collision = static_cast<CollisionEvent*>(event.get());
         state_machine.HandleEvent(event.get(), bogs);
       }
       delta += 8*dt;

@@ -11,11 +11,11 @@ void MakeBog(Entity* entity, const Body& body) {
 }
 
 namespace bog_states {
-void Standing::Enter() const {
-  cout << "Enter Standing" << endl;
+void Standing::Enter(Body*) const {
+  //cout << "Enter Standing" << endl;
 }
-void Standing::Exit() const {
-  cout << "Exit Standing" << endl;
+void Standing::Exit(Body*) const {
+  //cout << "Exit Standing" << endl;
 }
 const State* Standing::Update(Body* body, const Seconds dt) const {
   // movement
@@ -47,10 +47,11 @@ const State* Standing::HandleCollision(Body* body,
 }
 const Standing Standing::state = Standing();
 
-void Jumping::Enter() const {
+void Jumping::Enter(Body* body) const {
   cout << "Enter Jumping" << endl;
+  body->vel.y = 5;
 }
-void Jumping::Exit() const {
+void Jumping::Exit(Body*) const {
   cout << "Exit Jumping" << endl;
 }
 const State* Jumping::Update(Body* body, const Seconds dt) const {
@@ -66,8 +67,12 @@ const State* Jumping::Update(Body* body, const Seconds dt) const {
 const State* Jumping::HandleInput(const ButtonEvent*) const {
   return nullptr;
 }
-const State* Jumping::HandleCollision(Body*, const CollisionEvent*) const {
-  return &Standing::state;
+const State* Jumping::HandleCollision(Body*,
+                                      const CollisionEvent* collision) const {
+  if (collision->second == MAP_BODY_ID) {
+    return &Standing::state;
+  }
+  return nullptr;
 }
 const Jumping Jumping::state = Jumping();
 }  // bog_states

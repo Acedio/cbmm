@@ -152,7 +152,7 @@ vector<std::unique_ptr<Event>> Physics::Update(Seconds,
       auto collide_to = body;
       collide_to++;
       for (size_t target_i = i + 1; target_i < entities.size(); ++target_i) {
-        auto* target_body = entities[i].GetComponent<Body>();
+        auto* target_body = entities[target_i].GetComponent<Body>();
         assert(target_body);
         if (target_body->enabled &&
             RectRectCollision(body->bbox, target_body->bbox, &rect_fix)) {

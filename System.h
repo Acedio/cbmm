@@ -14,6 +14,7 @@ class System {
       Seconds, const std::vector<Entity>&) {
     return {};
   }
+  // TODO: Null check on Event?
   virtual std::vector<std::unique_ptr<Event>> HandleEvent(
       const Event*, const std::vector<Entity>&) {
     return {};

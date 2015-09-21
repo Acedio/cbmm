@@ -8,8 +8,8 @@
 
 class State {
  public:
-  virtual void Enter() const {};
-  virtual void Exit() const {};
+  virtual void Enter(Body*) const {};
+  virtual void Exit(Body*) const {};
   // Update handles physics movement and other such things
   virtual const State* Update(Body* body, const Seconds dt) const = 0;
   // Handles button presses and releases.
@@ -31,14 +31,17 @@ class StateComponent : public Component {
   const State* state_ = nullptr;
 };
 
+// TODO: Make this less Body-specific.
 class StateMachineSystem : public System {
  public:
-  std::vector<std::unique_ptr<Event>> Update(Seconds dt, const std::vector<Entity>& entities) override;
+  std::vector<std::unique_ptr<Event>> Update(
+      Seconds dt, const std::vector<Entity>& entities) override;
   std::vector<std::unique_ptr<Event>> HandleEvent(
       const Event* event, const std::vector<Entity>& entities) override;
 
  private:
-  void HandleTransition(StateComponent* state, const State* new_state);
+  void HandleTransition(Body* body, StateComponent* state,
+                        const State* new_state);
 };
 
 #endif  // STATE_H
