@@ -32,9 +32,6 @@ int main(int, char**) {
   int textureProgram =
       shaderManager.AddProgram("resources/texture_vertex.glsl",
                                "resources/texture_fragment.glsl");
-  int lineProgram =
-      shaderManager.AddProgram("resources/color_vertex.glsl",
-                               "resources/color_fragment.glsl");
 
   GeometryManager geometryManager = GeometryManager();
 
@@ -47,6 +44,7 @@ int main(int, char**) {
 
   Physics physics;
   StateMachineSystem state_machine;
+  BoundingBoxGraphicsSystem bb_graphics(&geometryManager, &shaderManager);
   EntityManager em;
   vector<Entity> bogs;
   for (int x = 0; x < 16; x += 2) {
@@ -147,16 +145,7 @@ int main(int, char**) {
                                     magnitude * sin(angle));
     }
 
-    shaderManager.UseProgram(lineProgram);
-    auto iter = bogs.begin();
-    geometryManager.DrawRects([&iter, &bogs]() {
-      Rect* ret = nullptr;
-      if (iter != bogs.end()) {
-        ret = &iter->GetComponent<Body>()->bbox;
-        ++iter;
-      }
-      return ret;
-    });
+    bb_graphics.Update(0 /* unused */, bogs);
     glEnable(GL_DEPTH_TEST);
 
     display.Swap();

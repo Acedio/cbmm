@@ -1,9 +1,12 @@
 #include "GeometryManager.h"
 
 #include <algorithm>
+#include <cassert>
 #include <iterator>
 
 #include <GL/glew.h>
+
+#include "Physics.h"
 
 namespace {
 const float initialVertexData[24] = {
@@ -12,7 +15,7 @@ const float initialVertexData[24] = {
     32.0f, 24.0f, 32.0f, 0.0f, 0.0f,  24.0f, 0.0f, 0.0f,
 };
 
-const unsigned int initialIndexData[4] = {0, 1, 2, 3};
+const unsigned int initialIndexData[6] = {0, 1, 2, 2, 1, 3};
 
 const float initialRectVertexData[32] = {
     0.0f,      0.0f,      0.0f, 1.0f, 0.0f,      1.0f / 12, 0.0f, 1.0f,
@@ -24,7 +27,7 @@ const float initialRectVertexData[32] = {
 
 GeometryManager::GeometryManager() {
   std::copy(initialVertexData, initialVertexData + 24, vertexData);
-  std::copy(initialIndexData, initialIndexData + 4, indexData);
+  std::copy(initialIndexData, initialIndexData + 6, indexData);
   std::copy(initialRectVertexData, initialRectVertexData + 32, rectVertexData);
   for (size_t i = 0; i < 24; ++i) texVertexData[i] = 1.0;
 
@@ -68,7 +71,7 @@ void GeometryManager::DrawTileMap() {
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferObject);
 
-  glDrawElements(GL_TRIANGLE_STRIP, sizeof(indexData) / sizeof(unsigned int),
+  glDrawElements(GL_TRIANGLES, sizeof(indexData) / sizeof(unsigned int),
                  GL_UNSIGNED_INT, (void*)0);
 
   glDisableVertexAttribArray(0);
@@ -134,7 +137,7 @@ void GeometryManager::DrawSubTexture(float sx, float sy, float sw, float sh,
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glDrawElements(GL_TRIANGLE_STRIP, sizeof(indexData) / sizeof(unsigned int),
+  glDrawElements(GL_TRIANGLES, sizeof(indexData) / sizeof(unsigned int),
                  GL_UNSIGNED_INT, (void*)0);
   glDisable(GL_BLEND);
 
@@ -180,4 +183,29 @@ void GeometryManager::DrawRects(const std::function<const Rect*()>& next_rect) {
     DrawRect(rect->upperLeft.x / 16.0 - 1, rect->upperLeft.y / 12.0 - 1,
              rect->w / 16.0, rect->h / 12.0);
   }
+}
+
+BoundingBoxGraphicsSystem::BoundingBoxGraphicsSystem(
+    GeometryManager* geometry_manager, ShaderManager* shader_manager)
+    : geometry_manager_(geometry_manager), shader_manager_(shader_manager) {
+  assert(geometry_manager_);
+  assert(shader_manager_);
+  line_program_ = shader_manager_->AddProgram("resources/color_vertex.glsl",
+                                              "resources/color_fragment.glsl");
+  assert(line_program_ >= 0);
+}
+
+std::vector<std::unique_ptr<Event>> BoundingBoxGraphicsSystem::Update(
+    Seconds, const std::vector<Entity>& entities) {
+  shader_manager_->UseProgram(line_program_);
+  auto iter = entities.begin();
+  geometry_manager_->DrawRects([&iter, &entities]() {
+    Rect* ret = nullptr;
+    if (iter != entities.end()) {
+      ret = &iter->GetComponent<Body>()->bbox;
+      ++iter;
+    }
+    return ret;
+  });
+  return {};
 }

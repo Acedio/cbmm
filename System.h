@@ -8,6 +8,7 @@
 
 typedef double Seconds;
 
+// TODO: Split systems into ones that update and ones that handle events?
 class System {
  public:
   virtual std::vector<std::unique_ptr<Event>> Update(

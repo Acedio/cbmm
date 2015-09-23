@@ -6,6 +6,8 @@
 #include <GL/glew.h>
 
 #include "Geometry.h"
+#include "ShaderManager.h"
+#include "System.h"
 
 class GeometryManager {
  public:
@@ -20,7 +22,7 @@ class GeometryManager {
 
  private:
   float vertexData[24];
-  unsigned int indexData[4];
+  unsigned int indexData[6];
   float rectVertexData[32];
   float texVertexData[24];
 
@@ -29,6 +31,19 @@ class GeometryManager {
   GLuint indexBufferObject;
   GLuint rectPositionBufferObject;
   GLuint texPositionBufferObject;
+};
+
+class BoundingBoxGraphicsSystem : public System {
+ public:
+  BoundingBoxGraphicsSystem(GeometryManager* geometry_manager,
+                            ShaderManager* shader_manager);
+  std::vector<std::unique_ptr<Event>> Update(
+      Seconds dt, const std::vector<Entity>& entities) override;
+ private:
+  // Not owned.
+  GeometryManager* geometry_manager_;
+  ShaderManager* shader_manager_;
+  int line_program_;
 };
 
 #endif
