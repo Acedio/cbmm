@@ -13,7 +13,10 @@ Display::Display(unsigned int width, unsigned int height, unsigned int bpp) {
 
   SDL_Init(SDL_INIT_EVERYTHING);
 
-  if (SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1)) {
+  if (SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1)
+          || SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3)
+          || SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3)
+          || SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE)) {
     cout << "Error setting up GL." << endl;
   }
 
@@ -27,6 +30,7 @@ Display::Display(unsigned int width, unsigned int height, unsigned int bpp) {
     cout << "Error opening surface: " << SDL_GetError() << endl;
   }
 
+  glewExperimental = GL_TRUE;
   GLenum glewErr = glewInit();
 
   if (glewErr != GLEW_OK) {

@@ -110,8 +110,9 @@ TextureRef TextureManager::LoadTexture(string filename, int level) {
       gluBuild2DMipmaps(GL_TEXTURE_2D, bpp, surface->w, surface->h, format,
                         GL_UNSIGNED_BYTE, surface->pixels);
     } else {
-      glTexImage2D(GL_TEXTURE_2D, level, bpp, surface->w, surface->h, 0, format,
-                   GL_UNSIGNED_BYTE, surface->pixels);
+      // TODO: Look into using GL_RGB if we have no alpha channel?
+      glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, surface->w, surface->h, 0,
+                   format, GL_UNSIGNED_BYTE, surface->pixels);
     }
 
     SDL_FreeSurface(surface);
