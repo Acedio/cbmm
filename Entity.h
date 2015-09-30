@@ -1,6 +1,7 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
+#include <cassert>
 #include <memory>
 
 #include "Component.h"
@@ -41,12 +42,17 @@ T* Entity::GetComponent() const {
 
 template <typename T1, typename T2>
 bool Entity::GetComponents(T1** t1, T2** t2) const {
+  assert(t1);
+  assert(t2);
   *t1 = GetComponent<T1>();
   *t2 = GetComponent<T2>();
   return *t1 && *t2;
 }
 template <typename T1, typename T2, typename T3>
 bool Entity::GetComponents(T1** t1, T2** t2, T3** t3) const {
+  assert(t1);
+  assert(t2);
+  assert(t3);
   *t1 = GetComponent<T1>();
   *t2 = GetComponent<T2>();
   *t3 = GetComponent<T3>();

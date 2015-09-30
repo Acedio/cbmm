@@ -209,3 +209,38 @@ std::vector<std::unique_ptr<Event>> BoundingBoxGraphicsSystem::Update(
   });
   return {};
 }
+
+SubSpriteGraphicsSystem::SubSpriteGraphicsSystem(
+    GeometryManager* geometry_manager, ShaderManager* shader_manager,
+    TextureManager* texture_manager)
+    : geometry_manager_(geometry_manager),
+      shader_manager_(shader_manager),
+      texture_manager_(texture_manager) {
+  assert(geometry_manager_);
+  assert(shader_manager_);
+  assert(texture_manager_);
+
+  texture_program_ = shader_manager_->AddProgram(
+      "resources/texture_vertex.glsl", "resources/texture_fragment.glsl");
+}
+
+std::vector<std::unique_ptr<Event>> SubSpriteGraphicsSystem::Update(
+    Seconds, const std::vector<Entity>& entities) {
+  texture_manager_->BindTexture(-1, 1);
+  shader_manager_->UseProgram(texture_program_);
+
+  for (const auto& entity : entities) {
+    Body* body;
+    Sprite* sprite;
+    if (entity.GetComponents(&body, &sprite)) {
+      // TODO: Figure out how to ellide all draws of the same texture source
+      // together.
+      texture_manager_->BindTexture(sprite->texture, 0);
+      // TODO: Figure out what the heck coordinate system DrawSubSprite uses :P
+      geometry_manager_->DrawSubSprite(
+          sprite->index, body->bbox.upperLeft.x / 16 - 1,
+          1.333333 * (body->bbox.upperLeft.y - 1) / 16 - 1);
+    }
+  }
+  return {};
+}

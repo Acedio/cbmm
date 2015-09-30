@@ -8,6 +8,7 @@
 #include "Geometry.h"
 #include "ShaderManager.h"
 #include "System.h"
+#include "TextureManager.h"
 
 class GeometryManager {
  public:
@@ -44,6 +45,21 @@ class BoundingBoxGraphicsSystem : public System {
   GeometryManager* geometry_manager_;
   ShaderManager* shader_manager_;
   int line_program_;
+};
+
+class SubSpriteGraphicsSystem : public System {
+ public:
+  SubSpriteGraphicsSystem(GeometryManager* geometry_manager,
+                          ShaderManager* shader_manager,
+                          TextureManager* texture_manager);
+  std::vector<std::unique_ptr<Event>> Update(
+      Seconds dt, const std::vector<Entity>& entities) override;
+ private:
+  // Not owned.
+  GeometryManager* geometry_manager_;
+  ShaderManager* shader_manager_;
+  TextureManager* texture_manager_;
+  int texture_program_;
 };
 
 #endif

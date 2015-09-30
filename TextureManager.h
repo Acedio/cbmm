@@ -10,6 +10,7 @@
 #include <string>
 #include <map>
 
+#include "Component.h"
 #include "TileMap.h"
 
 using namespace std;
@@ -34,6 +35,20 @@ class TextureManager {
   map<TextureRef, GLuint> textures;
   map<TextureRef, int> refcounts;
   TextureRef next_unused_ref;
+};
+
+class Sprite : public Component {
+ public:
+  Sprite() {}
+  Sprite(TextureRef texture, int index)
+      : texture(texture), index(index) {}
+
+  TextureRef texture = 0;
+  int index = 0;
+
+  ComponentType type() const override { return ComponentType::SPRITE; }
+
+  ~Sprite() override {}
 };
 
 #endif

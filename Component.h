@@ -5,6 +5,7 @@ enum class ComponentType {
   UNKNOWN,
   BODY,
   MOVE_STATE,
+  SPRITE,
 };
 
 class Component {

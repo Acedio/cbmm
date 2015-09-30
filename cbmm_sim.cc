@@ -45,6 +45,8 @@ int main(int, char**) {
   Physics physics;
   StateMachineSystem state_machine;
   BoundingBoxGraphicsSystem bb_graphics(&geometryManager, &shaderManager);
+  SubSpriteGraphicsSystem ss_graphics(&geometryManager, &shaderManager,
+                                      &textureManager);
   EntityManager em;
   vector<Entity> bogs;
   for (int x = 0; x < 16; x += 2) {
@@ -54,6 +56,7 @@ int main(int, char**) {
         new Body(true, {{(double)x, (double)x}, 1, 1}, {1, (double)0 / 2.0})));
     bogs.back().AddComponent(std::unique_ptr<StateComponent>(
         new StateComponent(&bog_states::Standing::state)));
+    bogs.back().AddComponent(std::unique_ptr<Sprite>(new Sprite(dogRef, 0)));
   }
 
   TileMap collision_map;
@@ -146,6 +149,7 @@ int main(int, char**) {
     }
 
     bb_graphics.Update(0 /* unused */, bogs);
+    ss_graphics.Update(0 /* unused */, bogs);
     glEnable(GL_DEPTH_TEST);
 
     display.Swap();
