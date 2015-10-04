@@ -21,7 +21,7 @@ const State* Standing::Update(Body* body, const Seconds dt) const {
   // movement
   Body new_body = *body;
   new_body.vel = body->vel - vec2f{0, 9} * dt;
-  new_body.bbox.upperLeft = new_body.bbox.upperLeft + body->vel * dt;
+  new_body.bbox.lowerLeft = new_body.bbox.lowerLeft + body->vel * dt;
 
   *body = new_body;
 
@@ -38,7 +38,7 @@ const State* Standing::HandleCollision(Body* body,
                                        const CollisionEvent* collision) const {
   if (collision->second == MAP_BODY_ID) {
     Body new_body = *body;
-    new_body.bbox.upperLeft += collision->fix;
+    new_body.bbox.lowerLeft += collision->fix;
     if (collision->fix.x != 0) new_body.vel.x = 0;
     if (collision->fix.y != 0) new_body.vel.y = 0;
     *body = new_body;
@@ -58,7 +58,7 @@ const State* Jumping::Update(Body* body, const Seconds dt) const {
   // movement
   Body new_body = *body;
   new_body.vel = body->vel - vec2f{0, 9} * dt;
-  new_body.bbox.upperLeft = new_body.bbox.upperLeft + body->vel * dt;
+  new_body.bbox.lowerLeft = new_body.bbox.lowerLeft + body->vel * dt;
 
   *body = new_body;
 

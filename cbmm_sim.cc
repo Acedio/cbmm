@@ -6,6 +6,7 @@
 #include <SDL.h>
 
 #include "Bog.h"
+#include "Camera.h"
 #include "Display.h"
 #include "EntityManager.h"
 #include "Event.h"
@@ -34,7 +35,6 @@ int main(int, char**) {
                                "resources/texture_fragment.glsl");
 
   GeometryManager geometryManager = GeometryManager();
-
   TextureManager textureManager = TextureManager();
 
   TextureRef tileSetRef =
@@ -44,6 +44,7 @@ int main(int, char**) {
 
   Physics physics;
   StateMachineSystem state_machine;
+  Camera camera;
   BoundingBoxGraphicsSystem bb_graphics(&geometryManager, &shaderManager);
   SubSpriteGraphicsSystem ss_graphics(&geometryManager, &shaderManager,
                                       &textureManager);
@@ -52,6 +53,7 @@ int main(int, char**) {
   for (int x = 0; x < 16; x += 2) {
     EntityId id = em.CreateEntity();
     bogs.emplace_back(id);
+    bogs.back().AddComponent(std::unique_ptr<Transform>(new Transform()));
     bogs.back().AddComponent(std::unique_ptr<Body>(
         new Body(true, {{(double)x, (double)x}, 1, 1}, {1, (double)0 / 2.0})));
     bogs.back().AddComponent(std::unique_ptr<StateComponent>(
@@ -148,6 +150,7 @@ int main(int, char**) {
                                     magnitude * sin(angle));
     }
 
+    camera.Update(0 /* unused */, bogs);
     bb_graphics.Update(0 /* unused */, bogs);
     ss_graphics.Update(0 /* unused */, bogs);
     glEnable(GL_DEPTH_TEST);

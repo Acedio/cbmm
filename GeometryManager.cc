@@ -6,6 +6,7 @@
 
 #include <GL/glew.h>
 
+#include "Camera.h"
 #include "Physics.h"
 
 namespace {
@@ -150,13 +151,13 @@ void GeometryManager::DrawSubTexture(float sx, float sy, float sw, float sh,
 
 void GeometryManager::DrawRect(float x, float y, float w, float h) {
   rectVertexData[0] = x;
-  rectVertexData[1] = y;
+  rectVertexData[1] = y + h;
   rectVertexData[4] = x;
-  rectVertexData[5] = y - h;
+  rectVertexData[5] = y;
   rectVertexData[8] = x + w;
-  rectVertexData[9] = y - h;
+  rectVertexData[9] = y;
   rectVertexData[12] = x + w;
-  rectVertexData[13] = y;
+  rectVertexData[13] = y + h;
   glBindBuffer(GL_ARRAY_BUFFER, rectPositionBufferObject);
   glBufferData(GL_ARRAY_BUFFER, sizeof(rectVertexData), rectVertexData,
                GL_STATIC_DRAW);
@@ -180,7 +181,7 @@ void GeometryManager::DrawRects(const std::function<const Rect*()>& next_rect) {
     if (!rect) {
       break;
     }
-    DrawRect(rect->upperLeft.x / 16.0 - 1, rect->upperLeft.y / 12.0 - 1,
+    DrawRect(rect->lowerLeft.x / 16.0 - 1, rect->lowerLeft.y / 12.0 - 1,
              rect->w / 16.0, rect->h / 12.0);
   }
 }
@@ -230,16 +231,15 @@ std::vector<std::unique_ptr<Event>> SubSpriteGraphicsSystem::Update(
   shader_manager_->UseProgram(texture_program_);
 
   for (const auto& entity : entities) {
-    Body* body;
+    Transform* transform;
     Sprite* sprite;
-    if (entity.GetComponents(&body, &sprite)) {
+    if (entity.GetComponents(&transform, &sprite)) {
       // TODO: Figure out how to ellide all draws of the same texture source
       // together.
       texture_manager_->BindTexture(sprite->texture, 0);
       // TODO: Figure out what the heck coordinate system DrawSubSprite uses :P
-      geometry_manager_->DrawSubSprite(
-          sprite->index, body->bbox.upperLeft.x / 16 - 1,
-          1.333333 * (body->bbox.upperLeft.y - 1) / 16 - 1);
+      geometry_manager_->DrawSubSprite(sprite->index, transform->position.x,
+                                       transform->position.y);
     }
   }
   return {};

@@ -1,6 +1,8 @@
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
 
+#include <string>
+
 struct vec2f {
   double x, y;
 };
@@ -30,7 +32,7 @@ inline vec2f operator/(const vec2f& a, const float& b) {
 }
 
 struct Rect {
-  vec2f upperLeft;
+  vec2f lowerLeft;
   double w, h;
 };
 

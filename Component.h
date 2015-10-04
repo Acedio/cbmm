@@ -6,6 +6,7 @@ enum class ComponentType {
   BODY,
   MOVE_STATE,
   SPRITE,
+  TRANSFORM,
 };
 
 class Component {

@@ -82,10 +82,10 @@ bool AxisCheck(double a1, double a2, double b1, double b2, double* fix) {
 bool Physics::RectRectCollision(const Rect& first, const Rect& second,
                                 vec2f* fix) {
   double x_fix, y_fix;
-  if (AxisCheck(first.upperLeft.x, first.upperLeft.x + first.w,
-                second.upperLeft.x, second.upperLeft.x + second.w, &x_fix) &&
-      AxisCheck(first.upperLeft.y - first.h, first.upperLeft.y,
-                second.upperLeft.y - second.h, second.upperLeft.y, &y_fix)) {
+  if (AxisCheck(first.lowerLeft.x, first.lowerLeft.x + first.w,
+                second.lowerLeft.x, second.lowerLeft.x + second.w, &x_fix) &&
+      AxisCheck(first.lowerLeft.y, first.lowerLeft.y + first.h,
+                second.lowerLeft.y, second.lowerLeft.y + second.h, &y_fix)) {
     if (abs(x_fix) < abs(y_fix)) {
       fix->x = x_fix;
       fix->y = 0;
@@ -99,32 +99,33 @@ bool Physics::RectRectCollision(const Rect& first, const Rect& second,
 }
 
 bool Physics::RectMapCollision(const Rect& rect, vec2f* fix) {
-  int tile_type = tile_map.At(rect.upperLeft.x + (rect.w / 2.0),
-                                    rect.upperLeft.y - rect.h);
+  int tile_type = tile_map.At(rect.lowerLeft.x + (rect.w / 2.0),
+                                    rect.lowerLeft.y);
   if (tile_type == TILE_SLOPE_01 || tile_type == TILE_SLOPE_10) {
-    return PointMapSlope(tile_map, {rect.upperLeft.x + (rect.w / 2.0),
-                                    rect.upperLeft.y - rect.h + fix->y},
+    return PointMapSlope(tile_map, {rect.lowerLeft.x + (rect.w / 2.0),
+                                    rect.lowerLeft.y + fix->y},
                          fix);
   }
 
   bool collided_below =
-      PointMapBelow(tile_map, {rect.upperLeft.x, rect.upperLeft.y - rect.h},
+      PointMapBelow(tile_map, {rect.lowerLeft.x, rect.lowerLeft.y},
                     fix) ||
       PointMapBelow(tile_map,
-                    {rect.upperLeft.x + rect.w, rect.upperLeft.y - rect.h},
+                    {rect.lowerLeft.x + rect.w, rect.lowerLeft.y},
                     fix);
 
   bool collided_side =
-      PointMapSide(tile_map,
-                   {rect.upperLeft.x, rect.upperLeft.y - rect.h + fix->y},
-                   fix) ||
-      PointMapSide(tile_map, {rect.upperLeft.x + rect.w,
-                              rect.upperLeft.y - rect.h + fix->y},
-                   fix) ||
-      PointMapSide(tile_map, {rect.upperLeft.x, rect.upperLeft.y + fix->y},
+      PointMapSide(tile_map, {rect.lowerLeft.x, rect.lowerLeft.y + fix->y},
                    fix) ||
       PointMapSide(tile_map,
-                   {rect.upperLeft.x + rect.w, rect.upperLeft.y + fix->y}, fix);
+                   {rect.lowerLeft.x + rect.w, rect.lowerLeft.y + fix->y},
+                   fix) ||
+      PointMapSide(tile_map,
+                   {rect.lowerLeft.x, rect.lowerLeft.y + rect.h + fix->y},
+                   fix) ||
+      PointMapSide(
+          tile_map,
+          {rect.lowerLeft.x + rect.w, rect.lowerLeft.y + rect.h + fix->y}, fix);
 
   return collided_below || collided_side;
 }
