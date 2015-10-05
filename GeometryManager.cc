@@ -175,14 +175,10 @@ void GeometryManager::DrawRect(float x, float y, float w, float h) {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void GeometryManager::DrawRects(const std::function<const Rect*()>& next_rect) {
-  const Rect* rect;
-  while ((rect = next_rect())) {
-    if (!rect) {
-      break;
-    }
-    DrawRect(rect->lowerLeft.x / 16.0 - 1, rect->lowerLeft.y / 12.0 - 1,
-             rect->w / 16.0, rect->h / 12.0);
+void GeometryManager::DrawRects(const std::function<bool(Rect*)>& next_rect) {
+  Rect rect;
+  while (next_rect(&rect)) {
+    DrawRect(rect.lowerLeft.x, rect.lowerLeft.y, rect.w, rect.h);
   }
 }
 
@@ -197,16 +193,17 @@ BoundingBoxGraphicsSystem::BoundingBoxGraphicsSystem(
 }
 
 std::vector<std::unique_ptr<Event>> BoundingBoxGraphicsSystem::Update(
-    Seconds, const std::vector<Entity>& entities) {
+    Seconds, const Camera& camera, const std::vector<Entity>& entities) {
   shader_manager_->UseProgram(line_program_);
   auto iter = entities.begin();
-  geometry_manager_->DrawRects([&iter, &entities]() {
-    Rect* ret = nullptr;
+  geometry_manager_->DrawRects([&iter, &entities, &camera](Rect* rect) {
     if (iter != entities.end()) {
-      ret = &iter->GetComponent<Body>()->bbox;
+      // TODO: What will the Transform component be used for?
+      *rect = camera.Transform(iter->GetComponent<Body>()->bbox);
       ++iter;
+      return true;
     }
-    return ret;
+    return false;
   });
   return {};
 }
@@ -226,20 +223,20 @@ SubSpriteGraphicsSystem::SubSpriteGraphicsSystem(
 }
 
 std::vector<std::unique_ptr<Event>> SubSpriteGraphicsSystem::Update(
-    Seconds, const std::vector<Entity>& entities) {
+    Seconds, const Camera& camera, const std::vector<Entity>& entities) {
   texture_manager_->BindTexture(-1, 1);
   shader_manager_->UseProgram(texture_program_);
 
   for (const auto& entity : entities) {
-    Transform* transform;
     Sprite* sprite;
-    if (entity.GetComponents(&transform, &sprite)) {
+    Body* body;
+    if (entity.GetComponents(&sprite, &body)) {
       // TODO: Figure out how to ellide all draws of the same texture source
       // together.
       texture_manager_->BindTexture(sprite->texture, 0);
-      // TODO: Figure out what the heck coordinate system DrawSubSprite uses :P
-      geometry_manager_->DrawSubSprite(sprite->index, transform->position.x,
-                                       transform->position.y);
+      vec2f transformed = camera.Transform(body->bbox.lowerLeft);
+      geometry_manager_->DrawSubSprite(sprite->index, transformed.x,
+                                       transformed.y);
     }
   }
   return {};

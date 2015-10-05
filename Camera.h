@@ -12,17 +12,19 @@
 // of the screen.
 // The Camera's job is to translate game coords to GL coords.
 
-class Camera : public System {
+class Camera {
  public:
   Camera() {};
   // Game (tile) coordinates
   Camera(const vec2f& center, const vec2f& size);
-  std::vector<std::unique_ptr<Event>> Update(
-      Seconds, const std::vector<Entity>&) override;
+  vec2f Transform(const vec2f& point) const;
+  Rect Transform(const Rect& rect) const;
  private:
   // Game (tile) coordinates
-  vec2f center_ = {0,0};
-  vec2f size_ = {32, 24};
+  vec2f center_ = {16, 12};
+  // Half size is more useful here because GL draws from -1 to 1 rather than a
+  // unit size of 1 (-0.5 to 0.5).
+  vec2f half_size_ = {16, 12};
 };
 
 class Transform : public Component {

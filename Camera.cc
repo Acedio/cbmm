@@ -1,23 +1,22 @@
 #include "Physics.h"
 #include "Camera.h"
 
-Camera::Camera(const vec2f& center, const vec2f& size)
-    : center_(center), size_(size) {}
+#include <iostream>
 
-std::vector<std::unique_ptr<Event>> Camera::Update(
-    Seconds, const std::vector<Entity>& entities) {
-  for (const auto& entity : entities) {
-    // Take entity position, transform it with camera coords, possibly cull it
-    // somehow if it isn't viewable, then write the GL coords to a transform
-    // component.
-    Body* body;
-    Transform* transform;
-    if (entity.GetComponents(&body, &transform)) {
-      vec2f point = body->bbox.lowerLeft;
-      vec2f half_size = size_/2;
-      vec2f translated = point - (center_ + half_size);
-      transform->position = {translated.x/half_size.x, translated.y/half_size.y};
-    }
-  }
-  return {};
+Camera::Camera(const vec2f& center, const vec2f& size)
+    : center_(center), half_size_(size/2) {}
+
+vec2f Camera::Transform(const vec2f& point) const {
+  vec2f translated = point - center_;
+  vec2f transformed = {translated.x / half_size_.x, translated.y / half_size_.y};
+  /* std::cout << "p " << point.x << ", " << point.y << std::endl
+            << "t " << transform->position.x << ", "
+            << transform->position.y << std::endl; */
+  return transformed;
+}
+
+Rect Camera::Transform(const Rect& rect) const {
+  Rect transformed = {Transform(rect.lowerLeft), rect.w / half_size_.x,
+                      rect.h / half_size_.y};
+  return transformed;
 }

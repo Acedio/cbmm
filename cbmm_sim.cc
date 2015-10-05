@@ -102,6 +102,24 @@ int main(int, char**) {
       state_machine.HandleEvent(&event, bogs);
     }
 
+    double dt = (double)(SDL_GetTicks() - last_ticks) / 1000.0;
+    if (!paused) {
+      state_machine.Update(dt, bogs);
+      vector<std::unique_ptr<Event>> events = physics.Update(dt, bogs);
+      for (const auto& event : events) {
+        auto* collision = static_cast<CollisionEvent*>(event.get());
+        state_machine.HandleEvent(event.get(), bogs);
+      }
+      delta += 8*dt;
+      /* for (const Collision& c : collisions) {
+        cout << "a " << c.first << " b " << c.second << " @ (" << c.fix.x << ","
+             << c.fix.y << ")" << endl;
+      } */
+    }
+    t += dt;
+    frames++;
+    last_ticks = SDL_GetTicks();
+
     // Begin drawing
     display.Clear();
 
@@ -150,32 +168,13 @@ int main(int, char**) {
                                     magnitude * sin(angle));
     }
 
-    camera.Update(0 /* unused */, bogs);
-    bb_graphics.Update(0 /* unused */, bogs);
-    ss_graphics.Update(0 /* unused */, bogs);
+    bb_graphics.Update(0 /* unused */, camera, bogs);
+    ss_graphics.Update(0 /* unused */, camera, bogs);
     glEnable(GL_DEPTH_TEST);
 
     display.Swap();
 
     shaderManager.ClearProgram();
-
-    double dt = (double)(SDL_GetTicks() - last_ticks) / 1000.0;
-    if (!paused) {
-      state_machine.Update(dt, bogs);
-      vector<std::unique_ptr<Event>> events = physics.Update(dt, bogs);
-      for (const auto& event : events) {
-        auto* collision = static_cast<CollisionEvent*>(event.get());
-        state_machine.HandleEvent(event.get(), bogs);
-      }
-      delta += 8*dt;
-      /* for (const Collision& c : collisions) {
-        cout << "a " << c.first << " b " << c.second << " @ (" << c.fix.x << ","
-             << c.fix.y << ")" << endl;
-      } */
-    }
-    t += dt;
-    frames++;
-    last_ticks = SDL_GetTicks();
 
     if (frames % 100 == 0) {
       cout << (float)frames / t << endl;

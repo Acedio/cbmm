@@ -1,10 +1,12 @@
 #ifndef GEOMETRYMANAGER_H
 #define GEOMETRYMANAGER_H
 
+#include <cassert>
 #include <functional>
 
 #include <GL/glew.h>
 
+#include "Camera.h"
 #include "Geometry.h"
 #include "ShaderManager.h"
 #include "System.h"
@@ -19,7 +21,7 @@ class GeometryManager {
   void DrawSubTexture(float sx, float sy, float sw, float sh,
                       float dx, float dy, float dw, float dh);
   void DrawRect(float x, float y, float w, float h);
-  void DrawRects(const std::function<const Rect*()>& next_rect);
+  void DrawRects(const std::function<bool(Rect*)>& next_rect);
 
  private:
   float vertexData[24];
@@ -34,12 +36,27 @@ class GeometryManager {
   GLuint texPositionBufferObject;
 };
 
-class BoundingBoxGraphicsSystem : public System {
+class GraphicsSystem : public System {
+ public:
+  std::vector<std::unique_ptr<Event>> Update(
+      Seconds, const std::vector<Entity>&) override {
+    // TODO: Just dying here probably isn't what we want to do :P
+    assert(false);
+    return {};
+  }
+  virtual std::vector<std::unique_ptr<Event>> Update(
+      Seconds dt, const Camera& camera,
+      const std::vector<Entity>& entities) = 0;
+};
+
+class BoundingBoxGraphicsSystem : public GraphicsSystem {
  public:
   BoundingBoxGraphicsSystem(GeometryManager* geometry_manager,
                             ShaderManager* shader_manager);
   std::vector<std::unique_ptr<Event>> Update(
-      Seconds dt, const std::vector<Entity>& entities) override;
+      Seconds dt, const Camera& camera,
+      const std::vector<Entity>& entities) override;
+
  private:
   // Not owned.
   GeometryManager* geometry_manager_;
@@ -47,13 +64,15 @@ class BoundingBoxGraphicsSystem : public System {
   int line_program_;
 };
 
-class SubSpriteGraphicsSystem : public System {
+class SubSpriteGraphicsSystem : public GraphicsSystem {
  public:
   SubSpriteGraphicsSystem(GeometryManager* geometry_manager,
                           ShaderManager* shader_manager,
                           TextureManager* texture_manager);
   std::vector<std::unique_ptr<Event>> Update(
-      Seconds dt, const std::vector<Entity>& entities) override;
+      Seconds dt, const Camera& camera,
+      const std::vector<Entity>& entities) override;
+
  private:
   // Not owned.
   GeometryManager* geometry_manager_;
