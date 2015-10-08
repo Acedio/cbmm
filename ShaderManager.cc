@@ -104,59 +104,85 @@ GLuint CreateProgram(GLuint vertexShader, GLuint fragmentShader) {
     delete[] log;
   }
 
+  // I think these may need to stick around for the above logging, but not
+  // sure...
   glDetachShader(program, vertexShader);
   glDetachShader(program, fragmentShader);
+
+  if (linked == GL_FALSE) {
+    glDeleteProgram(program);
+    program = 0;
+  }
 
   return program;
 }
 
-bool Program::Load(char const *vertexShaderFile,
+GLuint LoadProgram(char const *vertexShaderFile,
                    char const *fragmentShaderFile) {
-  vertexShader = OpenShader(GL_VERTEX_SHADER, vertexShaderFile);
-  fragmentShader = OpenShader(GL_FRAGMENT_SHADER, fragmentShaderFile);
+  GLuint vertexShader = OpenShader(GL_VERTEX_SHADER, vertexShaderFile);
+  GLuint fragmentShader = OpenShader(GL_FRAGMENT_SHADER, fragmentShaderFile);
 
   if (vertexShader == 0 || fragmentShader == 0) {
     return false;
   }
 
-  id = CreateProgram(vertexShader, fragmentShader);
+  GLuint id = CreateProgram(vertexShader, fragmentShader);
 
-  return true;
+  glDeleteShader(vertexShader);
+  glDeleteShader(fragmentShader);
+
+  return id;
 }
 
 void Program::Use() { glUseProgram(id); }
 
-MapProgram::MapProgram() {
-  mapOffsetX = 0;
-  mapOffsetY = 0;
+void TextureProgram::Setup() {
+  glUniform1i(texture_uniform_, 0);
 }
 
 void MapProgram::Setup() {
-  glUniform1i(glGetUniformLocation(id, "tileset"), 0);
-  glUniform1i(glGetUniformLocation(id, "tilemap"), 1);
-  glUniform2f(glGetUniformLocation(id, "offset"), mapOffsetX, mapOffsetY);
+  // TODO: This seems strange... Are these texture references? Maybe texture
+  // units?
+  glUniform1i(tileset_uniform_, 0);
+  glUniform1i(tilemap_uniform_, 1);
+  glUniform2f(offset_uniform_, map_offset_.x, map_offset_.y);
 }
 
-ShaderManager::ShaderManager() {}
-
-ShaderManager::~ShaderManager() {}
-
-int ShaderManager::AddProgram(char const *vertexShaderFile,
-                              char const *fragmentShaderFile) {
-  Program *p = new MapProgram();
-  if (!p->Load(vertexShaderFile, fragmentShaderFile)) {
-    return -1;
+std::unique_ptr<MapProgram> MapProgram::Make() {
+  std::unique_ptr<MapProgram> program(new MapProgram());
+  program->id = LoadProgram("resources/texture_vertex.glsl",
+                            "resources/tile_fragment.glsl");
+  if (!program->id) {
+    return nullptr;
   }
 
-  programs.push_back(p);
+  program->tileset_uniform_ = glGetUniformLocation(program->id, "tileset");
+  program->tilemap_uniform_ = glGetUniformLocation(program->id, "tilemap");
+  program->offset_uniform_ = glGetUniformLocation(program->id, "offset");
 
-  return programs.size() - 1;
+  return program;
 }
 
-void ShaderManager::UseProgram(int pid) {
-  programs.at(pid)->Use();
+std::unique_ptr<TextureProgram> TextureProgram::Make() {
+  std::unique_ptr<TextureProgram> program(new TextureProgram());
+  program->id = LoadProgram("resources/texture_vertex.glsl",
+                            "resources/texture_fragment.glsl");
+  if (!program->id) {
+    return nullptr;
+  }
 
-  programs.at(pid)->Setup();
+  program->texture_uniform_ = glGetUniformLocation(program->id, "texture");
+
+  return program;
 }
 
-void ShaderManager::ClearProgram() { glUseProgram(0); }
+std::unique_ptr<ColorProgram> ColorProgram::Make() {
+  std::unique_ptr<ColorProgram> program(new ColorProgram());
+  program->id = LoadProgram("resources/color_vertex.glsl",
+                            "resources/color_fragment.glsl");
+  if (!program->id) {
+    return nullptr;
+  }
+
+  return program;
+}

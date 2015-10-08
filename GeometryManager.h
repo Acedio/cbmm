@@ -16,7 +16,7 @@ class GeometryManager {
  public:
   GeometryManager();
   ~GeometryManager();
-  void DrawTileMap();
+  void DrawTileMap(const Camera& camera);
   void DrawSubSprite(int si, float dx, float dy);
   void DrawSubTexture(float sx, float sy, float sw, float sh,
                       float dx, float dy, float dw, float dh);
@@ -52,7 +52,7 @@ class GraphicsSystem : public System {
 class BoundingBoxGraphicsSystem : public GraphicsSystem {
  public:
   BoundingBoxGraphicsSystem(GeometryManager* geometry_manager,
-                            ShaderManager* shader_manager);
+                            ColorProgram* color_program);
   std::vector<std::unique_ptr<Event>> Update(
       Seconds dt, const Camera& camera,
       const std::vector<Entity>& entities) override;
@@ -60,14 +60,13 @@ class BoundingBoxGraphicsSystem : public GraphicsSystem {
  private:
   // Not owned.
   GeometryManager* geometry_manager_;
-  ShaderManager* shader_manager_;
-  int line_program_;
+  ColorProgram* color_program_;
 };
 
 class SubSpriteGraphicsSystem : public GraphicsSystem {
  public:
   SubSpriteGraphicsSystem(GeometryManager* geometry_manager,
-                          ShaderManager* shader_manager,
+                          TextureProgram* texture_program,
                           TextureManager* texture_manager);
   std::vector<std::unique_ptr<Event>> Update(
       Seconds dt, const Camera& camera,
@@ -76,9 +75,8 @@ class SubSpriteGraphicsSystem : public GraphicsSystem {
  private:
   // Not owned.
   GeometryManager* geometry_manager_;
-  ShaderManager* shader_manager_;
+  TextureProgram* texture_program_;
   TextureManager* texture_manager_;
-  int texture_program_;
 };
 
 #endif

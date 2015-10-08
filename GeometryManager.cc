@@ -62,7 +62,7 @@ GeometryManager::GeometryManager() {
 
 GeometryManager::~GeometryManager() {}
 
-void GeometryManager::DrawTileMap() {
+void GeometryManager::DrawTileMap(const Camera& camera) {
   glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
@@ -183,18 +183,15 @@ void GeometryManager::DrawRects(const std::function<bool(Rect*)>& next_rect) {
 }
 
 BoundingBoxGraphicsSystem::BoundingBoxGraphicsSystem(
-    GeometryManager* geometry_manager, ShaderManager* shader_manager)
-    : geometry_manager_(geometry_manager), shader_manager_(shader_manager) {
+    GeometryManager* geometry_manager, ColorProgram* color_program)
+    : geometry_manager_(geometry_manager), color_program_(color_program) {
   assert(geometry_manager_);
-  assert(shader_manager_);
-  line_program_ = shader_manager_->AddProgram("resources/color_vertex.glsl",
-                                              "resources/color_fragment.glsl");
-  assert(line_program_ >= 0);
+  assert(color_program_);
 }
 
 std::vector<std::unique_ptr<Event>> BoundingBoxGraphicsSystem::Update(
     Seconds, const Camera& camera, const std::vector<Entity>& entities) {
-  shader_manager_->UseProgram(line_program_);
+  color_program_->Use();
   auto iter = entities.begin();
   geometry_manager_->DrawRects([&iter, &entities, &camera](Rect* rect) {
     if (iter != entities.end()) {
@@ -209,23 +206,20 @@ std::vector<std::unique_ptr<Event>> BoundingBoxGraphicsSystem::Update(
 }
 
 SubSpriteGraphicsSystem::SubSpriteGraphicsSystem(
-    GeometryManager* geometry_manager, ShaderManager* shader_manager,
+    GeometryManager* geometry_manager, TextureProgram* texture_program,
     TextureManager* texture_manager)
     : geometry_manager_(geometry_manager),
-      shader_manager_(shader_manager),
+      texture_program_(texture_program),
       texture_manager_(texture_manager) {
   assert(geometry_manager_);
-  assert(shader_manager_);
+  assert(texture_program_);
   assert(texture_manager_);
-
-  texture_program_ = shader_manager_->AddProgram(
-      "resources/texture_vertex.glsl", "resources/texture_fragment.glsl");
 }
 
 std::vector<std::unique_ptr<Event>> SubSpriteGraphicsSystem::Update(
     Seconds, const Camera& camera, const std::vector<Entity>& entities) {
   texture_manager_->BindTexture(-1, 1);
-  shader_manager_->UseProgram(texture_program_);
+  texture_program_->Use();
 
   for (const auto& entity : entities) {
     Sprite* sprite;

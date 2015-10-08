@@ -1,46 +1,50 @@
 #ifndef SHADERMANAGER_H
 #define SHADERMANAGER_H
 
+#include <memory>
 #include <vector>
 #include <GL/glew.h>
 
+#include "Camera.h"
+#include "Geometry.h"
+
 using namespace std;
-
-GLuint CreateShader(GLenum shaderType, const char *shaderSource);
-
-GLuint OpenShader(GLenum shaderType, const char *shaderFilename);
-
-GLuint CreateProgram(GLuint vertexShader, GLuint fragmentShader);
 
 class Program {
  public:
-  virtual void Setup() = 0;
-  bool Load(char const *vertexShaderFile, char const *fragmentShaderFile);
+  void Setup() {}
   void Use();
 
  protected:
-  GLuint id, vertexShader, fragmentShader;
+  GLuint id;
+};
+
+class TextureProgram : public Program {
+ public:
+  void Setup();
+  static std::unique_ptr<TextureProgram> Make();
+ private:
+  TextureProgram() {}
+  GLint texture_uniform_;
 };
 
 class MapProgram : public Program {
  public:
-  MapProgram();
   void Setup();
-
+  void map_offset(const vec2f& offset) { map_offset_ = offset; }
+  static std::unique_ptr<MapProgram> Make();
  private:
-  float mapOffsetX, mapOffsetY;
+  MapProgram() {}
+  vec2f map_offset_ = {0,0};
+  GLint tileset_uniform_, tilemap_uniform_, offset_uniform_;
 };
 
-class ShaderManager {
- private:
-  vector<Program *> programs;
-
+class ColorProgram : public Program {
  public:
-  ShaderManager();
-  ~ShaderManager();
-  int AddProgram(char const *vertexShaderFile, char const *fragmentShaderFile);
-  void UseProgram(int pid);
-  void ClearProgram();
+  void Setup();
+  static std::unique_ptr<ColorProgram> Make();
+ private:
+  ColorProgram() {}
 };
 
 #endif

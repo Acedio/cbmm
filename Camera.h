@@ -19,6 +19,8 @@ class Camera {
   Camera(const vec2f& center, const vec2f& size);
   vec2f Transform(const vec2f& point) const;
   Rect Transform(const Rect& rect) const;
+  vec2f center() { return center_; }
+  void center(const vec2f& center) { center_ = center; }
  private:
   // Game (tile) coordinates
   vec2f center_ = {16, 12};

@@ -26,13 +26,9 @@ int main(int, char**) {
 
   Display display(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP);
 
-  ShaderManager shaderManager = ShaderManager();
-  int tileProgram =
-      shaderManager.AddProgram("resources/texture_vertex.glsl",
-                               "resources/tile_fragment.glsl");
-  int textureProgram =
-      shaderManager.AddProgram("resources/texture_vertex.glsl",
-                               "resources/texture_fragment.glsl");
+  std::unique_ptr<MapProgram> tileProgram = MapProgram::Make();
+  std::unique_ptr<TextureProgram> textureProgram = TextureProgram::Make();
+  std::unique_ptr<ColorProgram> colorProgram = ColorProgram::Make();
 
   GeometryManager geometryManager = GeometryManager();
   TextureManager textureManager = TextureManager();
@@ -45,8 +41,8 @@ int main(int, char**) {
   Physics physics;
   StateMachineSystem state_machine;
   Camera camera;
-  BoundingBoxGraphicsSystem bb_graphics(&geometryManager, &shaderManager);
-  SubSpriteGraphicsSystem ss_graphics(&geometryManager, &shaderManager,
+  BoundingBoxGraphicsSystem bb_graphics(&geometryManager, colorProgram.get());
+  SubSpriteGraphicsSystem ss_graphics(&geometryManager, textureProgram.get(),
                                       &textureManager);
   EntityManager em;
   vector<Entity> bogs;
@@ -104,6 +100,7 @@ int main(int, char**) {
 
     double dt = (double)(SDL_GetTicks() - last_ticks) / 1000.0;
     if (!paused) {
+      camera.center(vec2f{16,12} + vec2f{4*cos(t),0});
       state_machine.Update(dt, bogs);
       vector<std::unique_ptr<Event>> events = physics.Update(dt, bogs);
       for (const auto& event : events) {
@@ -127,12 +124,15 @@ int main(int, char**) {
 
     textureManager.BindTexture(tileSetRef, 0);
     textureManager.BindTexture(tileMapRef, 1);
-    shaderManager.UseProgram(tileProgram);
-    geometryManager.DrawTileMap();
+    tileProgram->Use();
+    tileProgram->map_offset(camera.center() - vec2f{16,12});
+    tileProgram->Setup();
+    geometryManager.DrawTileMap(camera);
 
     textureManager.BindTexture(dogRef, 0);
     textureManager.BindTexture(-1, 1);
-    shaderManager.UseProgram(textureProgram);
+    textureProgram->Use();
+    textureProgram->Setup();
     geometryManager.DrawSubTexture(5.0 / 16, 1.0 - 4.0 / 16, 1.0 / 16, 1.0 / 16,
                                    -2.0 / 16, 1.333333 / 16, 1.0 / 16,
                                    1.333333 / 16);
@@ -173,8 +173,6 @@ int main(int, char**) {
     glEnable(GL_DEPTH_TEST);
 
     display.Swap();
-
-    shaderManager.ClearProgram();
 
     if (frames % 100 == 0) {
       cout << (float)frames / t << endl;
