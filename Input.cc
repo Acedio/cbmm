@@ -23,6 +23,18 @@ std::vector<ButtonEvent> GetButtonEvents() {
           case SDLK_z:
             button_events.emplace_back(Button::JUMP, state);
             break;
+          case SDLK_UP:
+            button_events.emplace_back(Button::UP, state);
+            break;
+          case SDLK_DOWN:
+            button_events.emplace_back(Button::DOWN, state);
+            break;
+          case SDLK_LEFT:
+            button_events.emplace_back(Button::LEFT, state);
+            break;
+          case SDLK_RIGHT:
+            button_events.emplace_back(Button::RIGHT, state);
+            break;
           default:
             break;
         }

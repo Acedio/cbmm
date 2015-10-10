@@ -8,27 +8,27 @@
 #include "Physics.h"
 #include "State.h"
 
-void MakeBog(Entity* entity, const Body& body);
-
 namespace bog_states {
 class Standing : public State {
  public:
-  void Enter(Body* body) const override;
-  void Exit(Body* body) const override;
-  const State* Update(Body* body, const Seconds dt) const override;
-  const State* HandleInput(const ButtonEvent* event) const override;
-  const State* HandleCollision(Body* body,
+  void Enter(const Entity* entity) const override;
+  void Exit(const Entity* entity) const override;
+  const State* Update(const Entity* entity, const Seconds dt) const override;
+  const State* HandleInput(const Entity* entity,
+                           const ButtonEvent* event) const override;
+  const State* HandleCollision(const Entity* entity,
                                const CollisionEvent* event) const override;
   static const Standing state;
 };
 
 class Jumping : public State {
  public:
-  void Enter(Body* body) const override;
-  void Exit(Body* body) const override;
-  const State* Update(Body* body, const Seconds dt) const override;
-  const State* HandleInput(const ButtonEvent* event) const override;
-  const State* HandleCollision(Body* body,
+  void Enter(const Entity* entity) const override;
+  void Exit(const Entity* entity) const override;
+  const State* Update(const Entity* entity, const Seconds dt) const override;
+  const State* HandleInput(const Entity* entity,
+                           const ButtonEvent* event) const override;
+  const State* HandleCollision(const Entity* entity,
                                const CollisionEvent* event) const override;
   static const Jumping state;
 };

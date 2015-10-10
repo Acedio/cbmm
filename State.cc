@@ -3,11 +3,10 @@
 std::vector<std::unique_ptr<Event>> StateMachineSystem::Update(
     Seconds dt, const std::vector<Entity>& entities) {
   for (const auto& entity : entities) {
-    Body* body = entity.GetComponent<Body>();
     StateComponent* state_component = entity.GetComponent<StateComponent>();
-    if (body && state_component) {
-      const State* new_state = state_component->state()->Update(body, dt);
-      HandleTransition(body, state_component, new_state);
+    if (state_component) {
+      const State* new_state = state_component->state()->Update(&entity, dt);
+      HandleTransition(&entity, state_component, new_state);
     }
   }
   return {};
@@ -17,23 +16,22 @@ std::vector<std::unique_ptr<Event>> StateMachineSystem::HandleEvent(
     const Event* event, const std::vector<Entity>& entities) {
   if (event->type() == EventType::INPUT) {
     for (const auto& entity : entities) {
-      StateComponent* state;
-      Body* body;
-      if (entity.GetComponents(&state, &body)) {
-        const State* new_state =
-            state->state()->HandleInput(static_cast<const ButtonEvent*>(event));
-        HandleTransition(body, state, new_state);
+      StateComponent* state = entity.GetComponent<StateComponent>();
+      if (state) {
+        const State* new_state = state->state()->HandleInput(
+            &entity, static_cast<const ButtonEvent*>(event));
+        HandleTransition(&entity, state, new_state);
       }
     }
   } else if (event->type() == EventType::COLLISION) {
     auto* collision = static_cast<const CollisionEvent*>(event);
     if (collision->first < (int)entities.size()) {
-      StateComponent* state;
-      Body* body;
-      if (entities[collision->first].GetComponents(&state, &body)) {
+      const Entity* entity = &entities[collision->first];
+      StateComponent* state = entity->GetComponent<StateComponent>();
+      if (state) {
         const State* new_state =
-            state->state()->HandleCollision(body, collision);
-        HandleTransition(body, state, new_state);
+            state->state()->HandleCollision(entity, collision);
+        HandleTransition(entity, state, new_state);
       }
     }
   }
@@ -41,11 +39,11 @@ std::vector<std::unique_ptr<Event>> StateMachineSystem::HandleEvent(
   return {};
 }
 
-void StateMachineSystem::HandleTransition(Body* body, StateComponent* state,
+void StateMachineSystem::HandleTransition(const Entity* entity, StateComponent* state,
                                           const State* new_state) {
   if (new_state) {
-    state->state()->Exit(body);
+    state->state()->Exit(entity);
     state->state(new_state);
-    state->state()->Enter(body);
+    state->state()->Enter(entity);
   }
 }

@@ -5,20 +5,17 @@
 #include <iostream>
 using namespace std;
 
-void MakeBog(Entity* entity, const Body& body) {
-  entity->AddComponent(std::unique_ptr<Body>(new Body(body)));
-  //entity->AddComponent(std::unique_ptr<StateMachine>(new StateMachine(&bog_states::Standing::state)));
-}
-
 namespace bog_states {
-void Standing::Enter(Body*) const {
+void Standing::Enter(const Entity*) const {
   //cout << "Enter Standing" << endl;
 }
-void Standing::Exit(Body*) const {
+void Standing::Exit(const Entity*) const {
   //cout << "Exit Standing" << endl;
 }
-const State* Standing::Update(Body* body, const Seconds dt) const {
+const State* Standing::Update(const Entity* entity, const Seconds dt) const {
   // movement
+  Body* body = entity->GetComponent<Body>();
+  assert(body);
   Body new_body = *body;
   new_body.vel = body->vel - vec2f{0, 9} * dt;
   new_body.bbox.lowerLeft = new_body.bbox.lowerLeft + body->vel * dt;
@@ -27,16 +24,28 @@ const State* Standing::Update(Body* body, const Seconds dt) const {
 
   return nullptr;
 }
-const State* Standing::HandleInput(const ButtonEvent* event) const {
+const State* Standing::HandleInput(const Entity* entity,
+                                   const ButtonEvent* event) const {
+  Body* body = entity->GetComponent<Body>();
   if (event->button() == Button::JUMP &&
       event->button_state() == ButtonState::PRESSED) {
     return &Jumping::state;
+  } else if (event->button() == Button::LEFT &&
+             event->button_state() == ButtonState::PRESSED) {
+    // TODO: Hmm... How to deal with people pressing left while holding right?
+    // How do we know how to stop moving when a button is released?
+    body->vel.x = -1.0;
+  } else if (event->button() == Button::RIGHT &&
+             event->button_state() == ButtonState::PRESSED) {
+    body->vel.x = 1.0;
   }
   return nullptr;
 }
-const State* Standing::HandleCollision(Body* body,
+const State* Standing::HandleCollision(const Entity* entity,
                                        const CollisionEvent* collision) const {
   if (collision->second == MAP_BODY_ID) {
+    Body* body = entity->GetComponent<Body>();
+    assert(body);
     Body new_body = *body;
     new_body.bbox.lowerLeft += collision->fix;
     if (collision->fix.x != 0) new_body.vel.x = 0;
@@ -47,15 +56,19 @@ const State* Standing::HandleCollision(Body* body,
 }
 const Standing Standing::state = Standing();
 
-void Jumping::Enter(Body* body) const {
+void Jumping::Enter(const Entity* entity) const {
   cout << "Enter Jumping" << endl;
+  Body* body = entity->GetComponent<Body>();
+  assert(body);
   body->vel.y = 5;
 }
-void Jumping::Exit(Body*) const {
+void Jumping::Exit(const Entity*) const {
   cout << "Exit Jumping" << endl;
 }
-const State* Jumping::Update(Body* body, const Seconds dt) const {
+const State* Jumping::Update(const Entity* entity, const Seconds dt) const {
   // movement
+  Body* body = entity->GetComponent<Body>();
+  assert(body);
   Body new_body = *body;
   new_body.vel = body->vel - vec2f{0, 9} * dt;
   new_body.bbox.lowerLeft = new_body.bbox.lowerLeft + body->vel * dt;
@@ -64,10 +77,10 @@ const State* Jumping::Update(Body* body, const Seconds dt) const {
 
   return nullptr;
 }
-const State* Jumping::HandleInput(const ButtonEvent*) const {
+const State* Jumping::HandleInput(const Entity*, const ButtonEvent*) const {
   return nullptr;
 }
-const State* Jumping::HandleCollision(Body*,
+const State* Jumping::HandleCollision(const Entity*,
                                       const CollisionEvent* collision) const {
   if (collision->second == MAP_BODY_ID) {
     return &Standing::state;
