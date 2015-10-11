@@ -39,7 +39,7 @@ int main(int, char**) {
       textureManager.LoadTexture("resources/dog_tilesheet.png", 0);
 
   Physics physics;
-  StateMachineSystem state_machine;
+  auto jump_state_system = MakeJumpStateSystem();
   Camera camera;
   BoundingBoxGraphicsSystem bb_graphics(&geometryManager, colorProgram.get());
   SubSpriteGraphicsSystem ss_graphics(&geometryManager, textureProgram.get(),
@@ -52,8 +52,8 @@ int main(int, char**) {
     bogs.back().AddComponent(std::unique_ptr<Transform>(new Transform()));
     bogs.back().AddComponent(std::unique_ptr<Body>(
         new Body(true, {{(double)x, (double)x}, 1, 1}, {1, (double)0 / 2.0})));
-    bogs.back().AddComponent(std::unique_ptr<StateComponent>(
-        new StateComponent(&bog_states::Standing::state)));
+    bogs.back().AddComponent(std::unique_ptr<JumpStateComponent>(
+        new JumpStateComponent(JumpState::STANDING)));
     bogs.back().AddComponent(std::unique_ptr<Sprite>(new Sprite(dogRef, 0)));
   }
 
@@ -95,17 +95,17 @@ int main(int, char**) {
       }
       // May want to prevent input from triggering two immediate state
       // changes?
-      state_machine.HandleEvent(&event, bogs);
+      jump_state_system->HandleEvent(&event, bogs);
     }
 
     double dt = (double)(SDL_GetTicks() - last_ticks) / 1000.0;
     if (!paused) {
       camera.center(vec2f{16,12} + vec2f{4*cos(t),0});
-      state_machine.Update(dt, bogs);
+      jump_state_system->Update(dt, bogs);
       vector<std::unique_ptr<Event>> events = physics.Update(dt, bogs);
       for (const auto& event : events) {
         auto* collision = static_cast<CollisionEvent*>(event.get());
-        state_machine.HandleEvent(event.get(), bogs);
+        jump_state_system->HandleEvent(event.get(), bogs);
       }
       delta += 8*dt;
       /* for (const Collision& c : collisions) {

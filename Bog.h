@@ -8,30 +8,31 @@
 #include "Physics.h"
 #include "State.h"
 
-namespace bog_states {
-class Standing : public State {
- public:
-  void Enter(const Entity* entity) const override;
-  void Exit(const Entity* entity) const override;
-  const State* Update(const Entity* entity, const Seconds dt) const override;
-  const State* HandleInput(const Entity* entity,
-                           const ButtonEvent* event) const override;
-  const State* HandleCollision(const Entity* entity,
-                               const CollisionEvent* event) const override;
-  static const Standing state;
+enum class JumpState {
+  UNKNOWN,
+  STANDING,
+  JUMPING,
 };
 
-class Jumping : public State {
+class JumpStateComponent : public StateComponent<JumpState> {
  public:
-  void Enter(const Entity* entity) const override;
-  void Exit(const Entity* entity) const override;
-  const State* Update(const Entity* entity, const Seconds dt) const override;
-  const State* HandleInput(const Entity* entity,
-                           const ButtonEvent* event) const override;
-  const State* HandleCollision(const Entity* entity,
-                               const CollisionEvent* event) const override;
-  static const Jumping state;
+  JumpStateComponent(JumpState state) : StateComponent<JumpState>(state) {}
+  JumpStateComponent() : JumpStateComponent(JumpState::UNKNOWN) {}
+  ComponentType type() const override { return ComponentType::JUMP_STATE; }
 };
-}  // bog_states
+
+enum class LRState {
+  UNKNOWN,
+  STILL,
+  LEFT,
+  RIGHT,
+};
+
+class LRStateComponent : public StateComponent<LRState> {
+ public:
+  ComponentType type() const override { return ComponentType::LR_STATE; }
+};
+
+std::unique_ptr<StateMachineSystem<JumpStateComponent>> MakeJumpStateSystem();
 
 #endif  // BOG_H

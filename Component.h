@@ -4,7 +4,8 @@
 enum class ComponentType {
   UNKNOWN,
   BODY,
-  MOVE_STATE,
+  JUMP_STATE,
+  LR_STATE,
   SPRITE,
   TRANSFORM,
 };
