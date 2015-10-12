@@ -30,9 +30,12 @@ enum class LRState {
 
 class LRStateComponent : public StateComponent<LRState> {
  public:
+  LRStateComponent(LRState state) : StateComponent<LRState>(state) {}
+  LRStateComponent() : LRStateComponent(LRState::UNKNOWN) {}
   ComponentType type() const override { return ComponentType::LR_STATE; }
 };
 
 std::unique_ptr<StateMachineSystem<JumpStateComponent>> MakeJumpStateSystem();
+std::unique_ptr<StateMachineSystem<LRStateComponent>> MakeLRStateSystem();
 
 #endif  // BOG_H

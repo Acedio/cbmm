@@ -5,6 +5,8 @@
 #include <iostream>
 using namespace std;
 
+// TODO: Pull out common update code into a utility function.
+
 namespace {
 class Standing : public StateBehavior<JumpStateComponent> {
  public:
@@ -49,7 +51,7 @@ class Standing : public StateBehavior<JumpStateComponent> {
   }
 
   JumpState HandleCollision(JumpStateComponent*, const Entity* entity,
-                               const CollisionEvent* collision) const override {
+                            const CollisionEvent* collision) const override {
     if (collision->second == MAP_BODY_ID) {
       Body* body = entity->GetComponent<Body>();
       assert(body);
@@ -76,7 +78,8 @@ class Jumping : public StateBehavior<JumpStateComponent> {
   void Exit(JumpStateComponent*, const Entity*) const override {
     cout << "Exit Jumping" << endl;
   }
-  JumpState Update(JumpStateComponent*, const Entity* entity, const Seconds dt) const override {
+  JumpState Update(JumpStateComponent*, const Entity* entity,
+                   const Seconds dt) const override {
     // movement
     Body* body = entity->GetComponent<Body>();
     assert(body);
@@ -88,12 +91,12 @@ class Jumping : public StateBehavior<JumpStateComponent> {
 
     return state();
   }
-  JumpState HandleInput(JumpStateComponent*, const Entity*, const ButtonEvent*) const override {
+  JumpState HandleInput(JumpStateComponent*, const Entity*,
+                        const ButtonEvent*) const override {
     return state();
   }
   JumpState HandleCollision(JumpStateComponent*, const Entity*,
-                                        const CollisionEvent* collision) const
-      override {
+                            const CollisionEvent* collision) const override {
     if (collision->second == MAP_BODY_ID) {
       return JumpState::STANDING;
     }
@@ -108,6 +111,125 @@ std::unique_ptr<StateMachineSystem<JumpStateComponent>> MakeJumpStateSystem() {
       new StateMachineSystem<JumpStateComponent>());
   system->RegisterStateBehavior(std::unique_ptr<Standing>(new Standing()));
   system->RegisterStateBehavior(std::unique_ptr<Jumping>(new Jumping()));
+
+  return system;
+}
+
+namespace {
+class Left : public StateBehavior<LRStateComponent> {
+ public:
+  void Enter(LRStateComponent*, const Entity* entity) const override {
+    cout << "Enter Left" << endl;
+    Body* body = entity->GetComponent<Body>();
+    assert(body);
+    body->vel.x = -1.0;
+  }
+
+  void Exit(LRStateComponent*, const Entity*) const override {
+    cout << "Exit Left" << endl;
+  }
+
+  LRState Update(LRStateComponent*, const Entity* entity,
+                 const Seconds dt) const override {
+    // movement
+    Body* body = entity->GetComponent<Body>();
+    assert(body);
+    Body new_body = *body;
+    new_body.bbox.lowerLeft.x = new_body.bbox.lowerLeft.x + body->vel.x * dt;
+
+    *body = new_body;
+
+    return state();
+  }
+
+  LRState HandleInput(LRStateComponent*, const Entity*,
+                      const ButtonEvent* event) const override {
+    if (event->button() == Button::LEFT &&
+        event->button_state() == ButtonState::RELEASED) {
+      return LRState::STILL;
+    } else if (event->button() == Button::RIGHT &&
+               event->button_state() == ButtonState::PRESSED) {
+      return LRState::RIGHT;
+    }
+    return state();
+  }
+
+  LRState state() const override { return LRState::LEFT; }
+};
+
+class Right : public StateBehavior<LRStateComponent> {
+ public:
+  void Enter(LRStateComponent*, const Entity* entity) const override {
+    cout << "Enter Right" << endl;
+    Body* body = entity->GetComponent<Body>();
+    assert(body);
+    body->vel.x = 1.0;
+  }
+
+  void Exit(LRStateComponent*, const Entity*) const override {
+    cout << "Exit Right" << endl;
+  }
+
+  LRState Update(LRStateComponent*, const Entity* entity,
+                 const Seconds dt) const override {
+    // movement
+    Body* body = entity->GetComponent<Body>();
+    assert(body);
+    Body new_body = *body;
+    new_body.bbox.lowerLeft.x = new_body.bbox.lowerLeft.x + body->vel.x * dt;
+
+    *body = new_body;
+
+    return state();
+  }
+
+  LRState HandleInput(LRStateComponent*, const Entity*,
+                      const ButtonEvent* event) const override {
+    if (event->button() == Button::RIGHT &&
+        event->button_state() == ButtonState::RELEASED) {
+      return LRState::STILL;
+    } else if (event->button() == Button::LEFT &&
+               event->button_state() == ButtonState::PRESSED) {
+      return LRState::LEFT;
+    }
+    return state();
+  }
+
+  LRState state() const override { return LRState::RIGHT; }
+};
+
+class Still : public StateBehavior<LRStateComponent> {
+ public:
+  void Enter(LRStateComponent*, const Entity* entity) const override {
+    cout << "Enter Still" << endl;
+    Body* body = entity->GetComponent<Body>();
+    assert(body);
+    body->vel.x = 0;
+  }
+  void Exit(LRStateComponent*, const Entity*) const override {
+    cout << "Exit Still" << endl;
+  }
+  LRState HandleInput(LRStateComponent*, const Entity*,
+                      const ButtonEvent* event) const override {
+    if (event->button() == Button::RIGHT &&
+        event->button_state() == ButtonState::PRESSED) {
+      return LRState::RIGHT;
+    } else if (event->button() == Button::LEFT &&
+               event->button_state() == ButtonState::PRESSED) {
+      return LRState::LEFT;
+    }
+    return state();
+  }
+  LRState state() const override { return LRState::STILL; }
+};
+}  // namespace
+
+std::unique_ptr<StateMachineSystem<LRStateComponent>> MakeLRStateSystem() {
+  std::unique_ptr<StateMachineSystem<LRStateComponent>> system(
+      new StateMachineSystem<LRStateComponent>());
+  system->RegisterStateBehavior(std::unique_ptr<Left>(new Left()));
+  system->RegisterStateBehavior(std::unique_ptr<Right>(new Right()));
+  system->RegisterStateBehavior(std::unique_ptr<Still>(new Still()));
 
   return system;
 }

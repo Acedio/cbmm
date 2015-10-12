@@ -40,6 +40,7 @@ int main(int, char**) {
 
   Physics physics;
   auto jump_state_system = MakeJumpStateSystem();
+  auto lr_state_system = MakeLRStateSystem();
   Camera camera;
   BoundingBoxGraphicsSystem bb_graphics(&geometryManager, colorProgram.get());
   SubSpriteGraphicsSystem ss_graphics(&geometryManager, textureProgram.get(),
@@ -54,6 +55,8 @@ int main(int, char**) {
         new Body(true, {{(double)x, (double)x}, 1, 1}, {1, (double)0 / 2.0})));
     bogs.back().AddComponent(std::unique_ptr<JumpStateComponent>(
         new JumpStateComponent(JumpState::STANDING)));
+    bogs.back().AddComponent(std::unique_ptr<LRStateComponent>(
+        new LRStateComponent(LRState::STILL)));
     bogs.back().AddComponent(std::unique_ptr<Sprite>(new Sprite(dogRef, 0)));
   }
 
@@ -96,16 +99,19 @@ int main(int, char**) {
       // May want to prevent input from triggering two immediate state
       // changes?
       jump_state_system->HandleEvent(&event, bogs);
+      lr_state_system->HandleEvent(&event, bogs);
     }
 
     double dt = (double)(SDL_GetTicks() - last_ticks) / 1000.0;
     if (!paused) {
       camera.center(vec2f{16,12} + vec2f{4*cos(t),0});
       jump_state_system->Update(dt, bogs);
+      lr_state_system->Update(dt, bogs);
       vector<std::unique_ptr<Event>> events = physics.Update(dt, bogs);
       for (const auto& event : events) {
         auto* collision = static_cast<CollisionEvent*>(event.get());
         jump_state_system->HandleEvent(event.get(), bogs);
+        lr_state_system->HandleEvent(event.get(), bogs);
       }
       delta += 8*dt;
       /* for (const Collision& c : collisions) {
