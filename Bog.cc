@@ -120,9 +120,6 @@ class Left : public StateBehavior<LRStateComponent> {
  public:
   void Enter(LRStateComponent*, const Entity* entity) const override {
     cout << "Enter Left" << endl;
-    Body* body = entity->GetComponent<Body>();
-    assert(body);
-    body->vel.x = -1.0;
   }
 
   void Exit(LRStateComponent*, const Entity*) const override {
@@ -135,6 +132,8 @@ class Left : public StateBehavior<LRStateComponent> {
     Body* body = entity->GetComponent<Body>();
     assert(body);
     Body new_body = *body;
+    new_body.vel.x -= 16.0 * dt;
+    new_body.vel.x = new_body.vel.x < -4.0 ? -4.0 : new_body.vel.x;
     new_body.bbox.lowerLeft.x = new_body.bbox.lowerLeft.x + body->vel.x * dt;
 
     *body = new_body;
@@ -161,9 +160,6 @@ class Right : public StateBehavior<LRStateComponent> {
  public:
   void Enter(LRStateComponent*, const Entity* entity) const override {
     cout << "Enter Right" << endl;
-    Body* body = entity->GetComponent<Body>();
-    assert(body);
-    body->vel.x = 1.0;
   }
 
   void Exit(LRStateComponent*, const Entity*) const override {
@@ -176,6 +172,8 @@ class Right : public StateBehavior<LRStateComponent> {
     Body* body = entity->GetComponent<Body>();
     assert(body);
     Body new_body = *body;
+    new_body.vel.x += 16.0 * dt;
+    new_body.vel.x = new_body.vel.x > 4.0 ? 4.0 : new_body.vel.x;
     new_body.bbox.lowerLeft.x = new_body.bbox.lowerLeft.x + body->vel.x * dt;
 
     *body = new_body;

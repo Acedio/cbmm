@@ -47,7 +47,7 @@ int main(int, char**) {
                                       &textureManager);
   EntityManager em;
   vector<Entity> bogs;
-  for (int x = 0; x < 16; x += 2) {
+  for (int x = 0; x < 32; x += 1) {
     EntityId id = em.CreateEntity();
     bogs.emplace_back(id);
     bogs.back().AddComponent(std::unique_ptr<Transform>(new Transform()));
@@ -104,7 +104,6 @@ int main(int, char**) {
 
     double dt = (double)(SDL_GetTicks() - last_ticks) / 1000.0;
     if (!paused) {
-      camera.center(vec2f{16,12} + vec2f{4*cos(t),0});
       jump_state_system->Update(dt, bogs);
       lr_state_system->Update(dt, bogs);
       vector<std::unique_ptr<Event>> events = physics.Update(dt, bogs);
@@ -114,6 +113,7 @@ int main(int, char**) {
         lr_state_system->HandleEvent(event.get(), bogs);
       }
       delta += 8*dt;
+      camera.center(bogs.at(0).GetComponent<Body>()->bbox.lowerLeft);
       /* for (const Collision& c : collisions) {
         cout << "a " << c.first << " b " << c.second << " @ (" << c.fix.x << ","
              << c.fix.y << ")" << endl;
@@ -139,9 +139,6 @@ int main(int, char**) {
     textureManager.BindTexture(-1, 1);
     textureProgram->Use();
     textureProgram->Setup();
-    geometryManager.DrawSubTexture(5.0 / 16, 1.0 - 4.0 / 16, 1.0 / 16, 1.0 / 16,
-                                   -2.0 / 16, 1.333333 / 16, 1.0 / 16,
-                                   1.333333 / 16);
 
     auto dog = [](int i) {
       i %= 21;
@@ -166,7 +163,7 @@ int main(int, char**) {
       }
       return 0;
     };
-    for (int i = 0; i < 32; ++i) {
+    for (int i = 32; i < 32; ++i) {
       float angle = sin(delta*(float)i/32);
       float magnitude = (float)i/16.0;
       geometryManager.DrawSubSprite(dog(i),
