@@ -73,7 +73,7 @@ class Jumping : public StateBehavior<JumpStateComponent> {
     cout << "Enter Jumping" << endl;
     Body* body = entity->GetComponent<Body>();
     assert(body);
-    body->vel.y = 5;
+    body->vel.y = 8;
   }
   void Exit(JumpStateComponent*, const Entity*) const override {
     cout << "Exit Jumping" << endl;

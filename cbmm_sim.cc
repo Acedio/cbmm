@@ -47,7 +47,7 @@ int main(int, char**) {
                                       &textureManager);
   EntityManager em;
   vector<Entity> bogs;
-  for (int x = 0; x < 32; x += 1) {
+  for (int x = 0; x < 1; x += 1) {
     EntityId id = em.CreateEntity();
     bogs.emplace_back(id);
     bogs.back().AddComponent(std::unique_ptr<Transform>(new Transform()));

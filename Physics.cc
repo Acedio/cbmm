@@ -5,12 +5,36 @@
 
 namespace {
 bool PointMapBelow(const TileMap& tile_map, const vec2f& contact_pt,
-                   vec2f* fix) {
+                   float* y_fix) {
   float map_y = floor(contact_pt.y);
 
   int tile_type = tile_map.At(contact_pt.x, contact_pt.y);
   if (tile_type == TILE_BLOCK) {
-    fix->y = (map_y + 1) - contact_pt.y;
+    *y_fix = (map_y + 1) - contact_pt.y;
+
+    // If we're still in a tile, return the larger fix so we choose the correct
+    // (small) fix on the other axis.
+    if (tile_map.At(contact_pt.x, contact_pt.y + 1) == TILE_BLOCK) {
+      *y_fix += 1;
+    }
+
+    return true;
+  }
+
+  return false;
+}
+
+bool PointMapAbove(const TileMap& tile_map, const vec2f& contact_pt,
+                   float* y_fix) {
+  float map_y = floor(contact_pt.y);
+
+  int tile_type = tile_map.At(contact_pt.x, contact_pt.y);
+  if (tile_type == TILE_BLOCK) {
+    *y_fix = map_y - contact_pt.y;
+
+    if (tile_map.At(contact_pt.x, contact_pt.y - 1) == TILE_BLOCK) {
+      *y_fix -= 1;
+    }
 
     return true;
   }
@@ -46,12 +70,28 @@ bool PointMapSlope(const TileMap& tile_map, const vec2f& contact_pt,
   return false;
 }
 
-bool PointMapSide(const TileMap& tile_map, const vec2f& contact_pt,
-                  vec2f* fix) {
+bool PointMapLeft(const TileMap& tile_map, const vec2f& contact_pt,
+                  float* x_fix) {
   int tile_type = tile_map.At(contact_pt.x, contact_pt.y);
   if (tile_type == TILE_BLOCK) {
-    // Might want to split this up into two functions...
-    fix->x = round(contact_pt.x) - contact_pt.x;
+    *x_fix = floor(contact_pt.x + 1) - contact_pt.x;
+    if (tile_map.At(contact_pt.x + 1, contact_pt.y) == TILE_BLOCK) {
+      *x_fix += 1;
+    }
+    return true;
+  }
+
+  return false;
+}
+
+bool PointMapRight(const TileMap& tile_map, const vec2f& contact_pt,
+                   float* x_fix) {
+  int tile_type = tile_map.At(contact_pt.x, contact_pt.y);
+  if (tile_type == TILE_BLOCK) {
+    *x_fix = floor(contact_pt.x) - contact_pt.x;
+    if (tile_map.At(contact_pt.x - 1, contact_pt.y) == TILE_BLOCK) {
+      *x_fix -= 1;
+    }
     return true;
   }
 
@@ -107,27 +147,39 @@ bool Physics::RectMapCollision(const Rect& rect, vec2f* fix) {
                          fix);
   }
 
-  bool collided_below =
-      PointMapBelow(tile_map, {rect.lowerLeft.x, rect.lowerLeft.y},
-                    fix) ||
-      PointMapBelow(tile_map,
-                    {rect.lowerLeft.x + rect.w, rect.lowerLeft.y},
-                    fix);
+  float x_fix = 0, y_fix = 0;
 
   bool collided_side =
-      PointMapSide(tile_map, {rect.lowerLeft.x, rect.lowerLeft.y + fix->y},
-                   fix) ||
-      PointMapSide(tile_map,
-                   {rect.lowerLeft.x + rect.w, rect.lowerLeft.y + fix->y},
-                   fix) ||
-      PointMapSide(tile_map,
-                   {rect.lowerLeft.x, rect.lowerLeft.y + rect.h + fix->y},
-                   fix) ||
-      PointMapSide(
-          tile_map,
-          {rect.lowerLeft.x + rect.w, rect.lowerLeft.y + rect.h + fix->y}, fix);
+      PointMapLeft(tile_map, {rect.lowerLeft.x, rect.lowerLeft.y}, &x_fix) ||
+      PointMapLeft(tile_map, {rect.lowerLeft.x, rect.lowerLeft.y + rect.h},
+                   &x_fix) ||
+      PointMapRight(tile_map, {rect.lowerLeft.x + rect.w, rect.lowerLeft.y},
+                    &x_fix) ||
+      PointMapRight(tile_map,
+                    {rect.lowerLeft.x + rect.w, rect.lowerLeft.y + rect.h},
+                    &x_fix);
 
-  return collided_below || collided_side;
+  bool collided_above =
+      PointMapAbove(tile_map, {rect.lowerLeft.x, rect.lowerLeft.y + rect.h},
+                    &y_fix) ||
+      PointMapAbove(tile_map,
+                    {rect.lowerLeft.x + rect.w, rect.lowerLeft.y + rect.h},
+                    &y_fix);
+
+  bool collided_below =
+      PointMapBelow(tile_map, {rect.lowerLeft.x, rect.lowerLeft.y},
+                    &y_fix) ||
+      PointMapBelow(tile_map,
+                    {rect.lowerLeft.x + rect.w, rect.lowerLeft.y},
+                    &y_fix);
+
+  if (abs(x_fix) > abs(y_fix)) {
+    *fix = {0, y_fix};
+  } else {
+    *fix = {x_fix, 0};
+  }
+
+  return collided_below || collided_above || collided_side;
 }
 
 vector<std::unique_ptr<Event>> Physics::Update(Seconds,
