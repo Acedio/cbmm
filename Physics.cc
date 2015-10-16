@@ -42,6 +42,26 @@ bool PointMapAbove(const TileMap& tile_map, const vec2f& contact_pt,
   return false;
 }
 
+float heightAtX(float tilespace_x, int tile_type) {
+  switch (tile_type) {
+    case TILE_SLOPE_01:
+      return tilespace_x;
+    case TILE_SLOPE_10:
+      return 1 - tilespace_x;
+    case TILE_SLOPE_05:
+      return 0.5 * tilespace_x;
+    case TILE_SLOPE_51:
+      return 0.5 + 0.5 * tilespace_x;
+    case TILE_SLOPE_15:
+      return 1 - 0.5 * tilespace_x;
+    case TILE_SLOPE_50:
+      return 0.5 - 0.5 * tilespace_x;
+    default:
+      assert(false);
+      return -10;
+  }
+}
+
 // TODO: Velocity after @fix should be parallel to the slope so jittering
 // doesn't occur.
 bool PointMapSlope(const TileMap& tile_map, const vec2f& contact_pt,
@@ -50,16 +70,11 @@ bool PointMapSlope(const TileMap& tile_map, const vec2f& contact_pt,
   float map_y = floor(contact_pt.y);
 
   int tile_type = tile_map.At(contact_pt.x, contact_pt.y);
-  if (tile_type == TILE_SLOPE_01) {
-    float dist_from_slope = (contact_pt.y - map_y) - (contact_pt.x - map_x);
-    if (dist_from_slope < 0) {
-      fix->y = -dist_from_slope;
-      return true;
-    }
-    return false;
-  } else if (tile_type == TILE_SLOPE_10) {
+  if (tile_type == TILE_SLOPE_01 || tile_type == TILE_SLOPE_10 ||
+      tile_type == TILE_SLOPE_05 || tile_type == TILE_SLOPE_51 ||
+      tile_type == TILE_SLOPE_15 || tile_type == TILE_SLOPE_50) {
     float dist_from_slope =
-        (contact_pt.y - map_y) - (1 - (contact_pt.x - map_x));
+        (contact_pt.y - map_y) - heightAtX(contact_pt.x - map_x, tile_type);
     if (dist_from_slope < 0) {
       fix->y = -dist_from_slope;
       return true;
@@ -139,12 +154,10 @@ bool Physics::RectRectCollision(const Rect& first, const Rect& second,
 }
 
 bool Physics::RectMapCollision(const Rect& rect, vec2f* fix) {
-  int tile_type = tile_map.At(rect.lowerLeft.x + (rect.w / 2.0),
-                                    rect.lowerLeft.y);
-  if (tile_type == TILE_SLOPE_01 || tile_type == TILE_SLOPE_10) {
-    return PointMapSlope(tile_map, {rect.lowerLeft.x + (rect.w / 2.0),
-                                    rect.lowerLeft.y + fix->y},
-                         fix);
+  if (PointMapSlope(tile_map, {rect.lowerLeft.x + (rect.w / 2.0),
+                               rect.lowerLeft.y + fix->y},
+                    fix)) {
+    return true;
   }
 
   float x_fix = 0, y_fix = 0;

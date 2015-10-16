@@ -7,8 +7,12 @@
 enum TileType {
   TILE_EMPTY = 0,
   TILE_BLOCK = 1,
-  TILE_SLOPE_01 = 2,
-  TILE_SLOPE_10 = 3
+  TILE_SLOPE_01 = 2, 
+  TILE_SLOPE_10 = 3,
+  TILE_SLOPE_05 = 4,  // _,
+  TILE_SLOPE_51 = 5,  // -`
+  TILE_SLOPE_15 = 6,  // `-
+  TILE_SLOPE_50 = 7,  // ,_
 };
 
 class TileMap {
