@@ -20,10 +20,14 @@ class StateComponent : public Component {
   StateComponent(StateEnum state) : state_(state) {}
   StateEnum state() { return state_; }
   void state(StateEnum state) { state_ = state; }
+  Seconds time() { return time_; }
+  void time(Seconds time) { time_ = time; }
 
   virtual ComponentType type() const = 0;
  private:
   StateEnum state_ = StateEnum::UNKNOWN;
+  // Time spent in this state.
+  Seconds time_ = 0;
 };
 
 // ComponentType should be a subclass of StateComponent.
@@ -31,11 +35,12 @@ template <typename ComponentType>
 class StateBehavior {
  public:
   typedef decltype(std::declval<ComponentType>().state()) StateEnum;
-  // TODO: const& should be fine here.
   virtual void Enter(ComponentType*, const Entity*) const {};
   virtual void Exit(ComponentType*, const Entity*) const {};
   // Update handles physics movement and other such things
-  virtual StateEnum Update(ComponentType*, const Entity*, const Seconds) const {
+  virtual StateEnum Update(ComponentType* state_component, const Entity*,
+                           const Seconds dt) const {
+    state_component->time(state_component->time() + dt);
     return state();
   };
   // Handles button presses and releases.
@@ -61,6 +66,9 @@ class StateMachineSystem : public System {
     for (const auto& entity : entities) {
       ComponentType* state_component = entity.GetComponent<ComponentType>();
       if (state_component) {
+        // Update the time component.
+        state_component->time(state_component->time() + dt);
+
         auto state = state_component->state();
         const StateBehavior<ComponentType>* behavior = behaviors_[state].get();
         auto new_state = behavior->Update(state_component, &entity, dt);
@@ -123,6 +131,7 @@ class StateMachineSystem : public System {
           behaviors_[new_state].get();
       old_behavior->Exit(state_component, entity);
       state_component->state(new_state);
+      state_component->time(0);
       new_behavior->Enter(state_component, entity);
     }
   }

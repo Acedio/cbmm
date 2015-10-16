@@ -24,7 +24,7 @@ class Standing : public StateBehavior<JumpStateComponent> {
     Body* body = entity->GetComponent<Body>();
     assert(body);
     Body new_body = *body;
-    new_body.vel = body->vel - vec2f{0, 9} * dt;
+    new_body.vel = body->vel - vec2f{0, 40} * dt;
     new_body.bbox.lowerLeft = new_body.bbox.lowerLeft + body->vel * dt;
 
     *body = new_body;
@@ -67,16 +67,13 @@ class Standing : public StateBehavior<JumpStateComponent> {
   JumpState state() const override { return JumpState::STANDING; }
 };
 
-class Jumping : public StateBehavior<JumpStateComponent> {
+class Falling : public StateBehavior<JumpStateComponent> {
  public:
-  void Enter(JumpStateComponent*, const Entity* entity) const override {
-    cout << "Enter Jumping" << endl;
-    Body* body = entity->GetComponent<Body>();
-    assert(body);
-    body->vel.y = 8;
+  void Enter(JumpStateComponent*, const Entity*) const override {
+    cout << "Enter Falling" << endl;
   }
   void Exit(JumpStateComponent*, const Entity*) const override {
-    cout << "Exit Jumping" << endl;
+    cout << "Exit Falling" << endl;
   }
   JumpState Update(JumpStateComponent*, const Entity* entity,
                    const Seconds dt) const override {
@@ -84,7 +81,7 @@ class Jumping : public StateBehavior<JumpStateComponent> {
     Body* body = entity->GetComponent<Body>();
     assert(body);
     Body new_body = *body;
-    new_body.vel = body->vel - vec2f{0, 9} * dt;
+    new_body.vel = body->vel - vec2f{0, 40} * dt;
     new_body.bbox.lowerLeft = new_body.bbox.lowerLeft + body->vel * dt;
 
     *body = new_body;
@@ -102,6 +99,52 @@ class Jumping : public StateBehavior<JumpStateComponent> {
     }
     return state();
   }
+  JumpState state() const override { return JumpState::FALLING; }
+};
+
+class Jumping : public StateBehavior<JumpStateComponent> {
+ public:
+  void Enter(JumpStateComponent*, const Entity* entity) const override {
+    cout << "Enter Jumping" << endl;
+    Body* body = entity->GetComponent<Body>();
+    assert(body);
+    body->vel.y = 12;
+  }
+  void Exit(JumpStateComponent*, const Entity* entity) const override {
+    cout << "Exit Jumping" << endl;
+    Body* body = entity->GetComponent<Body>();
+    assert(body);
+    body->vel.y = 6;
+  }
+  JumpState Update(JumpStateComponent* state_component, const Entity* entity,
+                   const Seconds dt) const override {
+    if (state_component->time() > 0.2) {
+      return JumpState::FALLING;
+    }
+    // movement
+    Body* body = entity->GetComponent<Body>();
+    assert(body);
+    Body new_body = *body;
+    new_body.bbox.lowerLeft = new_body.bbox.lowerLeft + body->vel * dt;
+    *body = new_body;
+
+    return state();
+  }
+  JumpState HandleInput(JumpStateComponent*, const Entity*,
+                        const ButtonEvent* button_event) const override {
+    if (button_event->button() == Button::JUMP &&
+        button_event->button_state() == ButtonState::RELEASED) {
+      return JumpState::FALLING;
+    }
+    return state();
+  }
+  JumpState HandleCollision(JumpStateComponent*, const Entity*,
+                            const CollisionEvent* collision) const override {
+    if (collision->second == MAP_BODY_ID) {
+      return JumpState::FALLING;
+    }
+    return state();
+  }
   JumpState state() const override { return JumpState::JUMPING; }
 };
 }  // namespace
@@ -111,6 +154,7 @@ std::unique_ptr<StateMachineSystem<JumpStateComponent>> MakeJumpStateSystem() {
       new StateMachineSystem<JumpStateComponent>());
   system->RegisterStateBehavior(std::unique_ptr<Standing>(new Standing()));
   system->RegisterStateBehavior(std::unique_ptr<Jumping>(new Jumping()));
+  system->RegisterStateBehavior(std::unique_ptr<Falling>(new Falling()));
 
   return system;
 }

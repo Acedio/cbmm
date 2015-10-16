@@ -12,6 +12,7 @@ enum class JumpState {
   UNKNOWN,
   STANDING,
   JUMPING,
+  FALLING,
 };
 
 class JumpStateComponent : public StateComponent<JumpState> {
