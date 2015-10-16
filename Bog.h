@@ -20,6 +20,12 @@ class JumpStateComponent : public StateComponent<JumpState> {
   JumpStateComponent(JumpState state) : StateComponent<JumpState>(state) {}
   JumpStateComponent() : JumpStateComponent(JumpState::UNKNOWN) {}
   ComponentType type() const override { return ComponentType::JUMP_STATE; }
+  Seconds time_since_map_collision() { return time_since_map_collision_; }
+  void time_since_map_collision(Seconds new_time) {
+    time_since_map_collision_ = new_time;
+  }
+ private:
+  Seconds time_since_map_collision_ = 0;
 };
 
 enum class LRState {

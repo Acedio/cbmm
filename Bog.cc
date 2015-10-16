@@ -10,16 +10,19 @@ using namespace std;
 namespace {
 class Standing : public StateBehavior<JumpStateComponent> {
  public:
-  void Enter(JumpStateComponent*, const Entity*) const override {
-    // cout << "Enter Standing" << endl;
+  void Enter(JumpStateComponent* state_component, const Entity*) const override {
+    cout << "Enter Standing" << endl;
+    state_component->time_since_map_collision(0);
   }
 
   void Exit(JumpStateComponent*, const Entity*) const override {
-    // cout << "Exit Standing" << endl;
+    cout << "Exit Standing" << endl;
   }
 
-  JumpState Update(JumpStateComponent*, const Entity* entity,
+  JumpState Update(JumpStateComponent* state_component, const Entity* entity,
                    const Seconds dt) const override {
+    state_component->time_since_map_collision(
+        state_component->time_since_map_collision() + dt);
     // movement
     Body* body = entity->GetComponent<Body>();
     assert(body);
@@ -29,6 +32,9 @@ class Standing : public StateBehavior<JumpStateComponent> {
 
     *body = new_body;
 
+    if (state_component->time_since_map_collision() > 0.1) {
+      return JumpState::FALLING;
+    }
     return state();
   }
 
@@ -50,9 +56,11 @@ class Standing : public StateBehavior<JumpStateComponent> {
     return state();
   }
 
-  JumpState HandleCollision(JumpStateComponent*, const Entity* entity,
+  JumpState HandleCollision(JumpStateComponent* state_component,
+                            const Entity* entity,
                             const CollisionEvent* collision) const override {
     if (collision->second == MAP_BODY_ID) {
+      state_component->time_since_map_collision(0);
       Body* body = entity->GetComponent<Body>();
       assert(body);
       Body new_body = *body;
@@ -92,10 +100,19 @@ class Falling : public StateBehavior<JumpStateComponent> {
                         const ButtonEvent*) const override {
     return state();
   }
-  JumpState HandleCollision(JumpStateComponent*, const Entity*,
+  JumpState HandleCollision(JumpStateComponent*, const Entity* entity,
                             const CollisionEvent* collision) const override {
     if (collision->second == MAP_BODY_ID) {
-      return JumpState::STANDING;
+      Body* body = entity->GetComponent<Body>();
+      assert(body);
+      Body new_body = *body;
+      new_body.bbox.lowerLeft += collision->fix;
+      if (collision->fix.x != 0) new_body.vel.x = 0;
+      if (collision->fix.y != 0) new_body.vel.y = 0;
+      *body = new_body;
+      if (collision->fix.y > 0) {
+        return JumpState::STANDING;
+      }
     }
     return state();
   }
@@ -138,10 +155,19 @@ class Jumping : public StateBehavior<JumpStateComponent> {
     }
     return state();
   }
-  JumpState HandleCollision(JumpStateComponent*, const Entity*,
+  JumpState HandleCollision(JumpStateComponent*, const Entity* entity,
                             const CollisionEvent* collision) const override {
     if (collision->second == MAP_BODY_ID) {
-      return JumpState::FALLING;
+      Body* body = entity->GetComponent<Body>();
+      assert(body);
+      Body new_body = *body;
+      new_body.bbox.lowerLeft += collision->fix;
+      if (collision->fix.x != 0) new_body.vel.x = 0;
+      if (collision->fix.y != 0) new_body.vel.y = 0;
+      *body = new_body;
+      if (collision->fix.y < 0) {
+        return JumpState::FALLING;
+      }
     }
     return state();
   }
@@ -162,7 +188,7 @@ std::unique_ptr<StateMachineSystem<JumpStateComponent>> MakeJumpStateSystem() {
 namespace {
 class Left : public StateBehavior<LRStateComponent> {
  public:
-  void Enter(LRStateComponent*, const Entity* entity) const override {
+  void Enter(LRStateComponent*, const Entity*) const override {
     cout << "Enter Left" << endl;
   }
 
@@ -202,7 +228,7 @@ class Left : public StateBehavior<LRStateComponent> {
 
 class Right : public StateBehavior<LRStateComponent> {
  public:
-  void Enter(LRStateComponent*, const Entity* entity) const override {
+  void Enter(LRStateComponent*, const Entity*) const override {
     cout << "Enter Right" << endl;
   }
 
