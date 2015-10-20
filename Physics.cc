@@ -28,7 +28,7 @@ bool PointMapAbove(const TileMap& tile_map, const vec2f& contact_pt,
                    double* y_fix) {
   int tile_type = tile_map.At(contact_pt.x, contact_pt.y);
   if (tile_type == TILE_BLOCK) {
-    *y_fix = floor(contact_pt.y) - contact_pt.y - 0.01;
+    *y_fix = floor(contact_pt.y) - contact_pt.y - 0.001;
 
     if (tile_map.At(contact_pt.x, contact_pt.y - 1) == TILE_BLOCK) {
       *y_fix -= 1;
@@ -60,7 +60,7 @@ bool PointMapRight(const TileMap& tile_map, const vec2f& contact_pt,
                    double* x_fix) {
   int tile_type = tile_map.At(contact_pt.x, contact_pt.y);
   if (tile_type == TILE_BLOCK) {
-    *x_fix = floor(contact_pt.x) - contact_pt.x - 0.01;
+    *x_fix = floor(contact_pt.x) - contact_pt.x - 0.001;
     if (tile_map.At(contact_pt.x - 1, contact_pt.y) == TILE_BLOCK) {
       *x_fix -= 1;
     }
@@ -212,10 +212,15 @@ bool Physics::RectMapCollision(const Rect& rect, const vec2f& last_pos,
   if (PointMapSlope(tile_map,
                     {rect.lowerLeft.x + (rect.w / 2.0), last_pos.y},
                     &fix->y)) {
-    // fix should be based on rect.lowerLeft, so we need to correct from
-    // last_pos.
-    fix->y =  (last_pos.y + fix->y) - rect.lowerLeft.y;
-    return true;
+    if (last_pos.y + fix->y > rect.lowerLeft.y) {
+      // y is below slope after x movement, so we collided with it.
+      // fix should be based on rect.lowerLeft, so we need to correct from
+      // last_pos.
+      fix->y = (last_pos.y + fix->y) - rect.lowerLeft.y;
+      return true;
+    } else {
+      fix->y = 0;
+    }
   }
 
   if (!is_slope(tile_map.At(rect.lowerLeft.x + (rect.w / 2.0),
@@ -242,7 +247,6 @@ vector<std::unique_ptr<Event>> Physics::Update(Seconds dt,
     assert(body);
     if (body->enabled) {
       body->last_pos = body->bbox.lowerLeft;
-      std::cout << body->last_pos.x << " " << body->last_pos.y << std::endl;
       body->bbox.lowerLeft += body->vel * dt;
       // tilemap collision
       vec2f fix{0, 0};
