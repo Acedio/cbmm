@@ -19,9 +19,8 @@ class TileMap {
  public:
   TileMap();
   int LoadTmx(const std::string& filename, const std::string& layer_name);
-  int Load(char const *fileName);
   // 0,0 is lower left
-  int At(int x, int y) const;
+  TileType At(int x, int y) const;
   void Print(std::ostream &os) const;
 
   int GetWidth() const { return w; }

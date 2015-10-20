@@ -16,6 +16,8 @@ enum class Button {
   LEFT,
   RIGHT,
   QUIT,
+  PLUS,
+  MINUS,
   PAUSE
 };
 

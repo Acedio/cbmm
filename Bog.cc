@@ -28,7 +28,6 @@ class Standing : public StateBehavior<JumpStateComponent> {
     assert(body);
     Body new_body = *body;
     new_body.vel = body->vel - vec2f{0, 40} * dt;
-    new_body.bbox.lowerLeft = new_body.bbox.lowerLeft + body->vel * dt;
 
     *body = new_body;
 
@@ -90,7 +89,6 @@ class Falling : public StateBehavior<JumpStateComponent> {
     assert(body);
     Body new_body = *body;
     new_body.vel = body->vel - vec2f{0, 40} * dt;
-    new_body.bbox.lowerLeft = new_body.bbox.lowerLeft + body->vel * dt;
 
     *body = new_body;
 
@@ -142,7 +140,6 @@ class Jumping : public StateBehavior<JumpStateComponent> {
     Body* body = entity->GetComponent<Body>();
     assert(body);
     Body new_body = *body;
-    new_body.bbox.lowerLeft = new_body.bbox.lowerLeft + body->vel * dt;
     *body = new_body;
 
     return state();
@@ -203,8 +200,7 @@ class Left : public StateBehavior<LRStateComponent> {
     assert(body);
     Body new_body = *body;
     new_body.vel.x -= 16.0 * dt;
-    new_body.vel.x = new_body.vel.x < -4.0 ? -4.0 : new_body.vel.x;
-    new_body.bbox.lowerLeft.x = new_body.bbox.lowerLeft.x + body->vel.x * dt;
+    new_body.vel.x = new_body.vel.x < -8.0 ? -8.0 : new_body.vel.x;
 
     *body = new_body;
 
@@ -243,8 +239,7 @@ class Right : public StateBehavior<LRStateComponent> {
     assert(body);
     Body new_body = *body;
     new_body.vel.x += 16.0 * dt;
-    new_body.vel.x = new_body.vel.x > 4.0 ? 4.0 : new_body.vel.x;
-    new_body.bbox.lowerLeft.x = new_body.bbox.lowerLeft.x + body->vel.x * dt;
+    new_body.vel.x = new_body.vel.x > 8.0 ? 8.0 : new_body.vel.x;
 
     *body = new_body;
 

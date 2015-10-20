@@ -1,5 +1,32 @@
 #include "Input.h"
 
+namespace {
+  Button translate(int sdlk) {
+    switch (sdlk) {
+      case SDLK_ESCAPE:
+        return Button::QUIT;
+      case SDLK_p:
+        return Button::PAUSE;
+      case SDLK_z:
+        return Button::JUMP;
+      case SDLK_UP:
+        return Button::UP;
+      case SDLK_DOWN:
+        return Button::DOWN;
+      case SDLK_LEFT:
+        return Button::LEFT;
+      case SDLK_RIGHT:
+        return Button::RIGHT;
+      case SDLK_EQUALS:
+        return Button::PLUS;
+      case SDLK_MINUS:
+        return Button::MINUS;
+      default:
+        return Button::UNKNOWN;
+    }
+  }
+}  // namespace
+
 std::vector<ButtonEvent> GetButtonEvents() {
   std::vector<ButtonEvent> button_events;
   SDL_Event event;
@@ -10,30 +37,10 @@ std::vector<ButtonEvent> GetButtonEvents() {
                event.key.repeat == 0) {  // Ignore repeat presses.
       ButtonState state = (event.type == SDL_KEYUP ? ButtonState::RELEASED
                                                    : ButtonState::PRESSED);
-      switch (event.key.keysym.sym) {
-        case SDLK_ESCAPE:
-          button_events.emplace_back(Button::QUIT, state);
-          break;
-        case SDLK_p:
-          button_events.emplace_back(Button::PAUSE, state);
-          break;
-        case SDLK_z:
-          button_events.emplace_back(Button::JUMP, state);
-          break;
-        case SDLK_UP:
-          button_events.emplace_back(Button::UP, state);
-          break;
-        case SDLK_DOWN:
-          button_events.emplace_back(Button::DOWN, state);
-          break;
-        case SDLK_LEFT:
-          button_events.emplace_back(Button::LEFT, state);
-          break;
-        case SDLK_RIGHT:
-          button_events.emplace_back(Button::RIGHT, state);
-          break;
-        default:
-          break;
+      Button button = translate(event.key.keysym.sym);
+
+      if (button != Button::UNKNOWN) {
+        button_events.emplace_back(button, state);
       }
     }
   }

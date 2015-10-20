@@ -46,41 +46,11 @@ int TileMap::LoadTmx(const std::string& filename,
   return -1;
 }
 
-/// Returns 0 on success
-int TileMap::Load(char const* fileName) {
-  ifstream tileMapFile(fileName, ifstream::in);
-
-  if (!tileMapFile.good()) {
-    return -1;
-  }
-
-  tileMapFile >> w >> h;
-
-  if (w <= 0 || h <= 0) {
-    return -1;
-  }
-
-  tiles.resize(w * h);
-
-  for (int y = 0; y < h; ++y) {
-    for (int x = 0; x < w; ++x) {
-      if (!tileMapFile.good()) {
-        return -1;
-      }
-      int temp;
-      tileMapFile >> temp;
-      set(x, y, temp);
-    }
-  }
-
-  return 0;
-}
-
-int TileMap::At(int x, int y) const {
+TileType TileMap::At(int x, int y) const {
   if (x < 0 || y < 0 || x >= w || y >= h) {
-    return -1;
+    return TileType::TILE_EMPTY;
   }
-  return get(x, y);
+  return (TileType)get(x, y);
 }
 
 void TileMap::Print(std::ostream& os) const {

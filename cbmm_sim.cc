@@ -52,7 +52,7 @@ int main(int, char**) {
     bogs.emplace_back(id);
     bogs.back().AddComponent(std::unique_ptr<Transform>(new Transform()));
     bogs.back().AddComponent(std::unique_ptr<Body>(
-        new Body(true, {{(double)x, (double)x}, 1, 1}, {1, (double)0 / 2.0})));
+        new Body(true, {{2, 2}, 0.99, 0.99}, {1, (double)0 / 2.0})));
     bogs.back().AddComponent(std::unique_ptr<JumpStateComponent>(
         new JumpStateComponent(JumpState::STANDING)));
     bogs.back().AddComponent(std::unique_ptr<LRStateComponent>(
@@ -80,6 +80,8 @@ int main(int, char**) {
   double t = 0;
   double delta = 0;
 
+  double time_scale = 1;
+
   int last_ticks = SDL_GetTicks();
 
   while (running) {
@@ -95,6 +97,17 @@ int main(int, char**) {
           default:
             break;
         }
+      } else if (event.button_state() == ButtonState::PRESSED) {
+        switch (event.button()) {
+          case Button::PLUS:
+            time_scale *= 1.2;
+            break;
+          case Button::MINUS:
+            time_scale /= 1.2;
+            break;
+          default:
+            break;
+        }
       }
       // May want to prevent input from triggering two immediate state
       // changes?
@@ -102,7 +115,7 @@ int main(int, char**) {
       lr_state_system->HandleEvent(&event, bogs);
     }
 
-    double dt = (double)(SDL_GetTicks() - last_ticks) / 1000.0;
+    double dt = (double)(SDL_GetTicks() - last_ticks) / (time_scale * 1000.0);
     if (!paused) {
       jump_state_system->Update(dt, bogs);
       lr_state_system->Update(dt, bogs);
