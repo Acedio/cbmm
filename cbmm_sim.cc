@@ -126,7 +126,9 @@ int main(int, char**) {
         lr_state_system->HandleEvent(event.get(), bogs);
       }
       delta += 8*dt;
-      camera.center(bogs.at(0).GetComponent<Body>()->bbox.lowerLeft);
+      // Interpolate camera to Bog.
+      vec2f bog_pos = bogs.at(0).GetComponent<Body>()->bbox.lowerLeft;
+      camera.center(bog_pos*0.2 + camera.center()*0.8);
       /* for (const Collision& c : collisions) {
         cout << "a " << c.first << " b " << c.second << " @ (" << c.fix.x << ","
              << c.fix.y << ")" << endl;

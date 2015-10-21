@@ -27,7 +27,7 @@ class Standing : public StateBehavior<JumpStateComponent> {
     Body* body = entity->GetComponent<Body>();
     assert(body);
     Body new_body = *body;
-    new_body.vel = body->vel - vec2f{0, 40} * dt;
+    new_body.vel = body->vel - vec2f{0, 20} * dt;
 
     *body = new_body;
 
@@ -88,7 +88,7 @@ class Falling : public StateBehavior<JumpStateComponent> {
     Body* body = entity->GetComponent<Body>();
     assert(body);
     Body new_body = *body;
-    new_body.vel = body->vel - vec2f{0, 40} * dt;
+    new_body.vel = body->vel - vec2f{0, 20} * dt;
 
     *body = new_body;
 
@@ -123,17 +123,17 @@ class Jumping : public StateBehavior<JumpStateComponent> {
     cout << "Enter Jumping" << endl;
     Body* body = entity->GetComponent<Body>();
     assert(body);
-    body->vel.y = 12;
+    body->vel.y = 6;
   }
   void Exit(JumpStateComponent*, const Entity* entity) const override {
     cout << "Exit Jumping" << endl;
     Body* body = entity->GetComponent<Body>();
     assert(body);
-    body->vel.y = 6;
+    body->vel.y = 5;
   }
   JumpState Update(JumpStateComponent* state_component, const Entity* entity,
                    const Seconds dt) const override {
-    if (state_component->time() > 0.2) {
+    if (state_component->time() > 0.3) {
       return JumpState::FALLING;
     }
     // movement
@@ -200,7 +200,7 @@ class Left : public StateBehavior<LRStateComponent> {
     assert(body);
     Body new_body = *body;
     new_body.vel.x -= 16.0 * dt;
-    new_body.vel.x = new_body.vel.x < -8.0 ? -8.0 : new_body.vel.x;
+    new_body.vel.x = max(new_body.vel.x, -4.0);
 
     *body = new_body;
 
@@ -239,7 +239,7 @@ class Right : public StateBehavior<LRStateComponent> {
     assert(body);
     Body new_body = *body;
     new_body.vel.x += 16.0 * dt;
-    new_body.vel.x = new_body.vel.x > 8.0 ? 8.0 : new_body.vel.x;
+    new_body.vel.x = min(new_body.vel.x, 4.0);
 
     *body = new_body;
 

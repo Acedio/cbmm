@@ -229,7 +229,9 @@ std::vector<std::unique_ptr<Event>> SubSpriteGraphicsSystem::Update(
       // together.
       texture_manager_->BindTexture(sprite->texture, 0);
       vec2f transformed = camera.Transform(body->bbox.lowerLeft);
-      geometry_manager_->DrawSubSprite(sprite->index, transformed.x,
+      // HACK: Run cycle.
+      sprite->index++;
+      geometry_manager_->DrawSubSprite(((sprite->index/5)%6)+32, transformed.x,
                                        transformed.y);
     }
   }
