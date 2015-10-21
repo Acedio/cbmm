@@ -5,74 +5,50 @@
 #include "Physics.h"
 
 namespace {
-bool PointMapBelow(const TileMap& tile_map, const vec2f& contact_pt,
-                   double* y_fix) {
-  int tile_type = tile_map.At(contact_pt.x, contact_pt.y);
-  if (tile_type == TILE_BLOCK) {
-    *y_fix = floor(contact_pt.y + 1) - contact_pt.y;
 
-    // If we're still in a tile, return the larger fix so we choose the correct
-    // (small) fix on the other axis.
-    if (tile_map.At(contact_pt.x, contact_pt.y + 1) == TILE_BLOCK) {
-      *y_fix += 1;
-    }
+enum Location { LEFT = 1, RIGHT = 2, TOP = 4, BOTTOM = 8 };
+enum Axis { X, Y };
 
-    return true;
-  }
-
-  *y_fix = 0;
-  return false;
+Location operator|(Location lhs, Location rhs) {
+  return static_cast<Location>(static_cast<int>(lhs) | static_cast<int>(rhs));
 }
 
-bool PointMapAbove(const TileMap& tile_map, const vec2f& contact_pt,
-                   double* y_fix) {
-  int tile_type = tile_map.At(contact_pt.x, contact_pt.y);
-  if (tile_type == TILE_BLOCK) {
-    *y_fix = floor(contact_pt.y) - contact_pt.y - 0.001;
-
-    if (tile_map.At(contact_pt.x, contact_pt.y - 1) == TILE_BLOCK) {
-      *y_fix -= 1;
-    }
-
-    return true;
-  }
-
-  *y_fix = 0;
-  return false;
+vec2f PointOfRect(const Rect& rect, Location loc) {
+  double x =
+      loc & Location::LEFT ? rect.lowerLeft.x : rect.lowerLeft.x + rect.w;
+  double y =
+      loc & Location::BOTTOM ? rect.lowerLeft.y : rect.lowerLeft.y + rect.h;
+  return {x, y};
 }
 
-bool PointMapLeft(const TileMap& tile_map, const vec2f& contact_pt,
-                  double* x_fix) {
-  int tile_type = tile_map.At(contact_pt.x, contact_pt.y);
+bool PointMap(const TileMap& tile_map, const Rect& rect, Location loc,
+              Axis axis, double* fix) {
+  vec2f contact_pt = PointOfRect(rect, loc);
+  // If we're on the top or right edge of tile x or y == 1, we need to be
+  // okay/not colliding with an x_pos or y_pos == 2.
+  int tile_x =
+      (loc & Location::RIGHT) ? (ceil(contact_pt.x) - 1) : floor(contact_pt.x);
+  int tile_y =
+      (loc & Location::TOP) ? (ceil(contact_pt.y) - 1) : floor(contact_pt.y);
+
+  int tile_type = tile_map.At(tile_x, tile_y);
   if (tile_type == TILE_BLOCK) {
-    *x_fix = floor(contact_pt.x + 1) - contact_pt.x;
-    if (tile_map.At(contact_pt.x + 1, contact_pt.y) == TILE_BLOCK) {
-      *x_fix += 1;
-    }
+    double pos = (axis == Axis::X) ? contact_pt.x : contact_pt.y;
+    // Determine which direction we should push to after collision.
+    *fix = (((loc & Location::TOP) && (axis == Axis::Y)) ||
+            ((loc & Location::RIGHT) && (axis == Axis::X)))
+               ? (floor(pos) - pos)
+               : (ceil(pos) - pos);
+
     return true;
   }
 
-  *x_fix = 0;
-  return false;
-}
-
-bool PointMapRight(const TileMap& tile_map, const vec2f& contact_pt,
-                   double* x_fix) {
-  int tile_type = tile_map.At(contact_pt.x, contact_pt.y);
-  if (tile_type == TILE_BLOCK) {
-    *x_fix = floor(contact_pt.x) - contact_pt.x - 0.001;
-    if (tile_map.At(contact_pt.x - 1, contact_pt.y) == TILE_BLOCK) {
-      *x_fix -= 1;
-    }
-    return true;
-  }
-
-  *x_fix = 0;
+  *fix = 0;
   return false;
 }
 
 // TODO: These might belong in TileMap.cc
-double heightAtX(double tilespace_x, int tile_type) {
+double HeightAtX(double tilespace_x, int tile_type) {
   switch (tile_type) {
     case TILE_SLOPE_01:
       return tilespace_x;
@@ -92,7 +68,7 @@ double heightAtX(double tilespace_x, int tile_type) {
   }
 }
 
-bool is_slope(TileType tile_type) {
+bool IsSlope(TileType tile_type) {
   return tile_type == TILE_SLOPE_01 || tile_type == TILE_SLOPE_10 ||
          tile_type == TILE_SLOPE_05 || tile_type == TILE_SLOPE_51 ||
          tile_type == TILE_SLOPE_15 || tile_type == TILE_SLOPE_50;
@@ -106,9 +82,9 @@ bool PointMapSlope(const TileMap& tile_map, const vec2f& contact_pt,
   double map_y = floor(contact_pt.y);
 
   TileType tile_type = tile_map.At(contact_pt.x, contact_pt.y);
-  if (is_slope(tile_type)) {
+  if (IsSlope(tile_type)) {
     double dist_from_slope =
-        (contact_pt.y - map_y) - heightAtX(contact_pt.x - map_x, tile_type);
+        (contact_pt.y - map_y) - HeightAtX(contact_pt.x - map_x, tile_type);
     if (dist_from_slope < 0) {
       *y_fix = -dist_from_slope;
       return true;
@@ -162,14 +138,13 @@ bool Physics::RectRectCollision(const Rect& first, const Rect& second,
 
 bool Physics::XCollision(const Rect& rect, double* x_fix) {
   double tmp;
-  PointMapRight(tile_map, {rect.lowerLeft.x + rect.w, rect.lowerLeft.y}, x_fix);
-  PointMapRight(tile_map,
-                {rect.lowerLeft.x + rect.w, rect.lowerLeft.y + rect.h}, &tmp);
+  PointMap(tile_map, rect, Location::RIGHT | Location::BOTTOM, Axis::X, x_fix);
+  PointMap(tile_map, rect, Location::RIGHT | Location::TOP, Axis::X, &tmp);
   *x_fix = min(*x_fix, tmp);
 
   if (*x_fix == 0) {
-    PointMapLeft(tile_map, {rect.lowerLeft.x, rect.lowerLeft.y}, x_fix);
-    PointMapLeft(tile_map, {rect.lowerLeft.x, rect.lowerLeft.y + rect.h}, &tmp);
+    PointMap(tile_map, rect, Location::LEFT | Location::BOTTOM, Axis::X, x_fix);
+    PointMap(tile_map, rect, Location::LEFT | Location::TOP, Axis::X, &tmp);
     *x_fix = max(*x_fix, tmp);
   }
 
@@ -178,16 +153,13 @@ bool Physics::XCollision(const Rect& rect, double* x_fix) {
 
 bool Physics::YCollision(const Rect& rect, double* y_fix) {
   double tmp;
-  PointMapBelow(tile_map, {rect.lowerLeft.x, rect.lowerLeft.y}, y_fix);
-  PointMapBelow(tile_map, {rect.lowerLeft.x + rect.w, rect.lowerLeft.y}, &tmp);
+  PointMap(tile_map, rect, Location::BOTTOM | Location::LEFT, Axis::Y, y_fix);
+  PointMap(tile_map, rect, Location::BOTTOM | Location::RIGHT, Axis::Y, &tmp);
   *y_fix = max(*y_fix, tmp);
 
   if (*y_fix == 0) {
-    PointMapAbove(tile_map, {rect.lowerLeft.x, rect.lowerLeft.y + rect.h},
-                  y_fix);
-    PointMapAbove(tile_map,
-                  {rect.lowerLeft.x + rect.w, rect.lowerLeft.y + rect.h},
-                  &tmp);
+    PointMap(tile_map, rect, Location::LEFT | Location::TOP, Axis::Y, y_fix);
+    PointMap(tile_map, rect, Location::RIGHT | Location::TOP, Axis::Y, &tmp);
     *y_fix = min(*y_fix, tmp);
   }
 
@@ -200,7 +172,7 @@ bool Physics::RectMapCollision(const Rect& rect, const vec2f& last_pos,
   *fix = {0,0};
 
   bool was_on_slope =
-      is_slope(tile_map.At(last_pos.x + (rect.w / 2.0), last_pos.y));
+      IsSlope(tile_map.At(last_pos.x + (rect.w / 2.0), last_pos.y));
 
   if (!was_on_slope) {
     // We weren't on a slope, check X
@@ -223,8 +195,8 @@ bool Physics::RectMapCollision(const Rect& rect, const vec2f& last_pos,
     }
   }
 
-  if (!is_slope(tile_map.At(rect.lowerLeft.x + (rect.w / 2.0),
-                            rect.lowerLeft.y))) {
+  if (!IsSlope(
+          tile_map.At(rect.lowerLeft.x + (rect.w / 2.0), rect.lowerLeft.y))) {
     // Not on a slope, check Y w.r.t. block map.
     Rect x_fixed = rect;
     x_fixed.lowerLeft.x += fix->x;

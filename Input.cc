@@ -9,13 +9,13 @@ namespace {
         return Button::PAUSE;
       case SDLK_z:
         return Button::JUMP;
-      case SDLK_UP:
+      case SDLK_k:
         return Button::UP;
-      case SDLK_DOWN:
+      case SDLK_j:
         return Button::DOWN;
-      case SDLK_LEFT:
+      case SDLK_h:
         return Button::LEFT;
-      case SDLK_RIGHT:
+      case SDLK_l:
         return Button::RIGHT;
       case SDLK_EQUALS:
         return Button::PLUS;
