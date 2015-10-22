@@ -82,16 +82,21 @@ void GeometryManager::DrawTileMap(const Camera& camera) {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void GeometryManager::DrawSubSprite(int si, float dx, float dy) {
-  const float width = 1.0 / 16.0;
-  const float height = 1.0 / 16.0;
-  const int rows = 16;
-  const int cols = 16;
+void GeometryManager::DrawSubSprite(int si, Orientation orientation, float dx,
+                                    float dy) {
+  float width = 1.0 / 16.0;
+  float height = 1.0 / 16.0;
+  int rows = 16;
+  int cols = 16;
   int row = si / cols;
   int col = si % rows;
   float x = col / (float) cols;
   // - height because y is defined from top of sprite but height is "upward"
   float y = 1.0 - row / (float) rows - height;
+  if (orientation == Orientation::FLIPPED_H) {
+    x += width;
+    width = -width;
+  }
   DrawSubTexture(x, y, width, height, dx, dy, 1.0 / 16.0, 1.33333 / 16);
 }
 
@@ -231,7 +236,8 @@ std::vector<std::unique_ptr<Event>> SubSpriteGraphicsSystem::Update(
       vec2f transformed = camera.Transform(body->bbox.lowerLeft);
       // HACK: Run cycle.
       sprite->index++;
-      geometry_manager_->DrawSubSprite(((sprite->index/5)%6)+32, transformed.x,
+      geometry_manager_->DrawSubSprite(((sprite->index / 5) % 6) + 32,
+                                       sprite->orientation, transformed.x,
                                        transformed.y);
     }
   }

@@ -1,6 +1,7 @@
 #include "Bog.h"
 #include "Entity.h"
 #include "State.h"
+#include "TextureManager.h"
 
 #include <iostream>
 using namespace std;
@@ -185,8 +186,11 @@ std::unique_ptr<StateMachineSystem<JumpStateComponent>> MakeJumpStateSystem() {
 namespace {
 class Left : public StateBehavior<LRStateComponent> {
  public:
-  void Enter(LRStateComponent*, const Entity*) const override {
+  void Enter(LRStateComponent*, const Entity* entity) const override {
     cout << "Enter Left" << endl;
+    Sprite* sprite = entity->GetComponent<Sprite>();
+    assert(sprite);
+    sprite->orientation = Orientation::FLIPPED_H;
   }
 
   void Exit(LRStateComponent*, const Entity*) const override {
@@ -224,8 +228,11 @@ class Left : public StateBehavior<LRStateComponent> {
 
 class Right : public StateBehavior<LRStateComponent> {
  public:
-  void Enter(LRStateComponent*, const Entity*) const override {
+  void Enter(LRStateComponent*, const Entity* entity) const override {
     cout << "Enter Right" << endl;
+    Sprite* sprite = entity->GetComponent<Sprite>();
+    assert(sprite);
+    sprite->orientation = Orientation::NORMAL;
   }
 
   void Exit(LRStateComponent*, const Entity*) const override {

@@ -155,37 +155,6 @@ int main(int, char**) {
     textureProgram->Use();
     textureProgram->Setup();
 
-    auto dog = [](int i) {
-      i %= 21;
-      int rows = 0;
-      if (i < 1) {
-        return rows + i;
-      }
-      i -= 1;
-      rows += 16;
-      if (i < 4) {
-        return rows + i;
-      }
-      i -= 4;
-      rows += 16;
-      if (i < 6) {
-        return rows + i;
-      }
-      i -= 6;
-      rows += 16;
-      if (i < 12) {
-        return rows + i;
-      }
-      return 0;
-    };
-    for (int i = 32; i < 32; ++i) {
-      float angle = sin(delta*(float)i/32);
-      float magnitude = (float)i/16.0;
-      geometryManager.DrawSubSprite(dog(i),
-                                    magnitude * cos(angle) - 1.0,
-                                    magnitude * sin(angle));
-    }
-
     bb_graphics.Update(0 /* unused */, camera, bogs);
     ss_graphics.Update(0 /* unused */, camera, bogs);
     glEnable(GL_DEPTH_TEST);

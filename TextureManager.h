@@ -37,6 +37,12 @@ class TextureManager {
   TextureRef next_unused_ref;
 };
 
+enum class Orientation {
+  NORMAL,
+  FLIPPED_H,
+  FLIPPED_V
+};
+
 class Sprite : public Component {
  public:
   Sprite() {}
@@ -45,6 +51,7 @@ class Sprite : public Component {
 
   TextureRef texture = 0;
   int index = 0;
+  Orientation orientation = Orientation::NORMAL;
 
   ComponentType type() const override { return ComponentType::SPRITE; }
 
