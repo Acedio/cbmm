@@ -32,7 +32,10 @@ class Standing : public StateBehavior<JumpStateComponent> {
 
     *body = new_body;
 
-    if (state_component->time_since_map_collision() > 0.1) {
+    // This is the time that Bog can fall (e.g. no collision with map) before he
+    // can no longer jump. 0.2 feels about right and also has a bonus of being a
+    // bad hack to make Bog be able to jump when he's going down slopes.
+    if (state_component->time_since_map_collision() > 0.2) {
       return JumpState::FALLING;
     }
     return state();
