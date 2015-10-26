@@ -13,7 +13,8 @@ void main()
 {
     int tilesetSize = 16;
     vec2 offsetCoord = TexCoord + offset;
-    ivec2 tilePos = ivec2(offsetCoord);
+    // floor() here since it seems like casting to ivec2 rounds towards zero.
+    ivec2 tilePos = ivec2(floor(offsetCoord));
     vec2 coordFloor = floor(offsetCoord);
     vec2 coordFrac = vec2(offsetCoord - coordFloor);
 
