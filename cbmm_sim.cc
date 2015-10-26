@@ -37,6 +37,8 @@ int main(int, char**) {
       textureManager.LoadTexture("resources/tileset.png", 0);
   TextureRef dogRef =
       textureManager.LoadTexture("resources/dog_tilesheet.png", 0);
+  TextureRef bgRef =
+      textureManager.LoadTexture("resources/bg.png", 0);
 
   Physics physics;
   auto jump_state_system = MakeJumpStateSystem();
@@ -143,6 +145,12 @@ int main(int, char**) {
 
     glDisable(GL_DEPTH_TEST);
 
+    textureManager.BindTexture(bgRef, 0);
+    textureManager.BindTexture(-1, 1);
+    textureProgram->Use();
+    textureProgram->Setup();
+    geometryManager.DrawSubTexture(0,0,8,6,-1,-1,2,2);
+
     textureManager.BindTexture(tileSetRef, 0);
     textureManager.BindTexture(tileMapRef, 1);
     tileProgram->Use();
@@ -157,6 +165,7 @@ int main(int, char**) {
 
     bb_graphics.Update(0 /* unused */, camera, bogs);
     ss_graphics.Update(0 /* unused */, camera, bogs);
+
     glEnable(GL_DEPTH_TEST);
 
     display.Swap();
