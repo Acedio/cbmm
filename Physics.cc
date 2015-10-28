@@ -139,13 +139,13 @@ bool Physics::RectRectCollision(const Rect& first, const Rect& second,
 
 bool Physics::XCollision(const Rect& rect, double* x_fix) {
   double tmp;
-  PointMap(tile_map, rect, Location::RIGHT | Location::BOTTOM, Axis::X, x_fix);
-  PointMap(tile_map, rect, Location::RIGHT | Location::TOP, Axis::X, &tmp);
+  PointMap(*tile_map_, rect, Location::RIGHT | Location::BOTTOM, Axis::X, x_fix);
+  PointMap(*tile_map_, rect, Location::RIGHT | Location::TOP, Axis::X, &tmp);
   *x_fix = min(*x_fix, tmp);
 
   if (*x_fix == 0) {
-    PointMap(tile_map, rect, Location::LEFT | Location::BOTTOM, Axis::X, x_fix);
-    PointMap(tile_map, rect, Location::LEFT | Location::TOP, Axis::X, &tmp);
+    PointMap(*tile_map_, rect, Location::LEFT | Location::BOTTOM, Axis::X, x_fix);
+    PointMap(*tile_map_, rect, Location::LEFT | Location::TOP, Axis::X, &tmp);
     *x_fix = max(*x_fix, tmp);
   }
 
@@ -154,13 +154,13 @@ bool Physics::XCollision(const Rect& rect, double* x_fix) {
 
 bool Physics::YCollision(const Rect& rect, double* y_fix) {
   double tmp;
-  PointMap(tile_map, rect, Location::BOTTOM | Location::LEFT, Axis::Y, y_fix);
-  PointMap(tile_map, rect, Location::BOTTOM | Location::RIGHT, Axis::Y, &tmp);
+  PointMap(*tile_map_, rect, Location::BOTTOM | Location::LEFT, Axis::Y, y_fix);
+  PointMap(*tile_map_, rect, Location::BOTTOM | Location::RIGHT, Axis::Y, &tmp);
   *y_fix = max(*y_fix, tmp);
 
   if (*y_fix == 0) {
-    PointMap(tile_map, rect, Location::LEFT | Location::TOP, Axis::Y, y_fix);
-    PointMap(tile_map, rect, Location::RIGHT | Location::TOP, Axis::Y, &tmp);
+    PointMap(*tile_map_, rect, Location::LEFT | Location::TOP, Axis::Y, y_fix);
+    PointMap(*tile_map_, rect, Location::RIGHT | Location::TOP, Axis::Y, &tmp);
     *y_fix = min(*y_fix, tmp);
   }
 
@@ -173,7 +173,7 @@ bool Physics::RectMapCollision(const Rect& rect, const vec2f& last_pos,
   *fix = {0,0};
 
   bool was_on_slope =
-      IsSlope(tile_map.At(last_pos.x + (rect.w / 2.0), last_pos.y));
+      IsSlope(tile_map_->At(last_pos.x + (rect.w / 2.0), last_pos.y));
 
   if (!was_on_slope) {
     // We weren't on a slope, check X
@@ -182,7 +182,7 @@ bool Physics::RectMapCollision(const Rect& rect, const vec2f& last_pos,
     XCollision(x_only, &fix->x);
   }
 
-  if (PointMapSlope(tile_map,
+  if (PointMapSlope(*tile_map_,
                     {rect.lowerLeft.x + (rect.w / 2.0), last_pos.y},
                     &fix->y)) {
     if (last_pos.y + fix->y > rect.lowerLeft.y) {
@@ -197,13 +197,13 @@ bool Physics::RectMapCollision(const Rect& rect, const vec2f& last_pos,
   }
 
   if (!IsSlope(
-          tile_map.At(rect.lowerLeft.x + (rect.w / 2.0), rect.lowerLeft.y))) {
+          tile_map_->At(rect.lowerLeft.x + (rect.w / 2.0), rect.lowerLeft.y))) {
     // Not on a slope, check Y w.r.t. block map.
     Rect x_fixed = rect;
     x_fixed.lowerLeft.x += fix->x;
     YCollision(x_fixed, &fix->y);
   } else {
-    PointMapSlope(tile_map,
+    PointMapSlope(*tile_map_,
                   {rect.lowerLeft.x + (rect.w / 2.0), rect.lowerLeft.y},
                   &fix->y);
   }
@@ -213,6 +213,7 @@ bool Physics::RectMapCollision(const Rect& rect, const vec2f& last_pos,
 
 vector<std::unique_ptr<Event>> Physics::Update(Seconds dt,
                                                const vector<Entity>& entities) {
+  assert(tile_map_);
   vector<std::unique_ptr<Event>> collisions;
 
   for (size_t i = 0; i < entities.size(); ++i) {

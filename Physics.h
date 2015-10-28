@@ -41,14 +41,17 @@ class CollisionEvent : public Event {
 
 class Physics : public System {
  public:
-  void SetTileMap(const TileMap& tile_map) { this->tile_map = tile_map; }
-  vector<std::unique_ptr<Event>> Update(Seconds dt, const vector<Entity>& entities) override;
+  // tile_map must outlive this object.
+  explicit Physics(const TileMap* tile_map) : tile_map_(tile_map) {}
+  vector<std::unique_ptr<Event>> Update(
+      Seconds dt, const vector<Entity>& entities) override;
+
  private:
   bool RectRectCollision(const Rect& first, const Rect& second, vec2f* fix);
   bool XCollision(const Rect& rect, double* x_fix);
   bool YCollision(const Rect& rect, double* y_fix);
   bool RectMapCollision(const Rect& rect, const vec2f& last_pos, vec2f* fix);
-  TileMap tile_map;
+  const TileMap* tile_map_;
 };
 
 #endif

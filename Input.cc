@@ -5,6 +5,8 @@ namespace {
     switch (sdlk) {
       case SDLK_ESCAPE:
         return Button::QUIT;
+      case SDLK_d:
+        return Button::DEBUG;
       case SDLK_p:
         return Button::PAUSE;
       case SDLK_z:

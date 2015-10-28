@@ -1,8 +1,12 @@
 #ifndef TILEMAP_H
 #define TILEMAP_H
 
+#include <map>
+#include <memory>
 #include <ostream>
 #include <vector>
+
+#include "tmxparser/Tmx.h"
 
 enum TileType {
   TILE_EMPTY = 0,
@@ -17,8 +21,7 @@ enum TileType {
 
 class TileMap {
  public:
-  TileMap();
-  int LoadTmx(const std::string& filename, const std::string& layer_name);
+  explicit TileMap(const Tmx::TileLayer* tile_layer);
   // 0,0 is lower left
   TileType At(int x, int y) const;
   void Print(std::ostream &os) const;
@@ -31,6 +34,16 @@ class TileMap {
   void set(int x, int y, int tile);
   std::vector<int> tiles;
   int w, h;
+};
+
+class Map {
+ public:
+  int LoadTmx(const std::string& filename);
+  const TileMap* GetLayer(const std::string& layer_name) const;
+ private:
+  std::unique_ptr<Tmx::Map> map_;
+  // Layer name -> layer
+  std::map<std::string, TileMap> layers_;
 };
 
 #endif

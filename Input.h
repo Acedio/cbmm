@@ -18,7 +18,8 @@ enum class Button {
   QUIT,
   PLUS,
   MINUS,
-  PAUSE
+  PAUSE,
+  DEBUG
 };
 
 enum class ButtonState {

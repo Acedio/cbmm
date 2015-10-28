@@ -1,3 +1,4 @@
+#include <cassert>
 #include <cmath>
 #include <iostream>
 #include <memory>
@@ -35,12 +36,13 @@ int main(int, char**) {
 
   TextureRef tileSetRef =
       textureManager.LoadTexture("resources/tileset.png", 0);
+  TextureRef collisionSetRef =
+      textureManager.LoadTexture("resources/collision.png", 0);
   TextureRef dogRef =
       textureManager.LoadTexture("resources/dog_tilesheet.png", 0);
   TextureRef bgRef =
       textureManager.LoadTexture("resources/bg.png", 0);
 
-  Physics physics;
   auto jump_state_system = MakeJumpStateSystem();
   auto lr_state_system = MakeLRStateSystem();
   Camera camera;
@@ -54,7 +56,7 @@ int main(int, char**) {
     bogs.emplace_back(id);
     bogs.back().AddComponent(std::unique_ptr<Transform>(new Transform()));
     bogs.back().AddComponent(std::unique_ptr<Body>(
-        new Body(true, {{2, 2}, 0.99, 0.99}, {1, (double)0 / 2.0})));
+        new Body(true, {{2, 2}, 0.9, 0.75}, {1, (double)0 / 2.0})));
     bogs.back().AddComponent(std::unique_ptr<JumpStateComponent>(
         new JumpStateComponent(JumpState::STANDING)));
     bogs.back().AddComponent(std::unique_ptr<LRStateComponent>(
@@ -62,20 +64,22 @@ int main(int, char**) {
     bogs.back().AddComponent(std::unique_ptr<Sprite>(new Sprite(dogRef, 0)));
   }
 
-  TileMap collision_map;
-  if (collision_map.LoadTmx("resources/test.tmx", "Collision")) {
+  Map level;
+  if (level.LoadTmx("resources/test.tmx")) {
     cout << "Error loading test.tmx" << endl;
   }
-  physics.SetTileMap(collision_map);
+  const TileMap* collision_map = level.GetLayer("Collision");
+  assert(collision_map);
+  Physics physics(collision_map);
 
-  TileMap tilemap;
-  if (tilemap.LoadTmx("resources/test.tmx", "Tiles")) {
-    cout << "Error loading test.tmx" << endl;
-  }
-  TextureRef tileMapRef = textureManager.LoadTilemapTexture(tilemap);
+  const TileMap* tilemap = level.GetLayer("Tiles");
+  assert(tilemap);
+  TextureRef tileMapRef = textureManager.LoadTilemapTexture(*tilemap);
+  TextureRef collisionMapRef = textureManager.LoadTilemapTexture(*collision_map);
 
   bool running = true;
   bool paused = true;
+  bool debug = false;
 
   int frames = 0;
 
@@ -95,6 +99,9 @@ int main(int, char**) {
             continue;
           case Button::PAUSE:
             paused = !paused;
+            continue;
+          case Button::DEBUG:
+            debug = !debug;
             continue;
           default:
             break;
@@ -158,12 +165,23 @@ int main(int, char**) {
     tileProgram->Setup();
     geometryManager.DrawTileMap(camera);
 
+    if (debug) {
+      textureManager.BindTexture(collisionSetRef, 0);
+      textureManager.BindTexture(collisionMapRef, 1);
+      tileProgram->Use();
+      tileProgram->map_offset(camera.center() - vec2f{16,12});
+      tileProgram->Setup();
+      geometryManager.DrawTileMap(camera);
+    }
+
     textureManager.BindTexture(dogRef, 0);
     textureManager.BindTexture(-1, 1);
     textureProgram->Use();
     textureProgram->Setup();
 
-    bb_graphics.Update(0 /* unused */, camera, bogs);
+    if (debug) {
+      bb_graphics.Update(0 /* unused */, camera, bogs);
+    }
     ss_graphics.Update(0 /* unused */, camera, bogs);
 
     glEnable(GL_DEPTH_TEST);
