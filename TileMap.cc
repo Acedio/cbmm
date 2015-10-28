@@ -62,6 +62,22 @@ int Map::LoadTmx(const std::string& filename) {
     std::cout << "Found layer \"" << layer_name << "\"." << std::endl;
   }
 
+  for (int i = 0; i < map_->GetNumObjectGroups(); ++i) {
+    const Tmx::ObjectGroup* object_group = map_->GetObjectGroup(i);
+    for (int j = 0; j < object_group->GetNumObjects(); ++j) {
+      const Tmx::Object* object = object_group->GetObject(j);
+      MapObject mo;
+      mo.name = object->GetName();
+      // Flip the y-axis
+      mo.pos = {
+          (double)object->GetX() / map_->GetTileWidth(),
+          (double)(map_->GetHeight() * map_->GetTileHeight() - object->GetY()) /
+                  map_->GetTileHeight() -
+              1};
+      objects_[object->GetId()] = mo;
+    }
+  }
+
   return 0;
 }
 
@@ -71,4 +87,13 @@ const TileMap* Map::GetLayer(const std::string& layer_name) const {
     return nullptr;
   }
   return &layer->second;
+}
+
+const MapObject* Map::GetObject(const std::string& object_name) const {
+  for (const auto& object : objects_) {
+    if (object.second.name == object_name) {
+      return &object.second;
+    }
+  }
+  return nullptr;
 }

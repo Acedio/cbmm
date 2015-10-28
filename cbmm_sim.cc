@@ -49,21 +49,6 @@ int main(int, char**) {
   BoundingBoxGraphicsSystem bb_graphics(&geometryManager, colorProgram.get());
   SubSpriteGraphicsSystem ss_graphics(&geometryManager, textureProgram.get(),
                                       &textureManager);
-  EntityManager em;
-  vector<Entity> bogs;
-  for (int x = 0; x < 1; x += 1) {
-    EntityId id = em.CreateEntity();
-    bogs.emplace_back(id);
-    bogs.back().AddComponent(std::unique_ptr<Transform>(new Transform()));
-    bogs.back().AddComponent(std::unique_ptr<Body>(
-        new Body(true, {{2, 2}, 0.9, 0.75}, {1, (double)0 / 2.0})));
-    bogs.back().AddComponent(std::unique_ptr<JumpStateComponent>(
-        new JumpStateComponent(JumpState::STANDING)));
-    bogs.back().AddComponent(std::unique_ptr<LRStateComponent>(
-        new LRStateComponent(LRState::STILL)));
-    bogs.back().AddComponent(std::unique_ptr<Sprite>(new Sprite(dogRef, 0)));
-  }
-
   Map level;
   if (level.LoadTmx("resources/test.tmx")) {
     cout << "Error loading test.tmx" << endl;
@@ -76,6 +61,24 @@ int main(int, char**) {
   assert(tilemap);
   TextureRef tileMapRef = textureManager.LoadTilemapTexture(*tilemap);
   TextureRef collisionMapRef = textureManager.LoadTilemapTexture(*collision_map);
+
+  EntityManager em;
+  vector<Entity> bogs;
+  {
+    // Les' make us a bawg.
+    const MapObject* mo = level.GetObject("bog-start");
+    assert(mo);
+    EntityId id = em.CreateEntity();
+    bogs.emplace_back(id);
+    bogs.back().AddComponent(std::unique_ptr<Transform>(new Transform()));
+    bogs.back().AddComponent(std::unique_ptr<Body>(
+        new Body(true, {mo->pos, 0.9, 0.75}, {0, 0})));
+    bogs.back().AddComponent(std::unique_ptr<JumpStateComponent>(
+        new JumpStateComponent(JumpState::STANDING)));
+    bogs.back().AddComponent(std::unique_ptr<LRStateComponent>(
+        new LRStateComponent(LRState::STILL)));
+    bogs.back().AddComponent(std::unique_ptr<Sprite>(new Sprite(dogRef, 0)));
+  }
 
   bool running = true;
   bool paused = true;

@@ -8,6 +8,8 @@
 
 #include "tmxparser/Tmx.h"
 
+#include "Geometry.h"
+
 enum TileType {
   TILE_EMPTY = 0,
   TILE_BLOCK = 1,
@@ -36,14 +38,22 @@ class TileMap {
   int w, h;
 };
 
+// Probably want some sort of typing to these.
+struct MapObject {
+  std::string name;
+  vec2f pos;
+};
+
 class Map {
  public:
   int LoadTmx(const std::string& filename);
   const TileMap* GetLayer(const std::string& layer_name) const;
+  const MapObject* GetObject(const std::string& object_name) const;
  private:
   std::unique_ptr<Tmx::Map> map_;
   // Layer name -> layer
   std::map<std::string, TileMap> layers_;
+  std::map<int, MapObject> objects_;
 };
 
 #endif
