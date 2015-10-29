@@ -13,14 +13,14 @@ namespace {
 const float initialVertexData[24] = {
     1.0f,  1.0f,  0.0f,  1.0f, 1.0f,  -1.0f, 0.0f, 1.0f,
     -1.0f, 1.0f,  0.0f,  1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
-    32.0f, 24.0f, 32.0f, 0.0f, 0.0f,  24.0f, 0.0f, 0.0f,
+    16.0f, 12.0f, 16.0f, 0.0f, 0.0f,  12.0f, 0.0f, 0.0f,
 };
 
 const unsigned int initialIndexData[6] = {0, 1, 2, 2, 1, 3};
 
 const float initialRectVertexData[32] = {
-    0.0f,      0.0f,      0.0f, 1.0f, 0.0f,      1.0f / 12, 0.0f, 1.0f,
-    1.0f / 16, 1.0f / 12, 0.0f, 1.0f, 1.0f / 16, 0.0f,      0.0f, 1.0f,
+    0.0f,      0.0f,      0.0f, 1.0f, 0.0f,      1.0f / 6, 0.0f, 1.0f,
+    1.0f / 8, 1.0f / 6, 0.0f, 1.0f, 1.0f / 8, 0.0f,      0.0f, 1.0f,
     1.0f,      1.0f,      0.0f, 0.0f, 0.0f,      1.0f,      0.0f, 0.0f,
     1.0f,      0.0f,      0.0f, 0.0f, 0.0f,      1.0f,      0.0f, 0.0f,
 };
@@ -63,7 +63,12 @@ GeometryManager::GeometryManager() {
 GeometryManager::~GeometryManager() {}
 
 void GeometryManager::DrawTileMap(const Camera& camera) {
+  vertexData[16] = 2 * camera.half_size().x;
+  vertexData[17] = 2 * camera.half_size().y;
+  vertexData[18] = 2 * camera.half_size().x;
+  vertexData[21] = 2 * camera.half_size().y;
   glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
@@ -85,8 +90,9 @@ void GeometryManager::DrawTileMap(const Camera& camera) {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void GeometryManager::DrawSubSprite(int si, Orientation orientation, float dx,
-                                    float dy) {
+void GeometryManager::DrawSubSprite(int si, Orientation orientation,
+                                    const vec2f& dest_pos,
+                                    const Camera& camera) {
   float width = 1.0 / 16.0;
   float height = 1.0 / 16.0;
   int rows = 16;
@@ -100,7 +106,9 @@ void GeometryManager::DrawSubSprite(int si, Orientation orientation, float dx,
     x += width;
     width = -width;
   }
-  DrawSubTexture(x, y, width, height, dx, dy, 1.0 / 16.0, 1.33333 / 16);
+  vec2f transformed = camera.Transform(dest_pos);
+  DrawSubTexture(x, y, width, height, transformed.x, transformed.y,
+                 1.0 / camera.half_size().x, 1.0 / camera.half_size().y);
 }
 
 void GeometryManager::DrawSubTexture(float sx, float sy, float sw, float sh,
@@ -236,12 +244,11 @@ std::vector<std::unique_ptr<Event>> SubSpriteGraphicsSystem::Update(
       // TODO: Figure out how to ellide all draws of the same texture source
       // together.
       texture_manager_->BindTexture(sprite->texture, 0);
-      vec2f transformed = camera.Transform(body->bbox.lowerLeft);
       // HACK: Run cycle.
       sprite->index++;
       geometry_manager_->DrawSubSprite(((sprite->index / 5) % 6) + 32,
-                                       sprite->orientation, transformed.x,
-                                       transformed.y);
+                                       sprite->orientation,
+                                       body->bbox.lowerLeft, camera);
     }
   }
   return {};

@@ -14,19 +14,20 @@
 
 class Camera {
  public:
-  Camera() {};
   // Game (tile) coordinates
   Camera(const vec2f& center, const vec2f& size);
   vec2f Transform(const vec2f& point) const;
   Rect Transform(const Rect& rect) const;
-  vec2f center() { return center_; }
+  vec2f center() const { return center_; }
   void center(const vec2f& center) { center_ = center; }
+  vec2f half_size() const { return half_size_; }
+  void half_size(const vec2f& half_size) { half_size_ = half_size; }
  private:
   // Game (tile) coordinates
-  vec2f center_ = {16, 12};
+  vec2f center_;
   // Half size is more useful here because GL draws from -1 to 1 rather than a
   // unit size of 1 (-0.5 to 0.5).
-  vec2f half_size_ = {16, 12};
+  vec2f half_size_;
 };
 
 class Transform : public Component {

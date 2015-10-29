@@ -21,8 +21,11 @@
 using namespace std;
 
 int main(int, char**) {
-  const unsigned int SCREEN_WIDTH = 1024;
-  const unsigned int SCREEN_HEIGHT = 768;
+  const unsigned int SCREEN_WIDTH = 640;
+  const unsigned int SCREEN_HEIGHT = 480;
+  const unsigned int SCREEN_WIDTH_TILES = 20;
+  const unsigned int SCREEN_HEIGHT_TILES = 15;
+  const unsigned int TILE_SIZE = 16;
   const unsigned int SCREEN_BPP = 32;
 
   Display display(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP);
@@ -45,7 +48,7 @@ int main(int, char**) {
 
   auto jump_state_system = MakeJumpStateSystem();
   auto lr_state_system = MakeLRStateSystem();
-  Camera camera;
+  Camera camera({0, 0}, {SCREEN_WIDTH_TILES, SCREEN_HEIGHT_TILES});
   BoundingBoxGraphicsSystem bb_graphics(&geometryManager, colorProgram.get());
   SubSpriteGraphicsSystem ss_graphics(&geometryManager, textureProgram.get(),
                                       &textureManager);
@@ -159,12 +162,14 @@ int main(int, char**) {
     textureManager.BindTexture(-1, 1);
     textureProgram->Use();
     textureProgram->Setup();
-    geometryManager.DrawSubTexture(0,0,8,6,-1,-1,2,2);
+    // bg is four times as large as a tile.
+    geometryManager.DrawSubTexture(0, 0, camera.half_size().x / 2,
+                                   camera.half_size().y / 2, -1, -1, 2, 2);
 
     textureManager.BindTexture(tileSetRef, 0);
     textureManager.BindTexture(tileMapRef, 1);
     tileProgram->Use();
-    tileProgram->map_offset(camera.center() - vec2f{16,12});
+    tileProgram->map_offset(camera.center() - camera.half_size());
     tileProgram->Setup();
     geometryManager.DrawTileMap(camera);
 
@@ -172,7 +177,7 @@ int main(int, char**) {
       textureManager.BindTexture(collisionSetRef, 0);
       textureManager.BindTexture(collisionMapRef, 1);
       tileProgram->Use();
-      tileProgram->map_offset(camera.center() - vec2f{16,12});
+      tileProgram->map_offset(camera.center() - camera.half_size());
       tileProgram->Setup();
       geometryManager.DrawTileMap(camera);
     }

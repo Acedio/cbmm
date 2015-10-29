@@ -17,7 +17,8 @@ class GeometryManager {
   GeometryManager();
   ~GeometryManager();
   void DrawTileMap(const Camera& camera);
-  void DrawSubSprite(int si, Orientation orientation, float dx, float dy);
+  void DrawSubSprite(int si, Orientation orientation, const vec2f& dest_pos,
+                     const Camera& camera);
   void DrawSubTexture(float sx, float sy, float sw, float sh,
                       float dx, float dy, float dw, float dh);
   void DrawRect(float x, float y, float w, float h);
