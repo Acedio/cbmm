@@ -80,7 +80,8 @@ int main(int, char**) {
         new JumpStateComponent(JumpState::STANDING)));
     bogs.back().AddComponent(std::unique_ptr<LRStateComponent>(
         new LRStateComponent(LRState::STILL)));
-    bogs.back().AddComponent(std::unique_ptr<Sprite>(new Sprite(dogRef, 0)));
+    bogs.back().AddComponent(std::unique_ptr<Sprite>(
+        new Sprite(dogRef, 0, Orientation::NORMAL, {-1.0/16.0, 0})));
   }
 
   bool running = true;

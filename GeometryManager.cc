@@ -246,9 +246,9 @@ std::vector<std::unique_ptr<Event>> SubSpriteGraphicsSystem::Update(
       texture_manager_->BindTexture(sprite->texture, 0);
       // HACK: Run cycle.
       sprite->index++;
-      geometry_manager_->DrawSubSprite(((sprite->index / 5) % 6) + 32,
-                                       sprite->orientation,
-                                       body->bbox.lowerLeft, camera);
+      geometry_manager_->DrawSubSprite(
+          ((sprite->index / 5) % 6) + 32, sprite->orientation,
+          body->bbox.lowerLeft + sprite->offset, camera);
     }
   }
   return {};
