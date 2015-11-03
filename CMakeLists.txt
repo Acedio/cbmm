@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 3.1)
 project (cbmm_sim)
 set (cbmm_sim_VERSION_MAJOR 0)
 set (cbmm_sim_VERSION_MINOR 1)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/libs/tmxparser/cmake)
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/libs/tmxparser/cmake)
 
 set (BUILD_SHARED_LIBS OFF CACHE BOOL "Build a shared version of tinyxml2 (rather than static).")
 add_subdirectory (libs/tinyxml2 EXCLUDE_FROM_ALL)
@@ -48,6 +48,7 @@ target_link_libraries (cbmm_sim tmxparser_static tinyxml2)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/libs/tmxparser/src ${CMAKE_CURRENT_BINARY_DIR}/libs)
 set_property (TARGET cbmm_sim PROPERTY CXX_STANDARD 11)
 set_property (TARGET cbmm_sim PROPERTY CXX_STANDARD_REQUIRED ON)
+SET (CMAKE_CXX_FLAGS "-Wall")
 
 add_custom_target (copy_resources ALL)
 add_custom_command(TARGET copy_resources PRE_BUILD

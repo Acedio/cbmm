@@ -18,10 +18,11 @@ enum class JumpState {
 // TODO: Probably put these in the .cc file.
 inline string ToString(JumpState state) {
   switch (state) {
-    CASE(JumpState::UNKNOWN);
     CASE(JumpState::STANDING);
     CASE(JumpState::JUMPING);
     CASE(JumpState::FALLING);
+    default:
+    CASE(JumpState::UNKNOWN);
   }
 }
 
@@ -47,10 +48,11 @@ enum class LRState {
 
 inline string ToString(LRState state) {
   switch (state) {
-    CASE(LRState::UNKNOWN);
     CASE(LRState::STILL);
     CASE(LRState::LEFT);
     CASE(LRState::RIGHT);
+    default:
+    CASE(LRState::UNKNOWN);
   }
 }
 
