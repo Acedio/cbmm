@@ -15,6 +15,16 @@ enum class JumpState {
   FALLING,
 };
 
+// TODO: Probably put these in the .cc file.
+inline string ToString(JumpState state) {
+  switch (state) {
+    CASE(JumpState::UNKNOWN);
+    CASE(JumpState::STANDING);
+    CASE(JumpState::JUMPING);
+    CASE(JumpState::FALLING);
+  }
+}
+
 class JumpStateComponent : public StateComponent<JumpState> {
  public:
   JumpStateComponent(JumpState state) : StateComponent<JumpState>(state) {}
@@ -34,6 +44,15 @@ enum class LRState {
   LEFT,
   RIGHT,
 };
+
+inline string ToString(LRState state) {
+  switch (state) {
+    CASE(LRState::UNKNOWN);
+    CASE(LRState::STILL);
+    CASE(LRState::LEFT);
+    CASE(LRState::RIGHT);
+  }
+}
 
 class LRStateComponent : public StateComponent<LRState> {
  public:

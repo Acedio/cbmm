@@ -12,12 +12,10 @@ namespace {
 class Standing : public StateBehavior<JumpStateComponent> {
  public:
   void Enter(JumpStateComponent* state_component, const Entity*) const override {
-    cout << "Enter Standing" << endl;
     state_component->time_since_map_collision(0);
   }
 
   void Exit(JumpStateComponent*, const Entity*) const override {
-    cout << "Exit Standing" << endl;
   }
 
   JumpState Update(JumpStateComponent* state_component, const Entity* entity,
@@ -81,10 +79,8 @@ class Standing : public StateBehavior<JumpStateComponent> {
 class Falling : public StateBehavior<JumpStateComponent> {
  public:
   void Enter(JumpStateComponent*, const Entity*) const override {
-    cout << "Enter Falling" << endl;
   }
   void Exit(JumpStateComponent*, const Entity*) const override {
-    cout << "Exit Falling" << endl;
   }
   JumpState Update(JumpStateComponent*, const Entity* entity,
                    const Seconds dt) const override {
@@ -124,13 +120,11 @@ class Falling : public StateBehavior<JumpStateComponent> {
 class Jumping : public StateBehavior<JumpStateComponent> {
  public:
   void Enter(JumpStateComponent*, const Entity* entity) const override {
-    cout << "Enter Jumping" << endl;
     Body* body = entity->GetComponent<Body>();
     assert(body);
     body->vel.y = 6;
   }
   void Exit(JumpStateComponent*, const Entity* entity) const override {
-    cout << "Exit Jumping" << endl;
     Body* body = entity->GetComponent<Body>();
     assert(body);
     body->vel.y = 5;
@@ -190,14 +184,12 @@ namespace {
 class Left : public StateBehavior<LRStateComponent> {
  public:
   void Enter(LRStateComponent*, const Entity* entity) const override {
-    cout << "Enter Left" << endl;
     Sprite* sprite = entity->GetComponent<Sprite>();
     assert(sprite);
     sprite->orientation = Orientation::FLIPPED_H;
   }
 
   void Exit(LRStateComponent*, const Entity*) const override {
-    cout << "Exit Left" << endl;
   }
 
   LRState Update(LRStateComponent*, const Entity* entity,
@@ -232,14 +224,12 @@ class Left : public StateBehavior<LRStateComponent> {
 class Right : public StateBehavior<LRStateComponent> {
  public:
   void Enter(LRStateComponent*, const Entity* entity) const override {
-    cout << "Enter Right" << endl;
     Sprite* sprite = entity->GetComponent<Sprite>();
     assert(sprite);
     sprite->orientation = Orientation::NORMAL;
   }
 
   void Exit(LRStateComponent*, const Entity*) const override {
-    cout << "Exit Right" << endl;
   }
 
   LRState Update(LRStateComponent*, const Entity* entity,
@@ -274,13 +264,11 @@ class Right : public StateBehavior<LRStateComponent> {
 class Still : public StateBehavior<LRStateComponent> {
  public:
   void Enter(LRStateComponent*, const Entity* entity) const override {
-    cout << "Enter Still" << endl;
     Body* body = entity->GetComponent<Body>();
     assert(body);
     body->vel.x = 0;
   }
   void Exit(LRStateComponent*, const Entity*) const override {
-    cout << "Exit Still" << endl;
   }
   LRState HandleInput(LRStateComponent*, const Entity*,
                       const ButtonEvent* event) const override {

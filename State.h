@@ -2,6 +2,7 @@
 #define STATE_H
 
 #include <cassert>
+#include <iostream>
 #include <memory>
 #include <type_traits>
 #include <unordered_map>
@@ -12,6 +13,8 @@
 #include "Input.h"
 #include "Physics.h"
 #include "System.h"
+
+#define CASE(x) case x: return #x
 
 template <typename StateEnum>
 class StateComponent : public Component {
@@ -129,9 +132,11 @@ class StateMachineSystem : public System {
           behaviors_[old_state].get();
       const StateBehavior<ComponentType>* new_behavior =
           behaviors_[new_state].get();
+      std::cout << "Exiting " << ToString(old_behavior->state()) << std::endl;
       old_behavior->Exit(state_component, entity);
       state_component->state(new_state);
       state_component->time(0);
+      std::cout << "Entering " << ToString(new_behavior->state()) << std::endl;
       new_behavior->Enter(state_component, entity);
     }
   }
