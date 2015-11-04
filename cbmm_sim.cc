@@ -69,7 +69,7 @@ int main(int, char**) {
   vector<Entity> bogs;
   {
     // Les' make us a bawg.
-    const MapObject* mo = level.GetObject("bog-start");
+    const MapObject* mo = level.GetNamedObject("bog-start");
     assert(mo);
     EntityId id = em.CreateEntity();
     bogs.emplace_back(id);

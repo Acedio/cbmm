@@ -48,7 +48,7 @@ class Map {
  public:
   int LoadTmx(const std::string& filename);
   const TileMap* GetLayer(const std::string& layer_name) const;
-  const MapObject* GetObject(const std::string& object_name) const;
+  const MapObject* GetNamedObject(const std::string& object_name) const;
  private:
   std::unique_ptr<Tmx::Map> map_;
   // Layer name -> layer

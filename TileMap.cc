@@ -89,7 +89,7 @@ const TileMap* Map::GetLayer(const std::string& layer_name) const {
   return &layer->second;
 }
 
-const MapObject* Map::GetObject(const std::string& object_name) const {
+const MapObject* Map::GetNamedObject(const std::string& object_name) const {
   for (const auto& object : objects_) {
     if (object.second.name == object_name) {
       return &object.second;
