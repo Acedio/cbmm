@@ -9,6 +9,8 @@
 
 #include <string>
 #include <map>
+#include <memory>
+#include <vector>
 
 #include "Component.h"
 #include "TileMap.h"
@@ -16,6 +18,15 @@
 using namespace std;
 
 typedef unsigned int TextureRef;
+
+struct PixelData {
+  std::vector<GLbyte> data;
+  int w = 0, h = 0;
+  GLenum format;
+  int bpp = 0;
+};
+
+std::unique_ptr<PixelData> LoadToPixelData(string filename);
 
 class TextureManager {
  public:

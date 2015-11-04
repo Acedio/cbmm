@@ -1,6 +1,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 
+#include <cassert>
 #include <iostream>
 using namespace std;
 
@@ -44,6 +45,48 @@ TextureRef TextureManager::getUnusedRef() {
   return ref;
 }
 
+std::unique_ptr<PixelData> LoadToPixelData(string filename) {
+  std::unique_ptr<PixelData> pd = std::unique_ptr<PixelData>(new PixelData());
+
+  SDL_Surface *surface;
+
+  surface = IMG_Load(filename.c_str());
+  if (!surface) {
+    cout << "Unable to load texture \"" + filename + "\"." << endl;
+    return nullptr;
+  }
+  pd->bpp = surface->format->BytesPerPixel;
+  if (pd->bpp == 4) {
+    if (surface->format->Rmask == 0x000000ff) {
+      pd->format = GL_RGBA;
+    } else {
+      pd->format = GL_BGRA;
+    }
+  } else if (pd->bpp == 3) {
+    if (surface->format->Rmask == 0x000000ff) {
+      pd->format = GL_RGB;
+    } else {
+      pd->format = GL_BGR;
+    }
+  } else {
+    cout << "Texture \"" + filename + "\" does not have enough channels."
+         << endl;
+    return nullptr;
+  }
+  pd->w = surface->w;
+  pd->h = surface->h;
+  pd->data.reserve(pd->w * pd->h * pd->bpp);
+  // Flip the image vertically because glTexImage2D expects the first pixel to
+  // be the lower left.
+  for (int y = pd->h - 1; y >= 0; --y) {
+    for (int x = 0; x < pd->w * pd->bpp; ++x) {
+      pd->data.push_back(((Uint8 *)surface->pixels)[y * pd->w * pd->bpp + x]);
+    }
+  }
+  SDL_FreeSurface(surface);
+  return pd;
+}
+
 // level = -1 for auto-mipmapping
 TextureRef TextureManager::LoadTexture(string filename, int level) {
   TextureRef ref;
@@ -53,45 +96,9 @@ TextureRef TextureManager::LoadTexture(string filename, int level) {
     ref = fileref->second;
     refcounts[ref] += 1;
   } else {  // otherwise we should load it
-    SDL_Surface *surface;
+    std::unique_ptr<PixelData> pd = LoadToPixelData(filename);
+    assert(pd.get());
     GLuint texture;
-
-    surface = IMG_Load(filename.c_str());
-    if (!surface) {
-      cout << "Unable to load texture \"" + filename + "\"." << endl;
-      return 0;
-    }
-    int bpp = surface->format->BytesPerPixel;
-    for (int y = 0; y < surface->h / 2; ++y) {
-      for (int x = 0; x < surface->w * bpp; ++x) {
-        Uint8 temp = ((Uint8 *)surface->pixels)[y * surface->w * bpp + x];
-        ((Uint8 *)surface->pixels)[y * surface->w * bpp + x] =
-            ((Uint8 *)
-                 surface->pixels)[(surface->h - y - 1) * surface->w * bpp + x];
-        ((Uint8 *)
-             surface->pixels)[(surface->h - y - 1) * surface->w * bpp + x] =
-            temp;
-      }
-    }
-    GLenum format;
-    if (bpp == 4) {
-      if (surface->format->Rmask == 0x000000ff) {
-        format = GL_RGBA;
-      } else {
-        format = GL_BGRA;
-      }
-    } else if (bpp == 3) {
-      if (surface->format->Rmask == 0x000000ff) {
-        format = GL_RGB;
-      } else {
-        format = GL_BGR;
-      }
-    } else {
-      cout << "Texture \"" + filename + "\" does not have enough channels."
-           << endl;
-      return 0;
-    }
-
     glGenTextures(1, &texture);
 
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -107,15 +114,13 @@ TextureRef TextureManager::LoadTexture(string filename, int level) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     if (level == -1) {
-      gluBuild2DMipmaps(GL_TEXTURE_2D, bpp, surface->w, surface->h, format,
-                        GL_UNSIGNED_BYTE, surface->pixels);
+      gluBuild2DMipmaps(GL_TEXTURE_2D, pd->bpp, pd->w, pd->h, pd->format,
+                        GL_UNSIGNED_BYTE, pd->data.data());
     } else {
       // TODO: Look into using GL_RGB if we have no alpha channel?
-      glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, surface->w, surface->h, 0,
-                   format, GL_UNSIGNED_BYTE, surface->pixels);
+      glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, pd->w, pd->h, 0,
+                   pd->format, GL_UNSIGNED_BYTE, pd->data.data());
     }
-
-    SDL_FreeSurface(surface);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
