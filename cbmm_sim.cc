@@ -11,6 +11,7 @@
 #include "Display.h"
 #include "EntityManager.h"
 #include "Event.h"
+#include "Font.h"
 #include "GeometryManager.h"
 #include "Input.h"
 #include "Physics.h"
@@ -29,6 +30,9 @@ int main(int, char**) {
   const unsigned int SCREEN_BPP = 32;
 
   Display display(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP);
+
+  std::unique_ptr<PixelData> pd = LoadToPixelData("resources/dialogue.png");
+  std::unique_ptr<Font> font = Font::MakeFont(*pd.get());
 
   std::unique_ptr<MapProgram> tileProgram = MapProgram::Make();
   std::unique_ptr<TextureProgram> textureProgram = TextureProgram::Make();

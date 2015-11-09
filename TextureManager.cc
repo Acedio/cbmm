@@ -69,8 +69,9 @@ std::unique_ptr<PixelData> LoadToPixelData(string filename) {
       pd->format = GL_BGR;
     }
   } else {
-    cout << "Texture \"" + filename + "\" does not have enough channels."
-         << endl;
+    cout << "Texture \"" << filename
+         << "\" does not have enough channels. It has " << pd->bpp
+         << " channels." << endl;
     return nullptr;
   }
   pd->w = surface->w;
