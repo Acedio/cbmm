@@ -8,7 +8,7 @@ std::unique_ptr<Font> Font::MakeFont(const PixelData& pd) {
 
   std::unique_ptr<Font> font(new Font());
   int ci = 0;
-  // TODO: Assumes tileset w = h = 16
+  // TODO: Assumes tileset w = h = 16. Probably a safe assumption :P
   int tile_width = 16;
   int tile_height = 16;
   assert(pd.w % tile_width == 0);
@@ -21,8 +21,10 @@ std::unique_ptr<Font> Font::MakeFont(const PixelData& pd) {
   for (int row = rows - 1; row >= 0; --row) {
     for (int col = 0; col < cols; ++col) {
       Character& c = font->characters_[ci];
-      c.x = row; // Bottom is row 0 (texture coordinates)
-      c.y = col;
+      c.lower_left.x = ((float)row)/((float)rows); // Bottom is row 0 (texture coordinates)
+      c.lower_left.y = ((float)col)/((float)cols);
+      c.upper_right.x = ((float)(row+1))/((float)rows); // Bottom is row 0 (texture coordinates)
+      c.upper_right.y = ((float)(col+1))/((float)cols);
       c.width = 16;
 
       for (int tx = tile_width - 1; tx >= 0; --tx) {
@@ -34,7 +36,7 @@ std::unique_ptr<Font> Font::MakeFont(const PixelData& pd) {
               py * cols * tile_width * pd.bpp + px * pd.bpp + pd.bpp - 1;
           if (pd.data[alpha_i] != 0) { // we hit a pixel
             hit = true;
-            c.width = tx + 1; // finding a pixel in col 0 means width = 1.
+            c.width = (float)(tx + 1)/16.0; // finding a pixel in col 0 means width = 1.
             break;
           }
         }
@@ -50,6 +52,6 @@ std::unique_ptr<Font> Font::MakeFont(const PixelData& pd) {
   return font;
 }
 
-Character Font::GetCharacter(char) {
+Character Font::GetCharacter(char) const {
   return {};
 }
