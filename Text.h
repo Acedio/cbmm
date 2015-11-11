@@ -14,7 +14,7 @@ class Text {
   void AddCharacter(char c);
   void Draw(const vec2f& offset, int height) const;
  private:
-  Text(const Font* font) : font_(font);
+  Text(const Font* font) : font_(font) {}
 
   // In character coords, where character height = 1 character coord
   vec2f last_pos_;

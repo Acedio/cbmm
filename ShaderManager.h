@@ -28,6 +28,16 @@ class TextureProgram : public Program {
   GLint texture_uniform_;
 };
 
+class TextProgram : public Program {
+ public:
+  void Setup();
+  static std::unique_ptr<TextProgram> Make();
+ private:
+  TextProgram() {}
+  vec2f offset_ = {0, 0};
+  GLint texture_uniform_;
+};
+
 class MapProgram : public Program {
  public:
   void Setup();
@@ -35,7 +45,7 @@ class MapProgram : public Program {
   static std::unique_ptr<MapProgram> Make();
  private:
   MapProgram() {}
-  vec2f map_offset_ = {0,0};
+  vec2f map_offset_ = {0, 0};
   GLint tileset_uniform_, tilemap_uniform_, offset_uniform_;
 };
 

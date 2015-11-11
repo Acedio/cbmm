@@ -17,6 +17,7 @@
 #include "Physics.h"
 #include "ShaderManager.h"
 #include "State.h"
+#include "Text.h"
 #include "TextureManager.h"
 
 using namespace std;
@@ -31,10 +32,8 @@ int main(int, char**) {
 
   Display display(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP);
 
-  std::unique_ptr<PixelData> pd = LoadToPixelData("resources/dialogue.png");
-  std::unique_ptr<Font> font = Font::MakeFont(*pd.get());
-
   std::unique_ptr<MapProgram> tileProgram = MapProgram::Make();
+  std::unique_ptr<TextProgram> textProgram = TextProgram::Make();
   std::unique_ptr<TextureProgram> textureProgram = TextureProgram::Make();
   std::unique_ptr<ColorProgram> colorProgram = ColorProgram::Make();
 
@@ -49,6 +48,16 @@ int main(int, char**) {
       textureManager.LoadTexture("resources/dog_tilesheet.png", 0);
   TextureRef bgRef =
       textureManager.LoadTexture("resources/bg.png", 0);
+  TextureRef fontRef =
+      textureManager.LoadTexture("resources/dialogue.png", 0);
+
+  std::unique_ptr<Font> font;
+  {
+    std::unique_ptr<PixelData> pd = LoadToPixelData("resources/dialogue.png");
+    font = Font::MakeFont(*pd.get());
+  }
+  std::unique_ptr<Text> text = Text::MakeText(font.get());
+  text->AddCharacter('c');
 
   auto jump_state_system = MakeJumpStateSystem();
   auto lr_state_system = MakeLRStateSystem();
@@ -196,6 +205,13 @@ int main(int, char**) {
       bb_graphics.Update(0 /* unused */, camera, bogs);
     }
     ss_graphics.Update(0 /* unused */, camera, bogs);
+
+    textureManager.BindTexture(fontRef, 0);
+    textureManager.BindTexture(-1, 1);
+    textProgram->Use();
+    textProgram->Setup();
+
+    text->Draw({0,0}, 16);
 
     glEnable(GL_DEPTH_TEST);
 

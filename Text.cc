@@ -1,5 +1,7 @@
 #include "Text.h"
 
+#include <iostream>
+
 std::unique_ptr<Text> Text::MakeText(const Font* font) {
   std::unique_ptr<Text> text = std::unique_ptr<Text>(new Text(font));
   glGenBuffers(1, &text->position_buffer_);
@@ -31,23 +33,32 @@ void Text::AddCharacter(char c) {
   last_pos_.x += character.width;
 
   // Top left triangle tex coords
-  texture_coords_.push_back_(character.lower_left.x);
-  texture_coords_.push_back_(character.upper_right.y);
-  texture_coords_.push_back_(character.lower_left.x);
-  texture_coords_.push_back_(character.lower_left.y);
-  texture_coords_.push_back_(character.upper_right.x);
-  texture_coords_.push_back_(character.upper_right.y);
+  texture_coords_.push_back(character.lower_left.x);
+  texture_coords_.push_back(character.upper_right.y);
+  texture_coords_.push_back(character.lower_left.x);
+  texture_coords_.push_back(character.lower_left.y);
+  texture_coords_.push_back(character.upper_right.x);
+  texture_coords_.push_back(character.upper_right.y);
 
   // Bottom right triangle tex coords
-  texture_coords_.push_back_(character.upper_right.x);
-  texture_coords_.push_back_(character.upper_right.y);
-  texture_coords_.push_back_(character.lower_left.x);
-  texture_coords_.push_back_(character.lower_left.y);
-  texture_coords_.push_back_(character.upper_right.x);
-  texture_coords_.push_back_(character.lower_left.y);
+  texture_coords_.push_back(character.upper_right.x);
+  texture_coords_.push_back(character.upper_right.y);
+  texture_coords_.push_back(character.lower_left.x);
+  texture_coords_.push_back(character.lower_left.y);
+  texture_coords_.push_back(character.upper_right.x);
+  texture_coords_.push_back(character.lower_left.y);
 }
 
 void Text::Draw(const vec2f&, int) const {
+  std::cout << "Positions: " << std::endl;
+  for (GLfloat f : positions_) {
+    std::cout << f << std::endl;
+  }
+  std::cout << "TexCoords: " << std::endl;
+  for (GLfloat f : texture_coords_) {
+    std::cout << f << std::endl;
+  }
+
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
 
@@ -59,7 +70,7 @@ void Text::Draw(const vec2f&, int) const {
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
   glBindBuffer(GL_ARRAY_BUFFER, texture_coord_buffer_);
-  glBufferData(GL_ARRAY_BUFFER, texture_coords_.size(), positions_.data(),
+  glBufferData(GL_ARRAY_BUFFER, texture_coords_.size(), texture_coords_.data(),
                GL_STATIC_DRAW);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
 

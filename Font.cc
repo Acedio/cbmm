@@ -52,6 +52,6 @@ std::unique_ptr<Font> Font::MakeFont(const PixelData& pd) {
   return font;
 }
 
-Character Font::GetCharacter(char) const {
-  return {};
+Character Font::GetCharacter(char c) const {
+  return characters_[c];
 }

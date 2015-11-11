@@ -140,6 +140,36 @@ void TextureProgram::Setup() {
   glUniform1i(texture_uniform_, 0);
 }
 
+std::unique_ptr<TextureProgram> TextureProgram::Make() {
+  std::unique_ptr<TextureProgram> program(new TextureProgram());
+  program->id = LoadProgram("resources/texture_vertex.glsl",
+                            "resources/texture_fragment.glsl");
+  if (!program->id) {
+    return nullptr;
+  }
+
+  program->texture_uniform_ = glGetUniformLocation(program->id, "texture");
+
+  return program;
+}
+
+void TextProgram::Setup() {
+  glUniform1i(texture_uniform_, 0);
+}
+
+std::unique_ptr<TextProgram> TextProgram::Make() {
+  std::unique_ptr<TextProgram> program(new TextProgram());
+  program->id = LoadProgram("resources/text_vertex.glsl",
+                            "resources/texture_fragment.glsl");
+  if (!program->id) {
+    return nullptr;
+  }
+
+  program->texture_uniform_ = glGetUniformLocation(program->id, "texture");
+
+  return program;
+}
+
 void MapProgram::Setup() {
   // TODO: This seems strange... Are these texture references? Maybe texture
   // units?
@@ -159,19 +189,6 @@ std::unique_ptr<MapProgram> MapProgram::Make() {
   program->tileset_uniform_ = glGetUniformLocation(program->id, "tileset");
   program->tilemap_uniform_ = glGetUniformLocation(program->id, "tilemap");
   program->offset_uniform_ = glGetUniformLocation(program->id, "offset");
-
-  return program;
-}
-
-std::unique_ptr<TextureProgram> TextureProgram::Make() {
-  std::unique_ptr<TextureProgram> program(new TextureProgram());
-  program->id = LoadProgram("resources/texture_vertex.glsl",
-                            "resources/texture_fragment.glsl");
-  if (!program->id) {
-    return nullptr;
-  }
-
-  program->texture_uniform_ = glGetUniformLocation(program->id, "texture");
 
   return program;
 }
