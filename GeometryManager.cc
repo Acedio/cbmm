@@ -57,7 +57,6 @@ GeometryManager::GeometryManager() {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   glGenVertexArrays(1, &vertexArrayObject);
-  glBindVertexArray(vertexArrayObject);
 }
 
 GeometryManager::~GeometryManager() {}
@@ -67,6 +66,9 @@ void GeometryManager::DrawTileMap(const Camera& camera) {
   vertexData[17] = 2 * camera.half_size().y;
   vertexData[18] = 2 * camera.half_size().x;
   vertexData[21] = 2 * camera.half_size().y;
+
+  glBindVertexArray(vertexArrayObject);
+
   glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
   glEnableVertexAttribArray(0);
@@ -88,6 +90,7 @@ void GeometryManager::DrawTileMap(const Camera& camera) {
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
 }
 
 void GeometryManager::DrawSubSprite(int si, Orientation orientation,
@@ -141,6 +144,7 @@ void GeometryManager::DrawSubTexture(float sx, float sy, float sw, float sh,
   texVertexData[22] = sx;
   texVertexData[23] = sy;
 
+  glBindVertexArray(vertexArrayObject);
   glBindBuffer(GL_ARRAY_BUFFER, texPositionBufferObject);
   glBufferData(GL_ARRAY_BUFFER, sizeof(texVertexData), texVertexData,
                GL_STATIC_DRAW);
@@ -163,6 +167,7 @@ void GeometryManager::DrawSubTexture(float sx, float sy, float sw, float sh,
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
 }
 
 void GeometryManager::DrawRect(float x, float y, float w, float h) {
@@ -174,6 +179,9 @@ void GeometryManager::DrawRect(float x, float y, float w, float h) {
   rectVertexData[9] = y;
   rectVertexData[12] = x + w;
   rectVertexData[13] = y + h;
+
+  glBindVertexArray(vertexArrayObject);
+
   glBindBuffer(GL_ARRAY_BUFFER, rectPositionBufferObject);
   glBufferData(GL_ARRAY_BUFFER, sizeof(rectVertexData), rectVertexData,
                GL_STATIC_DRAW);
@@ -189,6 +197,7 @@ void GeometryManager::DrawRect(float x, float y, float w, float h) {
   glDisableVertexAttribArray(1);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
 }
 
 void GeometryManager::DrawRects(const std::function<bool(Rect*)>& next_rect) {

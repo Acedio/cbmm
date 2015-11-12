@@ -21,11 +21,12 @@ std::unique_ptr<Font> Font::MakeFont(const PixelData& pd) {
   for (int row = rows - 1; row >= 0; --row) {
     for (int col = 0; col < cols; ++col) {
       Character& c = font->characters_[ci];
-      c.lower_left.x = ((float)row)/((float)rows); // Bottom is row 0 (texture coordinates)
-      c.lower_left.y = ((float)col)/((float)cols);
-      c.upper_right.x = ((float)(row+1))/((float)rows); // Bottom is row 0 (texture coordinates)
-      c.upper_right.y = ((float)(col+1))/((float)cols);
-      c.width = 16;
+      c.lower_left.x = ((float)col)/((float)cols); // Bottom is row 0 (texture coordinates)
+      c.lower_left.y = ((float)row)/((float)rows);
+      c.upper_right.x = ((float)(col+1))/((float)cols); // Bottom is row 0 (texture coordinates)
+      c.upper_right.y = ((float)(row+1))/((float)rows);
+      // TODO: Update this with the correct width for a space.
+      c.width = 1;
 
       for (int tx = tile_width - 1; tx >= 0; --tx) {
         bool hit = false;
@@ -36,7 +37,9 @@ std::unique_ptr<Font> Font::MakeFont(const PixelData& pd) {
               py * cols * tile_width * pd.bpp + px * pd.bpp + pd.bpp - 1;
           if (pd.data[alpha_i] != 0) { // we hit a pixel
             hit = true;
-            c.width = (float)(tx + 1)/16.0; // finding a pixel in col 0 means width = 1.
+            // finding a pixel in col 0 means width is one pixel, or 1/16 of a
+            // font coord. Also add an extra pixel for spacing.
+            c.width = (float)(tx + 2)/16.0;
             break;
           }
         }

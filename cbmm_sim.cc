@@ -57,7 +57,10 @@ int main(int, char**) {
     font = Font::MakeFont(*pd.get());
   }
   std::unique_ptr<Text> text = Text::MakeText(font.get());
-  text->AddCharacter('c');
+  text->AddCharacter('B');
+  text->AddCharacter('o');
+  text->AddCharacter('g');
+  text->AddCharacter('!');
 
   auto jump_state_system = MakeJumpStateSystem();
   auto lr_state_system = MakeLRStateSystem();

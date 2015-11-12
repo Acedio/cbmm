@@ -19,6 +19,8 @@ class Text {
   // In character coords, where character height = 1 character coord
   vec2f last_pos_;
 
+  GLuint vertex_array_object_;
+
   // Can probably combine these.
   GLuint position_buffer_;
   GLuint texture_coord_buffer_;

@@ -4,6 +4,7 @@
 
 std::unique_ptr<Text> Text::MakeText(const Font* font) {
   std::unique_ptr<Text> text = std::unique_ptr<Text>(new Text(font));
+  glGenVertexArrays(1, &text->vertex_array_object_);
   glGenBuffers(1, &text->position_buffer_);
   glGenBuffers(1, &text->texture_coord_buffer_);
   return text;
@@ -19,15 +20,15 @@ void Text::AddCharacter(char c) {
   positions_.push_back(last_pos_.y);
   positions_.push_back(last_pos_.x);
   positions_.push_back(last_pos_.y - 1);
-  positions_.push_back(last_pos_.x + character.width);
+  positions_.push_back(last_pos_.x + 1);
   positions_.push_back(last_pos_.y);
 
   // Bottom right triangle positions
-  positions_.push_back(last_pos_.x + character.width);
+  positions_.push_back(last_pos_.x + 1);
   positions_.push_back(last_pos_.y);
   positions_.push_back(last_pos_.x);
   positions_.push_back(last_pos_.y - 1);
-  positions_.push_back(last_pos_.x + character.width);
+  positions_.push_back(last_pos_.x + 1);
   positions_.push_back(last_pos_.y - 1);
 
   last_pos_.x += character.width;
@@ -50,14 +51,7 @@ void Text::AddCharacter(char c) {
 }
 
 void Text::Draw(const vec2f&, int) const {
-  std::cout << "Positions: " << std::endl;
-  for (GLfloat f : positions_) {
-    std::cout << f << std::endl;
-  }
-  std::cout << "TexCoords: " << std::endl;
-  for (GLfloat f : texture_coords_) {
-    std::cout << f << std::endl;
-  }
+  glBindVertexArray(vertex_array_object_);
 
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
@@ -65,18 +59,19 @@ void Text::Draw(const vec2f&, int) const {
   glBindBuffer(GL_ARRAY_BUFFER, position_buffer_);
   // Given GL_STATIC_DRAW and GL_DYNAMIC_DRAW, it seems like this is probably
   // shouldn't be reuploaded every time :P
-  glBufferData(GL_ARRAY_BUFFER, positions_.size(), positions_.data(),
-               GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, positions_.size() * sizeof(GLfloat),
+               positions_.data(), GL_STATIC_DRAW);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
   glBindBuffer(GL_ARRAY_BUFFER, texture_coord_buffer_);
-  glBufferData(GL_ARRAY_BUFFER, texture_coords_.size(), texture_coords_.data(),
-               GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, texture_coords_.size() * sizeof(GLfloat),
+               texture_coords_.data(), GL_STATIC_DRAW);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glDrawArrays(GL_TRIANGLES, 0, characters_.size());
+  // 6 vertices per character
+  glDrawArrays(GL_TRIANGLES, 0, characters_.size() * 6);
   glDisable(GL_BLEND);
 
   glDisableVertexAttribArray(0);

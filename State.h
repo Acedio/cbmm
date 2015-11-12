@@ -132,11 +132,15 @@ class StateMachineSystem : public System {
           behaviors_[old_state].get();
       const StateBehavior<ComponentType>* new_behavior =
           behaviors_[new_state].get();
+#ifdef DEBUG
       std::cout << "Exiting " << ToString(old_behavior->state()) << std::endl;
+#endif
       old_behavior->Exit(state_component, entity);
       state_component->state(new_state);
       state_component->time(0);
+#ifdef DEBUG
       std::cout << "Entering " << ToString(new_behavior->state()) << std::endl;
+#endif
       new_behavior->Enter(state_component, entity);
     }
   }
