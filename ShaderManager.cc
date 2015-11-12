@@ -136,10 +136,6 @@ GLuint LoadProgram(char const *vertexShaderFile,
 
 void Program::Use() { glUseProgram(id); }
 
-void TextureProgram::Setup() {
-  glUniform1i(texture_uniform_, 0);
-}
-
 std::unique_ptr<TextureProgram> TextureProgram::Make() {
   std::unique_ptr<TextureProgram> program(new TextureProgram());
   program->id = LoadProgram("resources/texture_vertex.glsl",
@@ -153,7 +149,7 @@ std::unique_ptr<TextureProgram> TextureProgram::Make() {
   return program;
 }
 
-void TextProgram::Setup() {
+void TextureProgram::Setup() {
   glUniform1i(texture_uniform_, 0);
 }
 
@@ -166,16 +162,22 @@ std::unique_ptr<TextProgram> TextProgram::Make() {
   }
 
   program->texture_uniform_ = glGetUniformLocation(program->id, "texture");
+  program->transform_uniform_ = glGetUniformLocation(program->id, "transform");
 
   return program;
 }
 
-void MapProgram::Setup() {
-  // TODO: This seems strange... Are these texture references? Maybe texture
-  // units?
-  glUniform1i(tileset_uniform_, 0);
-  glUniform1i(tilemap_uniform_, 1);
-  glUniform2f(offset_uniform_, map_offset_.x, map_offset_.y);
+void TextProgram::Setup() {
+  GLfloat matrix[16] = {
+    // TODO: This 0.75 scaling factor should be piped in.
+    scale_ * (float)0.75, 0, 0, 0,
+    0, scale_, 0, 0,
+    0, 0, scale_, 0,
+    (float)offset_.x, (float)offset_.y, 0, 1
+  };
+
+  glUniformMatrix4fv(transform_uniform_, 1, GL_FALSE, matrix);
+  glUniform1i(texture_uniform_, 0);
 }
 
 std::unique_ptr<MapProgram> MapProgram::Make() {
@@ -191,6 +193,14 @@ std::unique_ptr<MapProgram> MapProgram::Make() {
   program->offset_uniform_ = glGetUniformLocation(program->id, "offset");
 
   return program;
+}
+
+void MapProgram::Setup() {
+  // TODO: This seems strange... Are these texture references? Maybe texture
+  // units?
+  glUniform1i(tileset_uniform_, 0);
+  glUniform1i(tilemap_uniform_, 1);
+  glUniform2f(offset_uniform_, map_offset_.x, map_offset_.y);
 }
 
 std::unique_ptr<ColorProgram> ColorProgram::Make() {

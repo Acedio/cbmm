@@ -26,7 +26,7 @@ std::unique_ptr<Font> Font::MakeFont(const PixelData& pd) {
       c.upper_right.x = ((float)(col+1))/((float)cols); // Bottom is row 0 (texture coordinates)
       c.upper_right.y = ((float)(row+1))/((float)rows);
       // TODO: Update this with the correct width for a space.
-      c.width = 1;
+      c.width = 3.0/16.0;
 
       for (int tx = tile_width - 1; tx >= 0; --tx) {
         bool hit = false;

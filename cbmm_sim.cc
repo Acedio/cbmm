@@ -57,10 +57,9 @@ int main(int, char**) {
     font = Font::MakeFont(*pd.get());
   }
   std::unique_ptr<Text> text = Text::MakeText(font.get());
-  text->AddCharacter('B');
-  text->AddCharacter('o');
-  text->AddCharacter('g');
-  text->AddCharacter('!');
+  for (auto c : "And so begins our hero's adventure!") {
+    text->AddCharacter(c);
+  }
 
   auto jump_state_system = MakeJumpStateSystem();
   auto lr_state_system = MakeLRStateSystem();
@@ -212,9 +211,11 @@ int main(int, char**) {
     textureManager.BindTexture(fontRef, 0);
     textureManager.BindTexture(-1, 1);
     textProgram->Use();
+    textProgram->offset({-0.5,0.3});
+    textProgram->scale(2.0/15.0);
     textProgram->Setup();
 
-    text->Draw({0,0}, 16);
+    text->Draw();
 
     glEnable(GL_DEPTH_TEST);
 

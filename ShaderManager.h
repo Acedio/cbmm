@@ -32,10 +32,14 @@ class TextProgram : public Program {
  public:
   void Setup();
   static std::unique_ptr<TextProgram> Make();
+  void scale(float scale) { scale_ = scale; }
+  void offset(vec2f offset) { offset_ = offset; }
  private:
   TextProgram() {}
   vec2f offset_ = {0, 0};
+  float scale_ = 1;
   GLint texture_uniform_;
+  GLint transform_uniform_;
 };
 
 class MapProgram : public Program {

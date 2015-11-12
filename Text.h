@@ -12,7 +12,7 @@ class Text {
  public:
   static std::unique_ptr<Text> MakeText(const Font* font);
   void AddCharacter(char c);
-  void Draw(const vec2f& offset, int height) const;
+  void Draw() const;
  private:
   Text(const Font* font) : font_(font) {}
 

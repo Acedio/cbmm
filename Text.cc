@@ -50,7 +50,7 @@ void Text::AddCharacter(char c) {
   texture_coords_.push_back(character.lower_left.y);
 }
 
-void Text::Draw(const vec2f&, int) const {
+void Text::Draw() const {
   glBindVertexArray(vertex_array_object_);
 
   glEnableVertexAttribArray(0);
