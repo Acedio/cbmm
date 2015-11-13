@@ -118,9 +118,10 @@ class StateMachineSystem : public System {
 
   void RegisterStateBehavior(
       std::unique_ptr<StateBehavior<ComponentType>> behavior) {
-    assert(behavior);
+    assert(behavior.get());
     StateEnum state = behavior->state();
-    assert(behaviors_.emplace(state, std::move(behavior)).second);
+    bool inserted = behaviors_.emplace(state, std::move(behavior)).second;
+    assert(inserted);
   }
 
  private:
