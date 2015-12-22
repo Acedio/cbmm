@@ -179,8 +179,12 @@ int main(int, char**) {
     textureProgram->Use();
     textureProgram->Setup();
     // bg is four times as large as a tile.
-    geometryManager.DrawSubTexture(0, 0, camera.half_size().x / 2,
-                                   camera.half_size().y / 2, -1, -1, 2, 2);
+    // Change the src coords based on camera to give a parallax vibe.
+    geometryManager.DrawSubTexture(camera.center().x / 16,
+                                   camera.center().y / 16,
+                                   camera.half_size().x / 2,
+                                   camera.half_size().y / 2,
+                                   -1, -1, 2, 2);
 
     textureManager.BindTexture(tileSetRef, 0);
     textureManager.BindTexture(tileMapRef, 1);
