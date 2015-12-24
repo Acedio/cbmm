@@ -1,6 +1,7 @@
 #include <GL/glew.h>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 #include "ShaderManager.h"
 
@@ -57,21 +58,10 @@ GLuint OpenShader(GLenum shaderType, const char *shaderFilename) {
     return 0;
   }
 
-  shaderFile.seekg(0, ios::end);
-  int length = shaderFile.tellg();
-  shaderFile.seekg(0, ios::beg);
+  stringstream buffer;
+  buffer << shaderFile.rdbuf();
 
-  // + 1 for \0
-  char *shaderSource = new char[length + 1];
-
-  shaderFile.read(shaderSource, length);
-  shaderSource[length] = 0;
-
-  shaderFile.close();
-
-  GLuint shaderRef = CreateShader(shaderType, shaderSource);
-
-  delete[] shaderSource;
+  GLuint shaderRef = CreateShader(shaderType, buffer.str().c_str());
 
   return shaderRef;
 }
