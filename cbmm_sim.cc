@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+// TODO: Why is this necessary on Jason's build?
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 
@@ -105,6 +106,7 @@ int main(int, char**) {
   bool debug = false;
 
   int frames = 0;
+  int logic_frames = 0;
 
   double t = 0;
   double delta = 0;
@@ -113,62 +115,81 @@ int main(int, char**) {
 
   int last_ticks = SDL_GetTicks();
 
-  while (running) {
-    for (ButtonEvent event : GetButtonEvents()) {
-      if (event.button_state() == ButtonState::RELEASED) {
-        switch (event.button()) {
-          case Button::QUIT:
-            running = false;
-            continue;
-          case Button::PAUSE:
-            paused = !paused;
-            continue;
-          case Button::DEBUG:
-            debug = !debug;
-            continue;
-          default:
-            break;
-        }
-      } else if (event.button_state() == ButtonState::PRESSED) {
-        switch (event.button()) {
-          case Button::PLUS:
-            time_scale *= 1.2;
-            break;
-          case Button::MINUS:
-            time_scale /= 1.2;
-            break;
-          default:
-            break;
-        }
-      }
-      // May want to prevent input from triggering two immediate state
-      // changes?
-      jump_state_system->HandleEvent(&event, bogs);
-      lr_state_system->HandleEvent(&event, bogs);
-    }
+  const int logics_per_second = 50;
 
-    double dt = (double)(SDL_GetTicks() - last_ticks) / (time_scale * 1000.0);
-    if (!paused) {
-      jump_state_system->Update(dt, bogs);
-      lr_state_system->Update(dt, bogs);
-      vector<std::unique_ptr<Event>> events = physics.Update(dt, bogs);
-      for (const auto& event : events) {
-        auto* collision = static_cast<CollisionEvent*>(event.get());
-        jump_state_system->HandleEvent(event.get(), bogs);
-        lr_state_system->HandleEvent(event.get(), bogs);
-      }
-      delta += 8*dt;
-      // Interpolate camera to Bog.
-      vec2f bog_pos = bogs.at(0).GetComponent<Body>()->bbox.lowerLeft;
-      camera.center(bog_pos*0.2 + camera.center()*0.8);
-      /* for (const Collision& c : collisions) {
-        cout << "a " << c.first << " b " << c.second << " @ (" << c.fix.x << ","
-             << c.fix.y << ")" << endl;
-      } */
-    }
-    t += dt;
-    frames++;
+  const int ticks_per_logic = 1000 / logics_per_second;
+
+  int next_logic_ticks = last_ticks + ticks_per_logic;
+
+  while (running) {
     last_ticks = SDL_GetTicks();
+
+    while (last_ticks >= next_logic_ticks) {
+      for (ButtonEvent event : GetButtonEvents()) {
+        if (event.button_state() == ButtonState::RELEASED) {
+          switch (event.button()) {
+            case Button::QUIT:
+              running = false;
+              continue;
+            case Button::PAUSE:
+              paused = !paused;
+              continue;
+            case Button::DEBUG:
+              debug = !debug;
+              continue;
+            default:
+              break;
+          }
+        } else if (event.button_state() == ButtonState::PRESSED) {
+          switch (event.button()) {
+            case Button::PLUS:
+              time_scale *= 1.2;
+              break;
+            case Button::MINUS:
+              time_scale /= 1.2;
+              break;
+            default:
+              break;
+          }
+        }
+        // May want to prevent input from triggering two immediate state
+        // changes?
+        jump_state_system->HandleEvent(&event, bogs);
+        lr_state_system->HandleEvent(&event, bogs);
+      }
+
+      // Fixed timestep
+      double dt = (double)(ticks_per_logic) / 1000.0;
+      if (!paused) {
+        jump_state_system->Update(dt, bogs);
+        lr_state_system->Update(dt, bogs);
+        vector<std::unique_ptr<Event>> events = physics.Update(dt, bogs);
+        for (const auto& event : events) {
+          auto* collision = static_cast<CollisionEvent*>(event.get());
+          jump_state_system->HandleEvent(event.get(), bogs);
+          lr_state_system->HandleEvent(event.get(), bogs);
+        }
+        delta += 8*dt;
+        // Interpolate camera to Bog.
+        vec2f bog_pos = bogs.at(0).GetComponent<Body>()->bbox.lowerLeft;
+        camera.center(bog_pos*0.2 + camera.center()*0.8);
+        /* for (const Collision& c : collisions) {
+          cout << "a " << c.first << " b " << c.second << " @ (" << c.fix.x << ","
+               << c.fix.y << ")" << endl;
+        } */
+      }
+
+      last_ticks = SDL_GetTicks();
+      next_logic_ticks += ticks_per_logic;
+      ++logic_frames;
+      t += dt;
+
+      if (logic_frames % 100 == 0) {
+        cout << "Logic/s: " << (float)logic_frames / t << endl;
+      }
+
+    }
+    frames++;
 
     // Begin drawing
     display.Clear();
@@ -227,7 +248,7 @@ int main(int, char**) {
     display.Swap();
 
     if (frames % 100 == 0) {
-      cout << (float)frames / t << endl;
+      cout << "Graphics/s: " << (float)frames / t << endl;
     }
   }
 
