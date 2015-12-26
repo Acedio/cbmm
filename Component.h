@@ -8,6 +8,7 @@ enum class ComponentType {
   LR_STATE,
   SPRITE,
   TRANSFORM,
+  ANIMATION,
 };
 
 class Component {

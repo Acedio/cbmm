@@ -8,6 +8,7 @@
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 
+#include "Animation.h"
 #include "Bog.h"
 #include "Camera.h"
 #include "Display.h"
@@ -39,8 +40,9 @@ int main(int, char**) {
   std::unique_ptr<TextureProgram> textureProgram = TextureProgram::Make();
   std::unique_ptr<ColorProgram> colorProgram = ColorProgram::Make();
 
-  GeometryManager geometryManager = GeometryManager();
-  TextureManager textureManager = TextureManager();
+  GeometryManager geometryManager;
+  TextureManager textureManager;
+  std::vector<Animation> animations;
 
   TextureRef tileSetRef =
       textureManager.LoadTexture("resources/tileset.png", 0);
@@ -52,6 +54,13 @@ int main(int, char**) {
       textureManager.LoadTexture("resources/bg.png", 0);
   TextureRef fontRef =
       textureManager.LoadTexture("resources/dialogue.png", 0);
+
+  animations.push_back(Animation({{32, 0.1}, {33, 0.1}, {34, 0.1},
+                                  {35, 0.1}, {36, 0.1}, {37, 0.1}}));
+  animations.push_back(Animation({{48, 0.1}, {49, 0.1}, {50, 0.1},
+                                  {51, 0.1}, {52, 0.1}, {53, 0.1},
+                                  {54, 0.1}, {55, 0.1}, {56, 0.1},
+                                  {57, 0.1}, {58, 0.1}, {59, 0.1}}));
 
   std::unique_ptr<Font> font;
   {
@@ -69,6 +78,8 @@ int main(int, char**) {
   BoundingBoxGraphicsSystem bb_graphics(&geometryManager, colorProgram.get());
   SubSpriteGraphicsSystem ss_graphics(&geometryManager, textureProgram.get(),
                                       &textureManager);
+  AnimationSystem animation_system(&animations);
+
   Map level;
   if (level.LoadTmx("resources/test.tmx")) {
     cout << "Error loading test.tmx" << endl;
@@ -99,6 +110,8 @@ int main(int, char**) {
         new LRStateComponent(LRState::STILL)));
     bogs.back().AddComponent(std::unique_ptr<Sprite>(
         new Sprite(dogRef, 0, Orientation::NORMAL, {-1.0/16.0, 0})));
+    bogs.back().AddComponent(std::unique_ptr<AnimationComponent>(
+        new AnimationComponent(0)));
   }
 
   bool running = true;
@@ -109,7 +122,6 @@ int main(int, char**) {
   int logic_frames = 0;
 
   double t = 0;
-  double delta = 0;
 
   double time_scale = 1;
 
@@ -163,13 +175,13 @@ int main(int, char**) {
       if (!paused) {
         jump_state_system->Update(dt, bogs);
         lr_state_system->Update(dt, bogs);
+        animation_system.Update(dt, bogs);
         vector<std::unique_ptr<Event>> events = physics.Update(dt, bogs);
         for (const auto& event : events) {
           auto* collision = static_cast<CollisionEvent*>(event.get());
           jump_state_system->HandleEvent(event.get(), bogs);
           lr_state_system->HandleEvent(event.get(), bogs);
         }
-        delta += 8*dt;
         // Interpolate camera to Bog.
         vec2f bog_pos = bogs.at(0).GetComponent<Body>()->bbox.lowerLeft;
         camera.center(bog_pos*0.2 + camera.center()*0.8);

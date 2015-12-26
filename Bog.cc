@@ -1,10 +1,12 @@
 #include "Bog.h"
-#include "Entity.h"
-#include "State.h"
-#include "TextureManager.h"
 
 #include <iostream>
 using namespace std;
+
+#include "Animation.h"
+#include "Entity.h"
+#include "State.h"
+#include "TextureManager.h"
 
 // TODO: Pull out common update code into a utility function.
 
@@ -184,9 +186,13 @@ namespace {
 class Left : public StateBehavior<LRStateComponent> {
  public:
   void Enter(LRStateComponent*, const Entity* entity) const override {
-    Sprite* sprite = entity->GetComponent<Sprite>();
-    assert(sprite);
+    AnimationComponent* animation;
+    Sprite* sprite;
+    bool exists = entity->GetComponents(&sprite, &animation);
+    assert(exists);
     sprite->orientation = Orientation::FLIPPED_H;
+    animation->key = 0;
+    animation->t = 0;
   }
 
   void Exit(LRStateComponent*, const Entity*) const override {
@@ -224,9 +230,13 @@ class Left : public StateBehavior<LRStateComponent> {
 class Right : public StateBehavior<LRStateComponent> {
  public:
   void Enter(LRStateComponent*, const Entity* entity) const override {
-    Sprite* sprite = entity->GetComponent<Sprite>();
-    assert(sprite);
+    AnimationComponent* animation;
+    Sprite* sprite;
+    bool exists = entity->GetComponents(&sprite, &animation);
+    assert(exists);
     sprite->orientation = Orientation::NORMAL;
+    animation->key = 0;
+    animation->t = 0;
   }
 
   void Exit(LRStateComponent*, const Entity*) const override {
@@ -264,8 +274,12 @@ class Right : public StateBehavior<LRStateComponent> {
 class Still : public StateBehavior<LRStateComponent> {
  public:
   void Enter(LRStateComponent*, const Entity* entity) const override {
-    Body* body = entity->GetComponent<Body>();
-    assert(body);
+    AnimationComponent* animation;
+    Body* body;
+    bool exists = entity->GetComponents(&body, &animation);
+    assert(exists);
+    animation->key = 1;
+    animation->t = 0;
     body->vel.x = 0;
   }
   void Exit(LRStateComponent*, const Entity*) const override {

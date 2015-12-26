@@ -30,6 +30,8 @@ class Camera {
   vec2f half_size_;
 };
 
+// Objects displayed on screen will have a transform component, but not
+// necessarily a backing physics component, e.g. Textboxes.
 class Transform : public Component {
  public:
   ComponentType type() const override { return ComponentType::TRANSFORM; }

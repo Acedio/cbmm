@@ -253,10 +253,8 @@ std::vector<std::unique_ptr<Event>> SubSpriteGraphicsSystem::Update(
       // TODO: Figure out how to ellide all draws of the same texture source
       // together.
       texture_manager_->BindTexture(sprite->texture, 0);
-      // HACK: Run cycle.
-      sprite->index++;
       geometry_manager_->DrawSubSprite(
-          ((sprite->index / 5) % 6) + 32, sprite->orientation,
+          sprite->index, sprite->orientation,
           body->bbox.lowerLeft + sprite->offset, camera);
     }
   }
