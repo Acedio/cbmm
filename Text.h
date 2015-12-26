@@ -17,7 +17,7 @@ class Text {
   Text(const Font* font) : font_(font) {}
 
   // In character coords, where character height = 1 character coord
-  vec2f last_pos_;
+  vec2f last_pos_ = {0, 0};
 
   GLuint vertex_array_object_;
 
