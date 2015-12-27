@@ -96,6 +96,8 @@ void GeometryManager::DrawTileMap(const Camera& camera) {
 void GeometryManager::DrawSubSprite(int si, Orientation orientation,
                                     const vec2f& dest_pos,
                                     const Camera& camera) {
+  // TODO: Need to clamp the values to always land within the given tile.
+  // Texels are occasionally grabbed from neighboring tiles.
   float width = 1.0 / 16.0;
   float height = 1.0 / 16.0;
   int rows = 16;

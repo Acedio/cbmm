@@ -4,7 +4,10 @@
 #include <string>
 
 struct vec2f {
-  double x, y;
+  vec2f(double x, double y) : x(x), y(y) {}
+  vec2f() {}
+  double x = 0;
+  double y = 0;
 };
 
 inline vec2f operator+(const vec2f& a, const vec2f& b) {
