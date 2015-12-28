@@ -6,6 +6,7 @@ enum class ComponentType {
   BODY,
   JUMP_STATE,
   LR_STATE,
+  BOX_STATE,
   SPRITE,
   TRANSFORM,
   ANIMATION,

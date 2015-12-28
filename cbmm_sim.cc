@@ -10,6 +10,7 @@
 
 #include "Animation.h"
 #include "Bog.h"
+#include "Box.h"
 #include "Camera.h"
 #include "Display.h"
 #include "EntityManager.h"
@@ -74,6 +75,7 @@ int main(int, char**) {
 
   auto jump_state_system = MakeJumpStateSystem();
   auto lr_state_system = MakeLRStateSystem();
+  auto box_state_system = MakeBoxStateSystem();
   Camera camera({0, 0}, {SCREEN_WIDTH_TILES, SCREEN_HEIGHT_TILES});
   BoundingBoxGraphicsSystem bb_graphics(&geometryManager, colorProgram.get());
   SubSpriteGraphicsSystem ss_graphics(&geometryManager, textureProgram.get(),
@@ -112,6 +114,18 @@ int main(int, char**) {
         new Sprite(dogRef, 0, Orientation::NORMAL, {-1.0/16.0, 0})));
     bogs.back().AddComponent(std::unique_ptr<AnimationComponent>(
         new AnimationComponent(0)));
+
+    const MapObject* box_mo = level.GetNamedObject("box");
+    assert(box_mo);
+    id = em.CreateEntity();
+    bogs.emplace_back(id);
+    bogs.back().AddComponent(std::unique_ptr<Transform>(new Transform()));
+    bogs.back().AddComponent(std::unique_ptr<Body>(
+        new Body(true, {box_mo->pos, 0.9, 0.9}, {0, 0})));
+    bogs.back().AddComponent(std::unique_ptr<BoxStateComponent>(
+          new BoxStateComponent(BoxState::AT_REST)));
+    bogs.back().AddComponent(std::unique_ptr<Sprite>(
+          new Sprite(tileSetRef, 1 /* block index */, Orientation::NORMAL, {0,0})));
   }
 
   bool running = true;
@@ -168,6 +182,9 @@ int main(int, char**) {
         // changes?
         jump_state_system->HandleEvent(&event, bogs);
         lr_state_system->HandleEvent(&event, bogs);
+        // TODO: Seems like there should be a way to manage the state systems,
+        // this will get out of hand :P
+        box_state_system->HandleEvent(&event, bogs);
       }
 
       // Fixed timestep
@@ -175,12 +192,14 @@ int main(int, char**) {
       if (!paused) {
         jump_state_system->Update(dt, bogs);
         lr_state_system->Update(dt, bogs);
+        box_state_system->Update(dt, bogs);
         animation_system.Update(dt, bogs);
         vector<std::unique_ptr<Event>> events = physics.Update(dt, bogs);
         for (const auto& event : events) {
           auto* collision = static_cast<CollisionEvent*>(event.get());
           jump_state_system->HandleEvent(event.get(), bogs);
           lr_state_system->HandleEvent(event.get(), bogs);
+          box_state_system->HandleEvent(event.get(), bogs);
         }
         // Interpolate camera to Bog.
         vec2f bog_pos = bogs.at(0).GetComponent<Body>()->bbox.lowerLeft;

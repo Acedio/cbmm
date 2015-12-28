@@ -28,7 +28,7 @@ inline string ToString(JumpState state) {
 
 class JumpStateComponent : public StateComponent<JumpState> {
  public:
-  JumpStateComponent(JumpState state) : StateComponent<JumpState>(state) {}
+  JumpStateComponent(JumpState initial) : StateComponent<JumpState>(initial) {}
   JumpStateComponent() : JumpStateComponent(JumpState::UNKNOWN) {}
   ComponentType type() const override { return ComponentType::JUMP_STATE; }
   Seconds time_since_map_collision() { return time_since_map_collision_; }
@@ -58,7 +58,7 @@ inline string ToString(LRState state) {
 
 class LRStateComponent : public StateComponent<LRState> {
  public:
-  LRStateComponent(LRState state) : StateComponent<LRState>(state) {}
+  LRStateComponent(LRState initial) : StateComponent<LRState>(initial) {}
   LRStateComponent() : LRStateComponent(LRState::UNKNOWN) {}
   ComponentType type() const override { return ComponentType::LR_STATE; }
 };
