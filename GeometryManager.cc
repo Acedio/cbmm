@@ -11,8 +11,10 @@
 
 namespace {
 const float initialVertexData[24] = {
+    // Positions
     1.0f,  1.0f,  0.0f,  1.0f, 1.0f,  -1.0f, 0.0f, 1.0f,
     -1.0f, 1.0f,  0.0f,  1.0f, -1.0f, -1.0f, 0.0f, 1.0f,
+    // Texture coords
     16.0f, 12.0f, 16.0f, 0.0f, 0.0f,  12.0f, 0.0f, 0.0f,
 };
 

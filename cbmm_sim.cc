@@ -239,6 +239,16 @@ int main(int, char**) {
                                    camera.half_size().y / 2,
                                    -1, -1, 2, 2);
 
+    textureManager.BindTexture(dogRef, 0);
+    textureManager.BindTexture(-1, 1);
+    textureProgram->Use();
+    textureProgram->Setup();
+
+    if (debug) {
+      bb_graphics.Update(0 /* unused */, camera, bogs);
+    }
+    ss_graphics.Update(0 /* unused */, camera, bogs);
+
     textureManager.BindTexture(tileSetRef, 0);
     textureManager.BindTexture(tileMapRef, 1);
     tileProgram->Use();
@@ -254,16 +264,6 @@ int main(int, char**) {
       tileProgram->Setup();
       geometryManager.DrawTileMap(camera);
     }
-
-    textureManager.BindTexture(dogRef, 0);
-    textureManager.BindTexture(-1, 1);
-    textureProgram->Use();
-    textureProgram->Setup();
-
-    if (debug) {
-      bb_graphics.Update(0 /* unused */, camera, bogs);
-    }
-    ss_graphics.Update(0 /* unused */, camera, bogs);
 
     textureManager.BindTexture(fontRef, 0);
     textureManager.BindTexture(-1, 1);

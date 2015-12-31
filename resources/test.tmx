@@ -1551,7 +1551,7 @@
   </data>
  </layer>
  <objectgroup name="Objects">
-  <object id="1" name="bog-start" x="272" y="64" width="16" height="16"/>
+  <object id="1" name="bog-start" x="272" y="128" width="16" height="16"/>
   <object id="2" name="box" x="192" y="64" width="16" height="16"/>
  </objectgroup>
 </map>
