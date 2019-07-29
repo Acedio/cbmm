@@ -24,8 +24,6 @@
 #include "Text.h"
 #include "TextureManager.h"
 
-using namespace std;
-
 int main(int, char**) {
   const unsigned int SCREEN_WIDTH = 640;
   const unsigned int SCREEN_HEIGHT = 480;
@@ -84,7 +82,7 @@ int main(int, char**) {
 
   Map level;
   if (level.LoadTmx("resources/test.tmx")) {
-    cout << "Error loading test.tmx" << endl;
+    std::cout << "Error loading test.tmx" << std::endl;
   }
   const TileMap* collision_map = level.GetLayer("Collision");
   assert(collision_map);
@@ -96,7 +94,7 @@ int main(int, char**) {
   TextureRef collisionMapRef = textureManager.LoadTilemapTexture(*collision_map);
 
   EntityManager em;
-  vector<Entity> bogs;
+  std::vector<Entity> bogs;
   {
     // Les' make us a bawg.
     const MapObject* mo = level.GetNamedObject("bog-start");
@@ -194,7 +192,7 @@ int main(int, char**) {
         lr_state_system->Update(dt, bogs);
         box_state_system->Update(dt, bogs);
         animation_system.Update(dt, bogs);
-        vector<std::unique_ptr<Event>> events = physics.Update(dt, bogs);
+        std::vector<std::unique_ptr<Event>> events = physics.Update(dt, bogs);
         for (const auto& event : events) {
           auto* collision = static_cast<CollisionEvent*>(event.get());
           jump_state_system->HandleEvent(event.get(), bogs);
@@ -204,10 +202,10 @@ int main(int, char**) {
         // Interpolate camera to Bog.
         vec2f bog_pos = bogs.at(0).GetComponent<Body>()->bbox.lowerLeft;
         camera.center(bog_pos*0.2 + camera.center()*0.8);
-        /* for (const Collision& c : collisions) {
-          cout << "a " << c.first << " b " << c.second << " @ (" << c.fix.x << ","
-               << c.fix.y << ")" << endl;
-        } */
+        // for (const Collision& c : collisions) {
+        //   std::cout << "a " << c.first << " b " << c.second << " @ (" << c.fix.x
+        //             << "," << c.fix.y << ")" << std::endl;
+        // }
       }
 
       last_ticks = SDL_GetTicks();
@@ -216,7 +214,7 @@ int main(int, char**) {
       t += dt;
 
       if (logic_frames % 100 == 0) {
-        cout << "Logic/s: " << (float)logic_frames / t << endl;
+        std::cout << "Logic/s: " << (float)logic_frames / t << std::endl;
       }
 
     }
@@ -279,7 +277,7 @@ int main(int, char**) {
     display.Swap();
 
     if (frames % 100 == 0) {
-      cout << "Graphics/s: " << (float)frames / t << endl;
+      std::cout << "Graphics/s: " << (float)frames / t << std::endl;
     }
   }
 

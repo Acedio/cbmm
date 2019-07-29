@@ -11,8 +11,6 @@
 #include "TileMap.h"
 #include "System.h"
 
-using namespace std;
-
 const EntityId MAP_BODY_ID = -1;
 
 class Body : public Component {
@@ -43,8 +41,8 @@ class Physics : public System {
  public:
   // tile_map must outlive this object.
   explicit Physics(const TileMap* tile_map) : tile_map_(tile_map) {}
-  vector<std::unique_ptr<Event>> Update(
-      Seconds dt, const vector<Entity>& entities) override;
+  std::vector<std::unique_ptr<Event>> Update(
+      Seconds dt, const std::vector<Entity>& entities) override;
 
  private:
   bool RectRectCollision(const Rect& first, const Rect& second, vec2f* fix);

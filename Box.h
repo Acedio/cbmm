@@ -13,7 +13,7 @@ enum class BoxState {
   FALLING,
 };
 
-inline string ToString(BoxState state) {
+inline std::string ToString(BoxState state) {
   switch (state) {
     CASE(BoxState::AT_REST);
     CASE(BoxState::FALLING);

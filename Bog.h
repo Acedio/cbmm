@@ -16,7 +16,7 @@ enum class JumpState {
 };
 
 // TODO: Probably put these in the .cc file.
-inline string ToString(JumpState state) {
+inline std::string ToString(JumpState state) {
   switch (state) {
     CASE(JumpState::STANDING);
     CASE(JumpState::JUMPING);
@@ -46,7 +46,7 @@ enum class LRState {
   RIGHT,
 };
 
-inline string ToString(LRState state) {
+inline std::string ToString(LRState state) {
   switch (state) {
     CASE(LRState::STILL);
     CASE(LRState::LEFT);

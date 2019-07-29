@@ -15,8 +15,6 @@
 #include "Component.h"
 #include "TileMap.h"
 
-using namespace std;
-
 typedef unsigned int TextureRef;
 
 struct PixelData {
@@ -26,14 +24,14 @@ struct PixelData {
   int bpp = 0;
 };
 
-std::unique_ptr<PixelData> LoadToPixelData(string filename);
+std::unique_ptr<PixelData> LoadToPixelData(std::string filename);
 
 class TextureManager {
  public:
   TextureManager();
   ~TextureManager();
 
-  TextureRef LoadTexture(string filename, int level);
+  TextureRef LoadTexture(std::string filename, int level);
   void UnloadTexture(TextureRef ref);
 
   void BindTexture(TextureRef ref, int unit);
@@ -42,9 +40,9 @@ class TextureManager {
 
  private:
   TextureRef getUnusedRef();
-  map<string, TextureRef> filenames;
-  map<TextureRef, GLuint> textures;
-  map<TextureRef, int> refcounts;
+  std::map<std::string, TextureRef> filenames;
+  std::map<TextureRef, GLuint> textures;
+  std::map<TextureRef, int> refcounts;
   TextureRef next_unused_ref;
 };
 

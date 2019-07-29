@@ -3,7 +3,6 @@
 
 #include <cassert>
 #include <iostream>
-using namespace std;
 
 #include "TextureManager.h"
 
@@ -33,9 +32,8 @@ TextureManager::TextureManager() {
 }
 
 TextureManager::~TextureManager() {
-  for (map<TextureRef, GLuint>::iterator i = textures.begin();
-       i != textures.end(); ++i) {
-    glDeleteTextures(1, &(i->second));
+  for (std::pair<TextureRef, GLuint> ref_texture : textures) {
+    glDeleteTextures(1, &ref_texture.second);
   }
 }
 
@@ -45,14 +43,14 @@ TextureRef TextureManager::getUnusedRef() {
   return ref;
 }
 
-std::unique_ptr<PixelData> LoadToPixelData(string filename) {
+std::unique_ptr<PixelData> LoadToPixelData(std::string filename) {
   std::unique_ptr<PixelData> pd = std::unique_ptr<PixelData>(new PixelData());
 
   SDL_Surface *surface;
 
   surface = IMG_Load(filename.c_str());
   if (!surface) {
-    cout << "Unable to load texture \"" + filename + "\"." << endl;
+    std::cout << "Unable to load texture \"" + filename + "\"." << std::endl;
     return nullptr;
   }
   pd->bpp = surface->format->BytesPerPixel;
@@ -69,9 +67,9 @@ std::unique_ptr<PixelData> LoadToPixelData(string filename) {
       pd->format = GL_BGR;
     }
   } else {
-    cout << "Texture \"" << filename
-         << "\" does not have enough channels. It has " << pd->bpp
-         << " channels." << endl;
+    std::cout << "Texture \"" << filename
+              << "\" does not have enough channels. It has " << pd->bpp
+              << " channels." << std::endl;
     return nullptr;
   }
   pd->w = surface->w;
@@ -89,9 +87,10 @@ std::unique_ptr<PixelData> LoadToPixelData(string filename) {
 }
 
 // level = -1 for auto-mipmapping
-TextureRef TextureManager::LoadTexture(string filename, int level) {
+TextureRef TextureManager::LoadTexture(std::string filename, int level) {
   TextureRef ref;
-  map<string, TextureRef>::iterator fileref = filenames.find(filename);
+  std::map<std::string, TextureRef>::iterator fileref =
+      filenames.find(filename);
   if (fileref != filenames.end()) {  // if we already have a reference to this
                                      // texture, return the ref
     ref = fileref->second;
@@ -147,7 +146,7 @@ TextureRef TextureManager::LoadTilemapTexture(const TileMap& tilemap) {
 
   int w = tilemap.GetWidth();
   int h = tilemap.GetHeight();
-  vector<GLubyte> map_data;
+  std::vector<GLubyte> map_data;
   // Textures are positive-up
   for (int y = 0; y < h; ++y) {
     for (int x = 0; x < w; ++x) {
@@ -159,7 +158,7 @@ TextureRef TextureManager::LoadTilemapTexture(const TileMap& tilemap) {
                GL_UNSIGNED_BYTE, map_data.data());
 
   if (glGetError() == GL_NO_ERROR) {
-    cout << "Loaded tilemap successfully" << endl;
+    std::cout << "Loaded tilemap successfully" << std::endl;
   }
 
   glBindTexture(GL_TEXTURE_2D, 0);
@@ -174,7 +173,7 @@ TextureRef TextureManager::LoadTilemapTexture(const TileMap& tilemap) {
 }
 
 void TextureManager::UnloadTexture(TextureRef ref) {
-  map<TextureRef, int>::iterator refcount;
+  std::map<TextureRef, int>::iterator refcount;
   if (ref != 0 &&
       (refcount = refcounts.find(ref)) !=
           refcounts.end()) {  // if it's not the default texture and the
@@ -184,7 +183,7 @@ void TextureManager::UnloadTexture(TextureRef ref) {
                                   // any objects, so we can really remove it
       refcounts.erase(refcount);
       textures.erase(ref);
-      for (map<string, TextureRef>::iterator i = filenames.begin();
+      for (std::map<std::string, TextureRef>::iterator i = filenames.begin();
            i != filenames.end(); ++i) {
         if (i->second == ref) {
           filenames.erase(i);
@@ -202,7 +201,7 @@ void TextureManager::BindTexture(TextureRef ref, int unit) {
     glActiveTexture(GL_TEXTURE1);
   }
 
-  map<TextureRef, GLuint>::iterator tex = textures.find(ref);
+  std::map<TextureRef, GLuint>::iterator tex = textures.find(ref);
   if (tex != textures.end()) {
     glBindTexture(GL_TEXTURE_2D, tex->second);
   } else {

@@ -4,8 +4,6 @@
 #include <fstream>
 #include <memory>
 
-using namespace std;
-
 TileMap::TileMap(const Tmx::TileLayer* tile_layer) {
   w = tile_layer->GetWidth();
   h = tile_layer->GetHeight();
@@ -32,7 +30,7 @@ void TileMap::Print(std::ostream& os) const {
     for (int x = 0; x < w; ++x) {
       os << get(x, y) << " ";
     }
-    os << endl;
+    os << std::endl;
   }
 }
 

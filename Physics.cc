@@ -141,12 +141,12 @@ bool Physics::XCollision(const Rect& rect, double* x_fix) {
   double tmp;
   PointMap(*tile_map_, rect, Location::RIGHT | Location::BOTTOM, Axis::X, x_fix);
   PointMap(*tile_map_, rect, Location::RIGHT | Location::TOP, Axis::X, &tmp);
-  *x_fix = min(*x_fix, tmp);
+  *x_fix = std::min(*x_fix, tmp);
 
   if (*x_fix == 0) {
     PointMap(*tile_map_, rect, Location::LEFT | Location::BOTTOM, Axis::X, x_fix);
     PointMap(*tile_map_, rect, Location::LEFT | Location::TOP, Axis::X, &tmp);
-    *x_fix = max(*x_fix, tmp);
+    *x_fix = std::max(*x_fix, tmp);
   }
 
   return *x_fix != 0;
@@ -156,12 +156,12 @@ bool Physics::YCollision(const Rect& rect, double* y_fix) {
   double tmp;
   PointMap(*tile_map_, rect, Location::BOTTOM | Location::LEFT, Axis::Y, y_fix);
   PointMap(*tile_map_, rect, Location::BOTTOM | Location::RIGHT, Axis::Y, &tmp);
-  *y_fix = max(*y_fix, tmp);
+  *y_fix = std::max(*y_fix, tmp);
 
   if (*y_fix == 0) {
     PointMap(*tile_map_, rect, Location::LEFT | Location::TOP, Axis::Y, y_fix);
     PointMap(*tile_map_, rect, Location::RIGHT | Location::TOP, Axis::Y, &tmp);
-    *y_fix = min(*y_fix, tmp);
+    *y_fix = std::min(*y_fix, tmp);
   }
 
   return *y_fix != 0;
@@ -211,10 +211,10 @@ bool Physics::RectMapCollision(const Rect& rect, const vec2f& last_pos,
   return fix->x != 0 || fix->y != 0;
 }
 
-vector<std::unique_ptr<Event>> Physics::Update(Seconds dt,
-                                               const vector<Entity>& entities) {
+std::vector<std::unique_ptr<Event>> Physics::Update(
+    Seconds dt, const std::vector<Entity>& entities) {
   assert(tile_map_);
-  vector<std::unique_ptr<Event>> collisions;
+  std::vector<std::unique_ptr<Event>> collisions;
 
   for (size_t i = 0; i < entities.size(); ++i) {
     auto* body = entities[i].GetComponent<Body>();

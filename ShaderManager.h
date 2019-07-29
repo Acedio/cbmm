@@ -8,8 +8,6 @@
 #include "Camera.h"
 #include "Geometry.h"
 
-using namespace std;
-
 class Program {
  public:
   void Setup() {}

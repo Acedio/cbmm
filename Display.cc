@@ -4,8 +4,6 @@
 
 #include "Display.h"
 
-using namespace std;
-
 Display::Display(unsigned int width, unsigned int height, unsigned int bpp) {
   screen_width = width;
   screen_height = height;
@@ -18,7 +16,7 @@ Display::Display(unsigned int width, unsigned int height, unsigned int bpp) {
       SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3) ||
       SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
                           SDL_GL_CONTEXT_PROFILE_CORE)) {
-    cout << "Error setting up GL." << endl;
+    std::cout << "Error setting up GL." << std::endl;
   }
 
   window = SDL_CreateWindow("CBMM!!!!", SDL_WINDOWPOS_UNDEFINED,
@@ -28,7 +26,7 @@ Display::Display(unsigned int width, unsigned int height, unsigned int bpp) {
   SDL_GL_CreateContext(window);  // probably should delete this
 
   if (!window) {
-    cout << "Error opening surface: " << SDL_GetError() << endl;
+    std::cout << "Error opening surface: " << SDL_GetError() << std::endl;
   }
 
   glewExperimental = GL_TRUE;
@@ -36,15 +34,15 @@ Display::Display(unsigned int width, unsigned int height, unsigned int bpp) {
 
   if (glewErr != GLEW_OK) {
     unsigned char const *test = glewGetErrorString(glewErr);
-    cout << "Error: " << test << endl;
+    std::cout << "Error: " << test << std::endl;
     return;
   }
 
   const GLubyte* version = glGetString(GL_SHADING_LANGUAGE_VERSION);
   if (version) {
-      cout << "GLSL version: " << version << endl;
+    std::cout << "GLSL version: " << version << std::endl;
   } else {
-      cout << "Could not get GLSL version." << endl;
+    std::cout << "Could not get GLSL version." << std::endl;
   }
 
   glClearColor(0, 0, 0, 1);

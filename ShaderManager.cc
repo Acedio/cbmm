@@ -5,7 +5,16 @@
 
 #include "ShaderManager.h"
 
-using namespace std;
+std::string shaderTypeToString(GLuint shaderType) {
+  switch (shaderType) {
+    case GL_VERTEX_SHADER:
+      return "vertex";
+    case GL_FRAGMENT_SHADER:
+      return "fragment";
+    default:
+      return "unknown";
+  }
+}
 
 GLuint CreateShader(GLenum shaderType, const char *shaderSource) {
   GLuint shader = glCreateShader(shaderType);
@@ -19,21 +28,8 @@ GLuint CreateShader(GLenum shaderType, const char *shaderSource) {
   glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
 
   if (compiled == GL_FALSE) {
-    cout << "Error encountered in ";
-
-    switch (shaderType) {
-      case GL_VERTEX_SHADER:
-        cout << "vertex";
-        break;
-      case GL_FRAGMENT_SHADER:
-        cout << "fragment";
-        break;
-      default:
-        cout << "unknown";
-        break;
-    }
-
-    cout << " shader:" << endl;
+    std::cout << "Error encountered in " << shaderTypeToString(shaderType)
+              << " shader: " << std::endl;
 
     int log_length = 0;
 
@@ -43,7 +39,7 @@ GLuint CreateShader(GLenum shaderType, const char *shaderSource) {
 
     glGetShaderInfoLog(shader, log_length, &log_length, log);
 
-    cout << log << endl;
+    std::cout << log << std::endl;
 
     delete[] log;
   }
@@ -52,13 +48,13 @@ GLuint CreateShader(GLenum shaderType, const char *shaderSource) {
 }
 
 GLuint OpenShader(GLenum shaderType, const char *shaderFilename) {
-  ifstream shaderFile(shaderFilename);
+  std::ifstream shaderFile(shaderFilename);
 
   if (!shaderFile.good()) {
     return 0;
   }
 
-  stringstream buffer;
+  std::stringstream buffer;
   buffer << shaderFile.rdbuf();
 
   GLuint shaderRef = CreateShader(shaderType, buffer.str().c_str());
@@ -79,7 +75,8 @@ GLuint CreateProgram(GLuint vertexShader, GLuint fragmentShader) {
   glGetProgramiv(program, GL_LINK_STATUS, &linked);
 
   if (linked == GL_FALSE) {
-    cout << "Error encountered while linking the shader program." << endl;
+    std::cout << "Error encountered while linking the shader program."
+              << std::endl;
 
     int log_length = 0;
 
@@ -89,7 +86,7 @@ GLuint CreateProgram(GLuint vertexShader, GLuint fragmentShader) {
 
     glGetProgramInfoLog(program, log_length, &log_length, log);
 
-    cout << log << endl;
+    std::cout << log << std::endl;
 
     delete[] log;
   }

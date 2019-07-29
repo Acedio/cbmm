@@ -1,7 +1,6 @@
 #include "Bog.h"
 
 #include <iostream>
-using namespace std;
 
 #include "Animation.h"
 #include "Entity.h"
@@ -205,7 +204,7 @@ class Left : public StateBehavior<LRStateComponent> {
     assert(body);
     Body new_body = *body;
     new_body.vel.x -= 16.0 * dt;
-    new_body.vel.x = max(new_body.vel.x, -4.0);
+    new_body.vel.x = std::max(new_body.vel.x, -4.0);
 
     *body = new_body;
 
@@ -249,7 +248,7 @@ class Right : public StateBehavior<LRStateComponent> {
     assert(body);
     Body new_body = *body;
     new_body.vel.x += 16.0 * dt;
-    new_body.vel.x = min(new_body.vel.x, 4.0);
+    new_body.vel.x = std::min(new_body.vel.x, 4.0);
 
     *body = new_body;
 
